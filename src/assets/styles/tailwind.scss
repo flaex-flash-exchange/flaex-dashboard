@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  input:invalid[data-focused="true"],
+  textarea:invalid[data-focused="true"] {
+    border: 1px solid red;
+    margin-bottom: 6px;
+  }
+
+  input:invalid[data-focused="true"] ~ span,
+  textarea:invalid[data-focused="true"] ~ span {
+    visibility: visible;
+    opacity: 1;
+    height: auto;
+    margin-bottom: 10px;
+  }
+
+  textarea {
+    height: 108px;
+  }
+
+  .heading {
+    @apply font-extralight tracking-wide mb-[20px] md:text-5xl text-chipo-heading text-4xl font-lucyCat mt-2;
+  }
+  .title {
+    @apply font-bold mb-[20px] md:text-lg text-chipo-hover-text font-montserrat;
+  }
+  .message {
+    @apply max-w-[100%] py-1 text-center m-auto font-light tracking-wide md:text-xl md:py-2 lg:max-w-[60%] text-chipo-text;
+  }
+
+  .wrap-content {
+    @apply m-auto px-[15px] max-w-[1170px];
+  }
+
+  .divider {
+    @apply border-4 border-chipo-text hover:border-chipo-hover-text duration-500 max-w-2xl  m-auto mt-20 mb-20;
+  }
+
+  .swiper_custom {
+    &.swiper {
+      @apply pb-[50px];
+
+      .swiper-button-next,
+      .swiper-button-prev {
+        top: 50%;
+        transform: translateY(-50%);
+
+        &:hover {
+          color: #f6b42c;
+        }
+        color: #f9ce75;
+        &::after {
+          font-size: 30px;
+        }
+      }
+    }
+  }
+
+  .pagination-item {
+    @apply m-2 text-[20px] flex items-center justify-center;
+    button {
+      @apply rounded-full w-[40px] h-[40px] p-2 cursor-pointer hover:text-chipo-heading flex items-center justify-center;
+      &.active {
+        @apply bg-chipo-heading text-white;
+      }
+    }
+  }
+
+  .button-primary {
+    @apply px-4 py-2 text-lg rounded-md bg-chipo-text font-bold hover:bg-chipo-hover-text duration-200 text-chipo-bg-primary drop-shadow-md;
+  }
+
+  .button-dark {
+    @apply px-4 py-2 text-lg rounded-md bg-chipo-bg-primary font-bold duration-200 hover:bg-chipo-bg-hover drop-shadow-md;
+  }
+
+  .center-inline {
+    @apply mx-auto my-0 block;
+  }
+  .center-all {
+    @apply flex justify-center items-center;
+  }
+}
+
+@layer utilities {
+  .btn-hover1 {
+    @apply bg-[#374048] text-white;
+  }
+}

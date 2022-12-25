@@ -1,0 +1,90 @@
+@import "./variable.scss";
+@import "./tailwind.scss";
+
+@font-face {
+  font-family: "iCielAlina";
+  font-style: normal;
+  src: url("../fonts/iCielAlina.ttf");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "daysOne";
+  font-style: normal;
+  src: url("../fonts/DaysOne.ttf");
+  font-display: swap;
+}
+@font-face {
+  font-family: "lucyCat";
+  font-style: normal;
+  src: url("../fonts/LucyCat.ttf");
+  font-display: swap;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  width: 100%;
+  font-size: 16px;
+  color: var(--text);
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+#__next {
+  width: 100%;
+  background: var(--bg-primary);
+  overflow-x: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+img {
+  object-fit: cover;
+}
+
+button {
+  font-family: var(--font-family);
+  cursor: pointer;
+}
+
+ul,
+li {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+p {
+  margin-bottom: 0;
+}
+
+.gm-style-cc {
+  display: none;
+}
+
+.break-spaces {
+  white-space: break-spaces;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* number of lines to show */
+          line-clamp: 3;
+  -webkit-box-orient: vertical;
+}

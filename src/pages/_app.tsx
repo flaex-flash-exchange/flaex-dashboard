@@ -1,17 +1,15 @@
-import Footer from "components/layout/Footer";
-import Header from "components/layout/Header";
 import type { AppProps } from "next/app";
 import "assets/styles/global.scss";
 import { store } from "../redux/store";
 import { Provider } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import LayoutWrapper from "components/layout/LayoutWrapper";
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <Provider store={store}>
-        <Header />
         <ToastContainer
           position="top-right"
           autoClose={2000}
@@ -19,7 +17,9 @@ function MyApp({ Component, pageProps }: AppProps) {
           pauseOnHover={false}
           theme="light"
         />
-        <Component {...pageProps} />
+        <LayoutWrapper>
+          <Component {...pageProps} />
+        </LayoutWrapper>
         {/* <Footer /> */}
       </Provider>
     </>

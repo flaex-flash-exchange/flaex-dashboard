@@ -2,22 +2,9 @@
 @import "./tailwind.scss";
 
 @font-face {
-  font-family: "iCielAlina";
-  font-style: normal;
-  src: url("../fonts/iCielAlina.ttf");
-  font-display: swap;
-}
-
-@font-face {
   font-family: "daysOne";
   font-style: normal;
   src: url("../fonts/DaysOne.ttf");
-  font-display: swap;
-}
-@font-face {
-  font-family: "lucyCat";
-  font-style: normal;
-  src: url("../fonts/LucyCat.ttf");
   font-display: swap;
 }
 
@@ -44,7 +31,8 @@ body {
 
 #__next {
   width: 100%;
-  background: var(--bg-primary);
+  background: rgb(0,36,83);
+  background: linear-gradient(90deg, rgba(0,36,83,1) 35%, rgba(4,12,24,1) 100%);
   overflow-x: hidden;
 }
 

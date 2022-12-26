@@ -22,13 +22,13 @@
   }
 
   .heading {
-    @apply font-extralight tracking-wide mb-[20px] md:text-5xl text-chipo-heading text-4xl font-lucyCat mt-2;
+    @apply font-extralight tracking-wide mb-[20px] md:text-5xl text-flaex-heading text-4xl font-lucyCat mt-2;
   }
   .title {
-    @apply font-bold mb-[20px] md:text-lg text-chipo-hover-text font-montserrat;
+    @apply font-bold mb-[20px] md:text-lg text-flaex-hover-text font-montserrat;
   }
   .message {
-    @apply max-w-[100%] py-1 text-center m-auto font-light tracking-wide md:text-xl md:py-2 lg:max-w-[60%] text-chipo-text;
+    @apply max-w-[100%] py-1 text-center m-auto font-light tracking-wide md:text-xl md:py-2 lg:max-w-[60%] text-flaex-text;
   }
 
   .wrap-content {
@@ -36,7 +36,7 @@
   }
 
   .divider {
-    @apply border-4 border-chipo-text hover:border-chipo-hover-text duration-500 max-w-2xl  m-auto mt-20 mb-20;
+    @apply border-4 border-flaex-text hover:border-flaex-hover-text duration-500 max-w-2xl  m-auto mt-20 mb-20;
   }
 
   .swiper_custom {
@@ -62,19 +62,19 @@
   .pagination-item {
     @apply m-2 text-[20px] flex items-center justify-center;
     button {
-      @apply rounded-full w-[40px] h-[40px] p-2 cursor-pointer hover:text-chipo-heading flex items-center justify-center;
+      @apply rounded-full w-[40px] h-[40px] p-2 cursor-pointer hover:text-flaex-heading flex items-center justify-center;
       &.active {
-        @apply bg-chipo-heading text-white;
+        @apply bg-flaex-heading text-white;
       }
     }
   }
 
   .button-primary {
-    @apply px-4 py-2 text-lg rounded-md bg-chipo-text font-bold hover:bg-chipo-hover-text duration-200 text-chipo-bg-primary drop-shadow-md;
+    @apply px-4 py-2 text-lg rounded-md bg-flaex-text font-bold hover:bg-flaex-hover-text duration-200 text-flaex-bg-primary drop-shadow-md;
   }
 
   .button-dark {
-    @apply px-4 py-2 text-lg rounded-md bg-chipo-bg-primary font-bold duration-200 hover:bg-chipo-bg-hover drop-shadow-md;
+    @apply px-4 py-2 text-lg rounded-md bg-flaex-bg-primary font-bold duration-200 hover:bg-flaex-bg-hover drop-shadow-md;
   }
 
   .center-inline {

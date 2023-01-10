@@ -28,6 +28,7 @@ module.exports = {
         "flaex-border-table": "F5F5F5",
         "flaex-green": "#00E833",
         "flaex-red": "#FF1D1D",
+        "flaex-button": "#BD905A",
       },
       backgroundImage: {
         hero: "url('/images/home/bg_hero_blue.webp')",

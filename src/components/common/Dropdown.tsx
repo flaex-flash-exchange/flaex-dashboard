@@ -37,17 +37,18 @@ const Dropdown = ({
 
   const componentRef = useOutSideClick(() => setIsOpen(false));
 
+  console.log("width", width);
   return (
     <div ref={componentRef as any} className={`relative h-full`}>
       <div onClick={() => setIsOpen((prev) => !prev)} className={classTitle}>
-        {selected && handleOption?.() ? selected.label : title}
+        {selected ? selected.label : title}
         {iconDown && <FaAngleDown />}
       </div>
 
       <ul
         className={`${
           isOpen ? "max-h-60 border-[0.6px]" : "max-h-0"
-        } absolute w-${width} translate-y-full ${bottomLength} right-0 bg-[#002453] overflow-y-auto duration-100 rounded`}
+        } absolute min-w-${width} translate-y-full ${bottomLength} right-0 bg-[#002453] overflow-y-auto duration-100 rounded`}
       >
         {isSearch && (
           <div className="flex items-center gap-2 p-2">

@@ -3,10 +3,19 @@ import classNames from "classnames";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
-import { FaTimes } from "react-icons/fa";
+import {
+  FaAngleDoubleRight,
+  FaChartPie,
+  FaDonate,
+  FaExchangeAlt,
+  FaHandHoldingUsd,
+  FaMapMarkerAlt,
+  FaTimes,
+} from "react-icons/fa";
 
-const Sidebar = ({ toggleCollapse }: { toggleCollapse: boolean }) => {
+const Sidebar = () => {
   const router = useRouter();
+  const [toggleCollapse, setToggleCollapse] = useState(true);
 
   const activeMenu = useMemo(() => {
     for (const menu of menuItems) {
@@ -18,8 +27,9 @@ const Sidebar = ({ toggleCollapse }: { toggleCollapse: boolean }) => {
     return classNames(
       "cursor-pointer text-[18px] rounded w-full overflow-hidden whitespace-nowrap",
       {
-        ["text-white"]: activeMenu?.id === menu.id,
+        ["text-flaex-primary"]: activeMenu?.id === menu.id,
         ["text-[#828282] pointer-events-none"]: menu.disabled === true,
+        ["text-[25px]"]: !toggleCollapse,
       },
     );
   };
@@ -37,27 +47,36 @@ const Sidebar = ({ toggleCollapse }: { toggleCollapse: boolean }) => {
   return (
     <>
       <div
-        className={`ease-in duration-300 absolute md:relative md:bg-transparent h-full md:h-auto w-[150px] z-50${
-          toggleCollapse ? "-left-full md:left-0" : "left-0"
+        className={`ease-in duration-300 absolute md:relative md:bg-transparent h-full md:h-auto w-[150px] z-50 ${
+          toggleCollapse ? "w-[150px]" : "w-[50px]"
         } `}
         // onMouseEnter={handleOnMouse}
         // onMouseLeave={handleOnMouse}
       >
         <div className="relative z-[12]">
-          <div className="py-[17px] block ease-in duration-200">
-            <FaTimes size={20} />
+          <div
+            className="py-[17px] block ease-in duration-200"
+            onClick={() => setToggleCollapse((prev) => !prev)}
+          >
+            {toggleCollapse ? (
+              <FaTimes size={25} />
+            ) : (
+              <FaAngleDoubleRight size={25} />
+            )}
           </div>
 
           <div>
             {menuItems.map((menu) => {
               const classes = getNavItemClasses(menu);
               return (
-                <div key={menu.id} className={`${classes}`}>
-                  <Link href={menu.link}>
-                    <a className="w-full h-full py-[17px] block ease-in duration-200">
-                      {menu.label}
-                    </a>
-                  </Link>
+                <div key={menu.id}>
+                  <div className={classes}>
+                    <Link href={menu.link}>
+                      <a className="w-full h-full py-[17px] block ease-in duration-200 ">
+                        {toggleCollapse ? menu.label : menu.icon}
+                      </a>
+                    </Link>
+                  </div>
                 </div>
               );
             })}
@@ -71,24 +90,24 @@ const Sidebar = ({ toggleCollapse }: { toggleCollapse: boolean }) => {
 export default Sidebar;
 
 const menuItems = [
-  { id: 1, label: "Dashboard", icon: "", link: "/" },
-  { id: 2, label: "Trade", icon: "", link: "/trade" },
+  { id: 1, label: "Dashboard", icon: <FaChartPie />, link: "/" },
+  { id: 2, label: "Trade", icon: <FaExchangeAlt />, link: "/trade" },
   {
     id: 3,
     label: "My positions",
-    icon: "",
+    icon: <FaMapMarkerAlt />,
     link: "/my-positions",
   },
   {
     id: 4,
     label: "Invest",
-    icon: "",
+    icon: <FaHandHoldingUsd />,
     link: "/invest",
   },
   {
     id: 5,
     label: "Staking",
-    icon: "",
+    icon: <FaDonate />,
     link: "/staking",
   },
 ];

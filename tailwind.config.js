@@ -16,6 +16,7 @@ module.exports = {
     },
     extend: {
       colors: {
+        "flaex-primary": "#BF83FF",
         "flaex-heading": "#fafafa",
         "flaex-text": "#f9ce75",
         "flaex-text-dark": "#2e2e2e",
@@ -24,6 +25,9 @@ module.exports = {
         "flaex-bg-hover": "#1e283b",
         "flaex-bg-second": "#3a3a3a",
         "flaex-border": "#C4C4C4",
+        "flaex-border-table": "F5F5F5",
+        "flaex-green": "#00E833",
+        "flaex-red": "#FF1D1D",
       },
       backgroundImage: {
         hero: "url('/images/home/bg_hero_blue.webp')",

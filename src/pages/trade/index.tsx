@@ -1,3 +1,4 @@
+import BottomInfo from "components/pages/trade/BottomInfo";
 import Mainbar from "components/pages/trade/Mainbar";
 import Topbar from "components/pages/trade/Topbar";
 import type { NextPage } from "next";
@@ -28,7 +29,7 @@ const Index: NextPage = () => {
         </div>
       </div>
 
-      <div>History</div>
+      <BottomInfo />
     </>
   );
 };

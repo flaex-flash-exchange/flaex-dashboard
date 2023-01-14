@@ -20,7 +20,8 @@
     "react-dom": "18.2.0",
     "react-redux": "^8.0.5",
     "react-toastify": "^9.1.1",
-    "swiper": "^8.4.5"
+    "swiper": "^8.4.5",
+    "tailwind-merge": "^1.8.1"
   },
   "devDependencies": {
     "@types/node": "18.7.1",

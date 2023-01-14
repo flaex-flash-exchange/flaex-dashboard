@@ -76,3 +76,8 @@ p {
           line-clamp: 3;
   -webkit-box-orient: vertical;
 }
+
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+}

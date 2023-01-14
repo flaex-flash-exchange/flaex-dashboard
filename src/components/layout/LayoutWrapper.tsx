@@ -10,7 +10,7 @@ const LayoutWrapper = ({ children }: { children: any }): JSX.Element => {
         <Header />
         <div className="flex justify-between mt-16">
           <Sidebar />
-          <div className="flex-1 flex flex-col p-2">{children}</div>
+          <div className="flex-1 flex flex-col p-2 pb-7">{children}</div>
         </div>
       </div>
 

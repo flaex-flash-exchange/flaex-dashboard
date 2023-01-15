@@ -1,4 +1,4 @@
-import Slider from "rc-slider";
+import SliderCustom from "components/common/SliderCustom";
 import React, { useEffect, useState } from "react";
 
 type ILongShort = { data?: any };
@@ -50,12 +50,12 @@ const LongShort = ({ data = mockData }: ILongShort) => {
 
       <div className="mt-[22px]">
         <div className="text-sm font-semibold">Leverage</div>
-        <div className="mt-2">
-          <Slider />
+        <div className="mt-8">
+          <SliderCustom />
         </div>
       </div>
 
-      <div className="rounded-[10px] bg-flaex-border bg-opacity-5 py-2.5 px-4 mt-[26px]">
+      <div className="rounded-[10px] bg-flaex-border bg-opacity-5 py-2.5 px-4 mt-12">
         <div className="flex justify-between text-[12px] font-light">
           <span>Amount</span>
           <span>Collateral In</span>

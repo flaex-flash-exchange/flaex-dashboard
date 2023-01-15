@@ -25,7 +25,10 @@ const Footer = (): JSX.Element => {
             <h4 className="text-sm font-semibold">{col.title}</h4>
             <div className="mt-[6px]">
               {col.listItems.map((item, idx) => (
-                <div key={idx} className="text-xs font-light mt-1">
+                <div
+                  key={idx}
+                  className="text-xs font-light mt-1 hover:text-flaex-primary hover:text-opacity-90"
+                >
                   <Link href="">{item}</Link>
                 </div>
               ))}

@@ -1,12 +1,15 @@
 import React from "react";
 import "rc-slider/assets/index.css";
-import Slider from "rc-slider";
 import LongShort from "./LongShort";
+import CloseRepay from "./CloseRepay";
+import { useContextTrade } from "context/TradeContext";
 
 const Mainbar = () => {
+  const { isShowLong } = useContextTrade();
+
   return (
     <div className="rounded-[10px] border-[0.2px] h-full px-4 py-3">
-      <LongShort />
+      {isShowLong === undefined ? <LongShort /> : <CloseRepay />}
     </div>
   );
 };

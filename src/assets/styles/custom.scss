@@ -38,6 +38,14 @@
       }
     }
   }
+
+  .rc-slider-mark-text-active {
+    color: #bd905a;
+  }
+
+  &.rc-slider-disabled {
+    background-color: transparent;
+  }
 }
 
 .rc-tooltip-content {

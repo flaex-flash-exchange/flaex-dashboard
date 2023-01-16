@@ -1,3 +1,4 @@
+import { useContextTrade } from "context/TradeContext";
 import { useCallback, useState } from "react";
 import { twMerge } from "tailwind-merge";
 type TableCustom = {
@@ -9,7 +10,7 @@ const styleTitleColDefault =
 const styleColDefault = "px-3.5 py-[5px] text-center text-sm font-light";
 
 const HistoryTable = ({ data, titleRow }: TableCustom): JSX.Element => {
-  const [isShowLong, setIsShowLong] = useState<boolean | undefined>(undefined);
+  const { isShowLong, setIsShowLong } = useContextTrade();
 
   const handleClickRow = useCallback(
     (data: any) => {
@@ -21,7 +22,17 @@ const HistoryTable = ({ data, titleRow }: TableCustom): JSX.Element => {
     },
     [setIsShowLong],
   );
-  console.log("clickkkkkk", "isShowLong", isShowLong);
+
+  const handleActiveRow = (data: any) => {
+    if (isShowLong === undefined) return;
+
+    if (data.direction.toLowerCase() === "long" && isShowLong) {
+      return "bg-flaex-primary bg-opacity-50";
+    }
+    if (data.direction.toLowerCase() === "short" && !isShowLong) {
+      return "bg-flaex-primary bg-opacity-50";
+    }
+  };
 
   return (
     <table className="w-full border-[0.2px] border-flaex-border rounded-[10px] py-[8px]">
@@ -45,7 +56,9 @@ const HistoryTable = ({ data, titleRow }: TableCustom): JSX.Element => {
         {data.map((row: any, idx: number) => (
           <tr
             key={idx}
-            className="hover:bg-flaex-primary hover:bg-opacity-30 cursor-pointer"
+            className={`hover:bg-flaex-primary hover:bg-opacity-30 ${handleActiveRow(
+              row,
+            )} cursor-pointer`}
             onClick={() => handleClickRow(row)}
           >
             {titleRow.map((col: any, idx: number) => {

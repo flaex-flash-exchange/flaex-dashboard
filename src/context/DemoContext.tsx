@@ -12,6 +12,7 @@ export type ProductListContextType = {
   setSearchValue: (value: string) => void;
   outputData: { [key: string]: any }[] | undefined;
 };
+
 export const ProductListContext = createContext<ProductListContextType | null>(
   null,
 );

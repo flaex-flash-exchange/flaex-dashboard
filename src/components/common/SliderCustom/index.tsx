@@ -3,7 +3,7 @@ import React from "react";
 import { handleRender } from "./TooltipSlider";
 
 const marks = {
-  0: <strong>0</strong>,
+  0: <strong>0%</strong>,
   100: "100%",
   200: "200%",
   300: "300%",
@@ -21,7 +21,7 @@ const marks = {
   },
 };
 
-const SliderCustom = () => {
+const SliderCustom = ({ value, onChangeValue, disabled }: any) => {
   return (
     <div>
       <Slider
@@ -30,6 +30,9 @@ const SliderCustom = () => {
         defaultValue={0}
         max={1000}
         handleRender={handleRender}
+        value={value}
+        onChange={onChangeValue}
+        disabled={disabled}
       />
     </div>
   );

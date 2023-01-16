@@ -10,6 +10,8 @@ const LongShort = ({ data = mockData }: ILongShort) => {
   const [payingValue, setPayingValue] = useState<number>(2.941);
   const [balanceValue, setBalanceValue] = useState<number>(4.2);
 
+  const [percentage, setPercentage] = useState<number>(0);
+
   const handleChangeLongShort = (clickedLong: boolean) => {
     if (clickedLong) {
       setIsLong(true);
@@ -20,8 +22,12 @@ const LongShort = ({ data = mockData }: ILongShort) => {
     setAmount(0);
     setPayingValue(0);
     setBalanceValue(0);
+    setPercentage(0);
   };
 
+  const handleChangeSlider = (value: number) => {
+    setPercentage(value);
+  };
   return (
     <div>
       <div className="flex text-base font-semibold bg-flaex-border bg-opacity-5 rounded-[10px]">
@@ -51,7 +57,7 @@ const LongShort = ({ data = mockData }: ILongShort) => {
       <div className="mt-[22px]">
         <div className="text-sm font-semibold">Leverage</div>
         <div className="mt-8">
-          <SliderCustom />
+          <SliderCustom value={percentage} onChangeValue={handleChangeSlider} />
         </div>
       </div>
 

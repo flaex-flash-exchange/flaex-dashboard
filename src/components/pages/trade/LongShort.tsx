@@ -29,7 +29,7 @@ const LongShort = ({ data = mockData }: ILongShort) => {
     setPercentage(value);
   };
   return (
-    <div>
+    <div className="flex h-full flex-col">
       <div className="flex text-base font-semibold bg-flaex-border bg-opacity-5 rounded-[10px]">
         <button
           onClick={() => {
@@ -56,6 +56,15 @@ const LongShort = ({ data = mockData }: ILongShort) => {
 
       <div className="mt-[22px]">
         <div className="text-sm font-semibold">Leverage</div>
+        <div className="flex justify-between rounded-[10px] bg-flaex-border bg-opacity-5 py-1 px-2 mt-2">
+          <input
+            className="bg-transparent outline-none"
+            onChange={(e: any) => handleChangeSlider(e.target.value)}
+            value={percentage}
+          />
+          <div className="mr-2">%</div>
+        </div>
+
         <div className="mt-8">
           <SliderCustom value={percentage} onChangeValue={handleChangeSlider} />
         </div>
@@ -97,9 +106,11 @@ const LongShort = ({ data = mockData }: ILongShort) => {
         ))}
       </div>
 
-      <button className="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full">
-        Connect Wallet
-      </button>
+      <div className="flex-1 flex flex-col justify-end">
+        <button className="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full">
+          Connect Wallet
+        </button>
+      </div>
     </div>
   );
 };

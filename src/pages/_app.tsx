@@ -5,22 +5,24 @@ import { Provider } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import LayoutWrapper from "components/layout/LayoutWrapper";
+import { ModalContextProvider } from "context/ModalContext";
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <Provider store={store}>
-        <ToastContainer
-          position="top-right"
-          autoClose={2000}
-          closeOnClick
-          pauseOnHover={false}
-          theme="light"
-        />
-        <LayoutWrapper>
-          <Component {...pageProps} />
-        </LayoutWrapper>
-        {/* <Footer /> */}
+        <ModalContextProvider>
+          <ToastContainer
+            position="top-right"
+            autoClose={2000}
+            closeOnClick
+            pauseOnHover={false}
+            theme="light"
+          />
+          <LayoutWrapper>
+            <Component {...pageProps} />
+          </LayoutWrapper>
+        </ModalContextProvider>
       </Provider>
     </>
   );

@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useModalContext } from "context/ModalContext";
 import Footer from "./Footer";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 
 const LayoutWrapper = ({ children }: { children: any }): JSX.Element => {
+  const { modals } = useModalContext();
+
   return (
     <div className="min-h-[900px] flex flex-col justify-between">
       <div className="pl-12 pr-24 pt-8">
@@ -15,6 +17,8 @@ const LayoutWrapper = ({ children }: { children: any }): JSX.Element => {
       </div>
 
       <Footer />
+
+      {modals}
     </div>
   );
 };

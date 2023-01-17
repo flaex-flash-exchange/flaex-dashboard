@@ -1,3 +1,4 @@
+import { useModalContext } from "context/ModalContext";
 import { useOutSideClick } from "hooks/useOutSideClick";
 import Image from "next/image";
 import React, { useState } from "react";
@@ -17,7 +18,7 @@ const Dropdown = ({
   iconDown = false,
   classTitle = classTitleDefault,
   classItem = classItemDefault,
-  width = "auto",
+  width,
   bottomLength = "-bottom-2",
   handleOption,
 }: {
@@ -36,8 +37,7 @@ const Dropdown = ({
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const componentRef = useOutSideClick(() => setIsOpen(false));
-
-  console.log("width", width);
+  const { pushModal } = useModalContext();
   return (
     <div ref={componentRef as any} className={`relative h-full`}>
       <div onClick={() => setIsOpen((prev) => !prev)} className={classTitle}>
@@ -48,7 +48,7 @@ const Dropdown = ({
       <ul
         className={`${
           isOpen ? "max-h-60 border-[0.6px]" : "max-h-0"
-        } absolute min-w-${width} translate-y-full ${bottomLength} right-0 bg-[#002453] overflow-y-auto duration-100 rounded`}
+        } absolute ${width} translate-y-full ${bottomLength} right-0 bg-[#002453] overflow-y-auto duration-100 rounded`}
       >
         {isSearch && (
           <div className="flex items-center gap-2 p-2">
@@ -66,8 +66,12 @@ const Dropdown = ({
             <div
               key={idx}
               onClick={() => {
-                setSelected(item);
+                if (!item) {
+                  setSelected(item);
+                  setIsOpen(false);
+                }
                 setIsOpen(false);
+                pushModal(item.elementModal());
               }}
               className={classItem}
             >

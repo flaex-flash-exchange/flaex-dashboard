@@ -16,7 +16,7 @@ const Modal = ({
 
   return (
     <div
-      className={`fixed inset-0  bg-flaex-text-dark bg-opacity-20 backdrop-blur-sm center-all z-50 duration-300  ${
+      className={`fixed inset-0  bg-flaex-border bg-opacity-5 backdrop-blur-sm center-all z-50 duration-300  ${
         isVisible ? "" : "scale-105"
       }`}
       onClick={(e) => handleClose(e)}

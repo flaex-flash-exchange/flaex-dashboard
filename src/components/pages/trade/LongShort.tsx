@@ -61,12 +61,19 @@ const LongShort = ({ data = mockData }: ILongShort) => {
             className="bg-transparent outline-none"
             onChange={(e: any) => handleChangeSlider(e.target.value)}
             value={percentage}
+            max={1000}
+            type="number"
           />
           <div className="mr-2">%</div>
         </div>
 
         <div className="mt-8">
-          <SliderCustom value={percentage} onChangeValue={handleChangeSlider} />
+          <SliderCustom
+            value={percentage}
+            onChangeValue={handleChangeSlider}
+            marks={marks}
+            max={1000}
+          />
         </div>
       </div>
 
@@ -130,4 +137,23 @@ const mockData = {
     { title: "Margin Ratio:", value: "1.41" },
     { title: "Commission Fee:", value: "8.66 USDC" },
   ],
+};
+
+const marks = {
+  0: <strong>0%</strong>,
+  100: "100%",
+  200: "200%",
+  300: "300%",
+  400: "400%",
+  500: "500%",
+  600: "600%",
+  700: "700%",
+  800: "800%",
+  900: "900%",
+  1000: {
+    style: {
+      color: "red",
+    },
+    label: <strong>1000%</strong>,
+  },
 };

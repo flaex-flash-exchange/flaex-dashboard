@@ -32,7 +32,7 @@ const CloseRepay = ({ data = mockData }: ICloseRepay) => {
   };
 
   return (
-    <div>
+    <div className="flex flex-col h-full">
       <div className="flex text-base font-semibold bg-flaex-border bg-opacity-5 rounded-[10px]">
         <button
           onClick={() => {
@@ -67,15 +67,31 @@ const CloseRepay = ({ data = mockData }: ICloseRepay) => {
         </button>
       </div>
 
-      <div className="mt-[22px]">
+      <div className="mt-[8px]">
         <div className="text-sm font-semibold">
           {isRepay ? "Repay Percentage" : "Close Percentage"}
         </div>
+
+        {isRepay && (
+          <div className="flex justify-between rounded-[10px] bg-flaex-border bg-opacity-5 py-1 px-2 mt-2">
+            <input
+              className="bg-transparent outline-none"
+              onChange={(e: any) => handleChangeSlider(e.target.value)}
+              value={percentage}
+              max={100}
+              type="number"
+            />
+            <div className="mr-2">%</div>
+          </div>
+        )}
+
         <div className="mt-8">
           <SliderCustom
             value={percentage}
             onChangeValue={handleChangeSlider}
             disabled={!isRepay}
+            marks={marks}
+            max={100}
           />
         </div>
       </div>
@@ -112,10 +128,11 @@ const CloseRepay = ({ data = mockData }: ICloseRepay) => {
               </div>
             ))}
       </div>
-
-      <button className="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full">
-        {isRepay ? "Repay Partial Debt" : "Close Position"}
-      </button>
+      <div className="flex-1 flex flex-col justify-end">
+        <button className="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full">
+          {isRepay ? "Repay Partial Debt" : "Close Position"}
+        </button>
+      </div>
     </div>
   );
 };
@@ -147,5 +164,24 @@ const mockData = {
       { title: "Margin Ratio After:", value: "1.4" },
       { title: "PnL:", value: "12.27 %" },
     ],
+  },
+};
+
+const marks = {
+  0: <strong>0%</strong>,
+  10: "10%",
+  20: "20%",
+  30: "30%",
+  40: "40%",
+  50: "50%",
+  60: "60%",
+  70: "70%",
+  80: "80%",
+  90: "90%",
+  100: {
+    style: {
+      color: "red",
+    },
+    label: <strong>100%</strong>,
   },
 };

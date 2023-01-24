@@ -32,8 +32,12 @@ body {
 
 #__next {
   width: 100%;
-  background: rgb(0,36,83);
-  background: linear-gradient(90deg, rgba(0,36,83,1) 35%, rgba(4,12,24,1) 100%);
+  background: rgb(0, 36, 83);
+  background: linear-gradient(
+    90deg,
+    rgba(0, 36, 83, 1) 35%,
+    rgba(4, 12, 24, 1) 100%
+  );
   overflow-x: hidden;
 }
 
@@ -74,11 +78,22 @@ p {
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 3; /* number of lines to show */
-          line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
 }
 
 table {
   border-collapse: separate;
   border-spacing: 0;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  /* display: none; <- Crashes Chrome on hover */
+  -webkit-appearance: none;
+  margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+
+input[type="number"] {
+  -moz-appearance: textfield; /* Firefox */
 }

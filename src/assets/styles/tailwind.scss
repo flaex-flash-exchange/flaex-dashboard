@@ -39,7 +39,6 @@
     @apply border-4 border-flaex-text hover:border-flaex-hover-text duration-500 max-w-2xl  m-auto mt-20 mb-20;
   }
 
-
   .swiper_custom {
     &.swiper {
       @apply pb-[50px];
@@ -71,7 +70,7 @@
   }
 
   .button-primary {
-    @apply px-4 py-2 text-lg rounded-md bg-flaex-text font-bold hover:bg-flaex-hover-text duration-200 text-flaex-bg-primary drop-shadow-md;
+    @apply py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full;
   }
 
   .button-dark {
@@ -83,6 +82,12 @@
   }
   .center-all {
     @apply flex justify-center items-center;
+  }
+  .bg-border-flaex {
+    @apply border-flaex-border-table rounded-[10px] border-[0.2px] bg-flaex-border bg-opacity-[3%];
+  }
+  .bg-border-transparent-flaex {
+    @apply border-flaex-border-table rounded-[10px] border-[0.2px];
   }
 }
 

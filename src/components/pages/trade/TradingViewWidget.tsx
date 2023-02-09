@@ -7,6 +7,10 @@ let tvScriptLoadingPromise: any;
 export default function TradingViewWidget() {
   const onLoadScriptRef = useRef<any>();
 
+  const clearScriptRef = () => {
+    onLoadScriptRef.current = null;
+  };
+
   useEffect(() => {
     onLoadScriptRef.current = createWidget;
 
@@ -26,14 +30,14 @@ export default function TradingViewWidget() {
       () => onLoadScriptRef.current && onLoadScriptRef.current(),
     );
 
-    return () => (onLoadScriptRef.current = null);
+    return clearScriptRef;
 
     function createWidget() {
       if (
         document.getElementById("tradingview_3af7b") &&
         "TradingView" in window
       ) {
-        new window.TradingView.widget({
+        new (window as any).TradingView.widget({
           autosize: true,
           symbol: "UNISWAP3ETH:WETHUSDT",
           interval: "D",

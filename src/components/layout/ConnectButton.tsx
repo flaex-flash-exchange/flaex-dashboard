@@ -10,21 +10,25 @@ import {
   useEnsName,
 } from "wagmi";
 
-import { FaAngleDown, FaCopy } from "react-icons/fa";
-
-import styled from "styled-components";
-import Dropdown from "components/common/Dropdown";
-import { IConnectWalletBtn } from "constants/interface";
+import AntDropDown from "components/common/AntCommon/AntDropdown";
+import AntImage from "components/common/AntCommon/AntImages";
 import BaseButton from "components/common/BaseButton";
+import { IConnectWalletBtn } from "constants/interface";
+import Link from "next/link";
+import styled from "styled-components";
+import { handleCopyToClipboard } from "util/commons";
 
 export function Connectbutton() {
   const { address, isConnected } = useAccount();
   //   const { data: ensAvatar } = useEnsAvatar({ address });
   const { data: ensName } = useEnsName({ address });
   const { disconnect } = useDisconnect();
-  const { pushModal } = useModalContext();
 
   const [walletConnected, setWalletConnected] = useState(false);
+
+  const onCopyAddress = (address: string) => {
+    handleCopyToClipboard(`${address}`);
+  };
 
   useEffect(() => {
     if (isConnected) {
@@ -34,39 +38,75 @@ export function Connectbutton() {
     setWalletConnected(false);
   }, [isConnected]);
 
-  const test = (id: any) => {
-    console.log({ id });
-  };
-
   if (walletConnected) {
     return (
-      <div>
-        <Dropdown
-          title={
-            <div className="flex items-center px-2 font-semibold duration-200 rounded-xl py-1 text-[18px] lg:px-6 lg:py-2 border ease-in cursor-pointer border-text-flaex-border ">
-              <div className="overflow-hidden truncate w-32">
-                {ensName ? `${ensName} (${address})` : address}
-              </div>
-              <div>
-                <FaAngleDown />
-              </div>
-            </div>
-          }
-          data={mockDataSetting}
-          width={"min-w-[120px]"}
-          classItem="py-2 px-4 cursor-pointer hover:text-flaex-primary duration-200 text-sm"
-          sizeIcon={18}
-          bottomLength="-bottom-5"
-          //   handleOption={test}
-        />
-        {/* <button
-          onClick={() => disconnect()}
-          className="px-2 font-semibold duration-200 rounded-xl py-1 text-[18px] lg:px-6 lg:py-2 border ease-in cursor-pointer border-text-flaex-border"
-        >
-          Disconnect
-        </button> */}
+      <div className="flex items-center px-2 font-semibold duration-200 rounded-xl py-1 text-[18px] lg:px-6 lg:py-2 border ease-in cursor-pointer border-text-flaex-border ">
+        <div className="overflow-hidden truncate w-32">
+          <AntDropDown
+            className="test-motmi"
+            title={ensName ? `${ensName} (${address})` : address}
+            options={[
+              {
+                key: "1",
+                label: (
+                  <DropboxItem onClick={() => onCopyAddress(`${address}`)}>
+                    <AntImage src="/images/header/copy.svg" />
+                    <span>Copy Address</span>
+                  </DropboxItem>
+                ),
+              },
+              {
+                key: "2",
+                label: (
+                  <Link
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={`https://etherscan.io/address/${address}`}
+                  >
+                    <a target="_blank">
+                      <DropboxItem>
+                        <AntImage src="/images/header/explorer.svg" />
+                        <span>View on Explorer</span>
+                      </DropboxItem>
+                    </a>
+                  </Link>
+                ),
+              },
+              {
+                key: "3",
+                label: (
+                  <DropboxItem onClick={() => disconnect()}>
+                    <AntImage src="/images/header/disconnect.svg" />
+                    <span>Disconnect</span>
+                  </DropboxItem>
+                ),
+              },
+            ]}
+          />
+        </div>
       </div>
     );
+    // return (
+    //   <div>
+    //     <Dropdown
+    //       title={
+    //         <div className="flex items-center px-2 font-semibold duration-200 rounded-xl py-1 text-[18px] lg:px-6 lg:py-2 border ease-in cursor-pointer border-text-flaex-border ">
+    //           <div className="overflow-hidden truncate w-32">
+    //             {ensName ? `${ensName} (${address})` : address}
+    //           </div>
+    //           <div>
+    //             <FaAngleDown />
+    //           </div>
+    //         </div>
+    //       }
+    //       data={mockDataSetting}
+    //       width={"min-w-[120px]"}
+    //       classItem="py-2 px-4 cursor-pointer hover:text-flaex-primary duration-200 text-sm"
+    //       sizeIcon={18}
+    //       bottomLength="-bottom-5"
+    //     />
+    //   </div>
+    // );
   }
 
   return <ConnectWalletBtn />;
@@ -82,21 +122,6 @@ export const ConnectWalletBtn = (props: IConnectWalletBtn) => {
     />
   );
 };
-
-const mockDataSetting = [
-  {
-    label: "copy address",
-    icon: "/images/header/copy.svg",
-  },
-  {
-    label: "View on Explorer",
-    icon: "/images/header/explorer.svg",
-  },
-  {
-    label: "Disconnect",
-    icon: "/images/header/disconnect.svg",
-  },
-];
 
 const ModalConnectWallet = () => {
   const { closeModals } = useModalContext();
@@ -160,6 +185,14 @@ const BtnInModalConnect = styled.div`
   &:hover {
     background-color: rgba(0, 0, 0, 0.1);
   }
+`;
+
+const DropboxItem = styled.div`
+  color: white;
+  gap: 15px;
+  display: flex;
+  align-items: center;
+  flex-direction: row-reverse;
 `;
 
 const mockDataWallet = [

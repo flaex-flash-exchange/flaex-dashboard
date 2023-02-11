@@ -18,6 +18,7 @@
     "ethers": "^5",
     "mongoose": "^6.7.3",
     "next": "12.2.4",
+    "node-sass": "^8.0.0",
     "rc-slider": "^10.1.0",
     "rc-tooltip": "^5.2.2",
     "react": "18.2.0",

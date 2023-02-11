@@ -1,6 +1,9 @@
-import DropdownCoin from "components/common/DropdownCoin";
-import { CoupleCoin } from "constants/typeData";
+import AntSelect from "components/common/AntCommon/AntSelect";
+import { TCoupleCoin } from "constants/interface";
+import { useContextTrade } from "context/TradeContext";
+// import DropdownCoin from "components/common/DropdownCoin";
 import React from "react";
+import { splitStringOnSlash } from "util/commons";
 import { convertCurrency } from "util/convertValue";
 
 type ITopBar = {
@@ -12,10 +15,22 @@ type ITopBar = {
 };
 
 const Topbar = ({ amount, currency, change, high, low }: ITopBar) => {
+  const { setCoupleTradeCoins } = useContextTrade();
+
+  const onSelectCouple = (item: string) => {
+    const [before, after] = splitStringOnSlash(item);
+    setCoupleTradeCoins((prev: TCoupleCoin) => ({
+      ...prev,
+      base: before,
+      quote: after,
+      origin: item,
+    }));
+  };
   return (
     <div className="grid grid-cols-6 border-flaex-border-table items-center rounded-[10px] border-[0.6px] px-5 py-2">
-      <div className="col-span-2 h-ful w-10/12">
-        <DropdownCoin data={mockData} />
+      <div className="col-span-2 h-ful w-10/12 z-10">
+        {/* <DropdownCoin data={mockData} /> */}
+        <AntSelect onSelection={onSelectCouple} />
       </div>
 
       <div className="text-center">
@@ -48,9 +63,3 @@ const Topbar = ({ amount, currency, change, high, low }: ITopBar) => {
 };
 
 export default Topbar;
-
-const mockData: CoupleCoin[] = [
-  { firstCoin: "ETH", secondCoin: "USDC" },
-  { firstCoin: "BTC", secondCoin: "USDC" },
-  { firstCoin: "BTC", secondCoin: "ETH" },
-];

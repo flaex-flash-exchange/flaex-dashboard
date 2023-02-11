@@ -65,3 +65,21 @@
     display: none;
   }
 }
+
+.ant-select-dropdown,
+.ant-dropdown-menu {
+  background-color: #002353 !important;
+  border: 0.5px solid white;
+}
+
+.ant-select-selector {
+  background-color: transparent !important;
+  border: none !important;
+}
+
+.ant-select-item-option-selected {
+  background-color: transparent !important;
+}
+.ant-select-dropdown-rtl {
+  direction: ltr;
+}

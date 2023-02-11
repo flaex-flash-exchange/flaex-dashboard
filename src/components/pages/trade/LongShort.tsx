@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import BaseButton from "components/common/BaseButton";
 import SliderCustom from "components/common/SliderCustom";
 import { ConnectWalletBtn } from "components/layout/ConnectButton";
+import { useContextTrade } from "context/TradeContext";
 
 type ILongShort = { data?: any };
 
@@ -13,6 +14,7 @@ const LSBtn = {
 
 const LongShort = ({ data = mockData }: ILongShort) => {
   const { isConnected } = useAccount();
+  const { coupleTradeCoins } = useContextTrade();
 
   const [isLong, setIsLong] = useState<boolean>(true);
   const [amountValue, setAmount] = useState<number>(10);
@@ -144,7 +146,7 @@ const LongShort = ({ data = mockData }: ILongShort) => {
       <div className="flex-1 flex flex-col justify-end">
         {btnConnected ? (
           <BaseButton
-            btnLabel={`${btnLabel} ${""}`}
+            btnLabel={`${btnLabel} ${coupleTradeCoins?.origin}`}
             onButtonClick={() => handleLongShort(btnLabel)}
             moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
           />

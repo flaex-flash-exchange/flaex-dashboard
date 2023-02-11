@@ -3,28 +3,46 @@ import { useModalContext } from "context/ModalContext";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { FaAlignRight, FaTimes } from "react-icons/fa";
+import {
+  FaAlignRight,
+  FaAngleDoubleRight,
+  FaTimes,
+  FaWallet,
+} from "react-icons/fa";
 
-const Header = (): JSX.Element => {
+const Header = ({ toggleCollapse, onChangeToggle }: any): JSX.Element => {
   const [isSetting, setIsSetting] = useState<boolean>(false);
 
   const { pushModal } = useModalContext();
   return (
     <div className="flex justify-between items-center">
+      <div
+        className="py-[17px] block md:hidden ease-in duration-200"
+        onClick={() => onChangeToggle()}
+      >
+        {toggleCollapse ? (
+          <FaTimes size={25} />
+        ) : (
+          <FaAngleDoubleRight size={25} />
+        )}
+      </div>
+
       <Link href={"/"}>
         <a className="flex items-center">
           <img
             src="/images/logo.svg"
             alt="logo"
-            className="w-[60px] h-[60px] mr-2"
+            className="w-12 h-12 md:w-[60px] md:h-[60px] mr-2"
           />
-          <span className={`text-[30px] leading-[50px] tracking-[3px]`}>
+          <span
+            className={` text-[28px] md:text-[30px] leading-[50px] tracking-[3px]`}
+          >
             flæx
           </span>
         </a>
       </Link>
 
-      <div className="flex gap-6 items-center ">
+      <div className="flex gap-2 md:gap-6 items-center ">
         {/* <Link href="/">
           <button className="px-2 font-semibold duration-200 rounded-xl py-1 text-[16px] lg:px-5 lg:py-2 border mr-2 md:mr-5 ease-in cursor-pointer border-text-flaex-border">
             Connect Wallet
@@ -40,10 +58,17 @@ const Header = (): JSX.Element => {
         /> */}
 
         <button
-          className="px-2 font-semibold duration-200 rounded-xl py-1 text-[18px] lg:px-6 lg:py-2 border ease-in cursor-pointer border-text-flaex-border"
+          className="px-2 hidden md:block font-semibold duration-200 rounded-lg md:rounded-xl py-1 text-[16px] md:text-[18px] lg:px-6 lg:py-2 border ease-in cursor-pointer border-text-flaex-border"
           onClick={() => pushModal(<ModalConnectWallet />)}
         >
           Connect Wallet
+        </button>
+
+        <button
+          className="md:hidden"
+          onClick={() => pushModal(<ModalConnectWallet />)}
+        >
+          <FaWallet />
         </button>
 
         <Dropdown

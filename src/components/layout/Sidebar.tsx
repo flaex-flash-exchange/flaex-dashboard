@@ -10,12 +10,12 @@ import {
   FaExchangeAlt,
   FaHandHoldingUsd,
   FaMapMarkerAlt,
+  FaRegTimesCircle,
   FaTimes,
 } from "react-icons/fa";
 
-const Sidebar = () => {
+const Sidebar = ({ toggleCollapse, onChangeToggle }: any) => {
   const router = useRouter();
-  const [toggleCollapse, setToggleCollapse] = useState(true);
 
   const activeMenu = useMemo(() => {
     for (const menu of menuItems) {
@@ -34,29 +34,31 @@ const Sidebar = () => {
     );
   };
 
-  const getNavSubItemClasses = (submenu: any) => {
-    return classNames(
-      "cursor-pointer text-[18px] rounded w-full overflow-hidden whitespace-nowrap",
-      {
-        ["text-white"]: activeMenu?.id === submenu.id,
-        ["text-[#828282] pointer-events-none"]: submenu.disabled === true,
-      },
-    );
-  };
+  // const getNavSubItemClasses = (submenu: any) => {
+  //   return classNames(
+  //     "cursor-pointer text-[18px] rounded w-full overflow-hidden whitespace-nowrap",
+  //     {
+  //       ["text-white"]: activeMenu?.id === submenu.id,
+  //       ["text-[#828282] pointer-events-none"]: submenu.disabled === true,
+  //     },
+  //   );
+  // };
 
   return (
-    <>
+    <div className="h-full">
       <div
-        className={`ease-in duration-300 absolute md:relative md:bg-transparent h-full md:h-auto w-[150px] z-50 ${
-          toggleCollapse ? "w-[150px]" : "w-[50px]"
+        className={`ease-in duration-300 md:relative bg-flaex-linear md:bg-transparent h-full md:h-auto z-50 ${
+          toggleCollapse
+            ? "fixed inset-0 md:w-[150px] px-10 md:px-0"
+            : "md:w-[50px]"
         } `}
         // onMouseEnter={handleOnMouse}
         // onMouseLeave={handleOnMouse}
       >
-        <div className="relative z-[12]">
+        <div className="relative z-[12] h-full">
           <div
-            className="py-[17px] block ease-in duration-200"
-            onClick={() => setToggleCollapse((prev) => !prev)}
+            className="py-[17px] hidden md:block ease-in duration-200"
+            onClick={() => onChangeToggle()}
           >
             {toggleCollapse ? (
               <FaTimes size={25} />
@@ -65,7 +67,16 @@ const Sidebar = () => {
             )}
           </div>
 
-          <div>
+          {toggleCollapse && (
+            <button
+              className="md:hidden absolute top-10 right-0"
+              onClick={() => onChangeToggle()}
+            >
+              <FaRegTimesCircle size={25} />
+            </button>
+          )}
+
+          <div className="hidden md:block">
             {menuItems.map((menu) => {
               const classes = getNavItemClasses(menu);
               return (
@@ -81,9 +92,49 @@ const Sidebar = () => {
               );
             })}
           </div>
+
+          {toggleCollapse && (
+            <div className="flex flex-col py-20 md:hidden h-full justify-between">
+              <div>
+                {menuItems.map((menu) => {
+                  const classes = getNavItemClasses(menu);
+                  return (
+                    <div key={menu.id}>
+                      <div className={classes}>
+                        <Link href={menu.link}>
+                          <a
+                            className="w-full h-full py-[17px] ease-in duration-200  text-[18px] flex items-center"
+                            onClick={() => onChangeToggle()}
+                          >
+                            <span className="mr-4 text-[25px]">
+                              {menu.icon}
+                            </span>{" "}
+                            {menu.label}
+                          </a>
+                        </Link>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="flex flex-col gap-4 items-end justify-center">
+                <img
+                  src="/images/logo.svg"
+                  alt="logo"
+                  className="w-20 h-20 md:w-[60px] md:h-[60px] mr-2"
+                />
+                <span
+                  className={` text-[40px] md:text-[30px] leading-[50px] tracking-[3px]`}
+                >
+                  flæx
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

@@ -47,10 +47,8 @@ const Sidebar = ({ toggleCollapse, onChangeToggle }: any) => {
   return (
     <div className="h-full">
       <div
-        className={`ease-in duration-300 md:relative bg-flaex-linear md:bg-transparent h-full md:h-auto z-50 ${
-          toggleCollapse
-            ? "fixed inset-0 md:w-[150px] px-10 md:px-0"
-            : "md:w-[50px]"
+        className={`fixed -left-full bottom-0 top-0 md:top-auto md:bottom-auto md:left-auto w-full ease-in duration-300 md:relative bg-flaex-linear md:bg-transparent h-full md:h-auto z-50 ${
+          toggleCollapse ? "left-0 md:w-[150px] px-10 md:px-0" : "md:w-[50px]"
         } `}
         // onMouseEnter={handleOnMouse}
         // onMouseLeave={handleOnMouse}
@@ -66,15 +64,6 @@ const Sidebar = ({ toggleCollapse, onChangeToggle }: any) => {
               <FaAngleDoubleRight size={25} />
             )}
           </div>
-
-          {toggleCollapse && (
-            <button
-              className="md:hidden absolute top-10 right-0"
-              onClick={() => onChangeToggle()}
-            >
-              <FaRegTimesCircle size={25} />
-            </button>
-          )}
 
           <div className="hidden md:block">
             {menuItems.map((menu) => {
@@ -94,43 +83,52 @@ const Sidebar = ({ toggleCollapse, onChangeToggle }: any) => {
           </div>
 
           {toggleCollapse && (
-            <div className="flex flex-col py-20 md:hidden h-full justify-between">
-              <div>
-                {menuItems.map((menu) => {
-                  const classes = getNavItemClasses(menu);
-                  return (
-                    <div key={menu.id}>
-                      <div className={classes}>
-                        <Link href={menu.link}>
-                          <a
-                            className="w-full h-full py-[17px] ease-in duration-200  text-[18px] flex items-center"
-                            onClick={() => onChangeToggle()}
-                          >
-                            <span className="mr-4 text-[25px]">
-                              {menu.icon}
-                            </span>{" "}
-                            {menu.label}
-                          </a>
-                        </Link>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+            <>
+              <button
+                className="md:hidden absolute top-10 right-0"
+                onClick={() => onChangeToggle()}
+              >
+                <FaRegTimesCircle size={25} />
+              </button>
 
-              <div className="flex flex-col gap-4 items-end justify-center">
-                <img
-                  src="/images/logo.svg"
-                  alt="logo"
-                  className="w-20 h-20 md:w-[60px] md:h-[60px] mr-2"
-                />
-                <span
-                  className={` text-[40px] md:text-[30px] leading-[50px] tracking-[3px]`}
-                >
-                  flæx
-                </span>
+              <div className="flex flex-col py-20 md:hidden h-full justify-between">
+                <div>
+                  {menuItems.map((menu) => {
+                    const classes = getNavItemClasses(menu);
+                    return (
+                      <div key={menu.id}>
+                        <div className={classes}>
+                          <Link href={menu.link}>
+                            <a
+                              className="w-full h-full py-[17px] ease-in duration-200 text-[18px] flex items-center"
+                              onClick={() => onChangeToggle()}
+                            >
+                              <span className="mr-4 text-[25px]">
+                                {menu.icon}
+                              </span>{" "}
+                              {menu.label}
+                            </a>
+                          </Link>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="flex flex-col gap-4 items-end justify-center">
+                  <img
+                    src="/images/logo.svg"
+                    alt="logo"
+                    className="w-20 h-20 md:w-[60px] md:h-[60px] mr-2"
+                  />
+                  <span
+                    className={` text-[40px] md:text-[30px] leading-[50px] tracking-[3px]`}
+                  >
+                    flæx
+                  </span>
+                </div>
               </div>
-            </div>
+            </>
           )}
         </div>
       </div>

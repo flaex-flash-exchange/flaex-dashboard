@@ -8,7 +8,7 @@ const classTitleDefault =
   "flex text-2xl font-semibold items-center gap-2 px-2 h-full";
 
 const classItemDefault =
-  "p-2 cursor-pointer hover:text-flaex-primary duration-200";
+  "py-2 px-4 cursor-pointer hover:text-flaex-primary duration-200";
 
 const Dropdown = ({
   sizeIcon = 24,

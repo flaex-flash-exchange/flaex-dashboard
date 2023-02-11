@@ -1,16 +1,27 @@
+import { useAccount } from "wagmi";
+import React, { useEffect, useMemo, useState } from "react";
+import BaseButton from "components/common/BaseButton";
 import SliderCustom from "components/common/SliderCustom";
-import React, { useEffect, useState } from "react";
+import { ConnectWalletBtn } from "components/layout/ConnectButton";
 
 type ILongShort = { data?: any };
 
-const LongShort = ({ data = mockData }: ILongShort) => {
-  const [isLong, setIsLong] = useState<boolean>(true);
+const LSBtn = {
+  LONG: "Long",
+  SHORT: "Short",
+};
 
+const LongShort = ({ data = mockData }: ILongShort) => {
+  const { isConnected } = useAccount();
+
+  const [isLong, setIsLong] = useState<boolean>(true);
   const [amountValue, setAmount] = useState<number>(10);
   const [payingValue, setPayingValue] = useState<number>(2.941);
   const [balanceValue, setBalanceValue] = useState<number>(4.2);
-
   const [percentage, setPercentage] = useState<number>(0);
+  const [btnConnected, setbtnConnected] = useState(false);
+
+  const btnLabel = useMemo(() => (isLong ? LSBtn.LONG : LSBtn.SHORT), [isLong]);
 
   const handleChangeLongShort = (clickedLong: boolean) => {
     if (clickedLong) {
@@ -18,7 +29,6 @@ const LongShort = ({ data = mockData }: ILongShort) => {
     } else {
       setIsLong(false);
     }
-
     setAmount(0);
     setPayingValue(0);
     setBalanceValue(0);
@@ -28,6 +38,24 @@ const LongShort = ({ data = mockData }: ILongShort) => {
   const handleChangeSlider = (value: number) => {
     setPercentage(value);
   };
+
+  const handleLongShort = (type: string) => {
+    switch (type) {
+      case LSBtn.LONG:
+        console.log("click", type);
+        break;
+      case LSBtn.SHORT:
+        console.log("click", type);
+        break;
+      default:
+        break;
+    }
+  };
+
+  useEffect(() => {
+    setbtnConnected(isConnected);
+  }, [isConnected]);
+
   return (
     <div className="flex h-full flex-col">
       <div className="flex text-base font-semibold bg-flaex-border bg-opacity-5 rounded-[10px]">
@@ -39,7 +67,7 @@ const LongShort = ({ data = mockData }: ILongShort) => {
             isLong ? "bg-flaex-button" : ""
           } text-base py-2.5 rounded-[10px]`}
         >
-          Long
+          {LSBtn.LONG}
         </button>
 
         <button
@@ -50,7 +78,7 @@ const LongShort = ({ data = mockData }: ILongShort) => {
             !isLong ? "bg-flaex-button" : ""
           } text-base py-2.5 rounded-[10px]`}
         >
-          Short
+          {LSBtn.SHORT}
         </button>
       </div>
 
@@ -114,9 +142,15 @@ const LongShort = ({ data = mockData }: ILongShort) => {
       </div>
 
       <div className="flex-1 flex flex-col justify-end">
-        <button className="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full">
-          Connect Wallet
-        </button>
+        {btnConnected ? (
+          <BaseButton
+            btnLabel={`${btnLabel} ${""}`}
+            onButtonClick={() => handleLongShort(btnLabel)}
+            moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
+          />
+        ) : (
+          <ConnectWalletBtn extendClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none" />
+        )}
       </div>
     </div>
   );

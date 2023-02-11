@@ -11,8 +11,11 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^1.8.6",
+    "@types/styled-components": "^5.1.26",
+    "antd": "^5.1.7",
     "axios": "^0.27.2",
     "classnames": "^2.3.2",
+    "ethers": "^5",
     "mongoose": "^6.7.3",
     "next": "12.2.4",
     "rc-slider": "^10.1.0",
@@ -21,8 +24,10 @@
     "react-dom": "18.2.0",
     "react-redux": "^8.0.5",
     "react-toastify": "^9.1.1",
+    "styled-components": "^5.3.6",
     "swiper": "^8.4.5",
-    "tailwind-merge": "^1.8.1"
+    "tailwind-merge": "^1.8.1",
+    "wagmi": "^0.11.5"
   },
   "devDependencies": {
     "@types/node": "18.7.1",

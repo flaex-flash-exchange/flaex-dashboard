@@ -1,0 +1,20 @@
+export const chainId = {
+  mainnet: 1,
+  ropsten: 3,
+  rinkeby: 4,
+  goerli: 5,
+  kovan: 42,
+  sepolia: 11_155_111,
+  optimism: 10,
+  optimismKovan: 69,
+  optimismGoerli: 420,
+  polygon: 137,
+  polygonMumbai: 80_001,
+  arbitrum: 42_161,
+  arbitrumRinkeby: 421_611,
+  arbitrumGoerli: 421_613,
+  localhost: 1_337,
+  hardhat: 31_337,
+  foundry: 31_337,
+} as const;
+export type ChainName = keyof typeof chainId;

@@ -35,12 +35,20 @@ const AntSelect = (props: ISelectProps) => {
       <Select
         defaultValue={items[0].value}
         style={{
-          width: 120,
+          maxWidth: 120,
           direction: "ltr",
         }}
         onChange={onSelection}
         options={items}
-        suffixIcon={<FaAngleDown style={{ color: "white", fontSize: 18 }} />}
+        suffixIcon={
+          <FaAngleDown
+            style={{
+              color: "white",
+              fontSize: 18,
+              marginRight: "-10px",
+            }}
+          />
+        }
         {...props}
       />
     </SelectWrapper>

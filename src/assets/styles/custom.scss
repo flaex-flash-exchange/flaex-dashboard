@@ -83,3 +83,9 @@
 .ant-select-dropdown-rtl {
   direction: ltr;
 }
+
+@media screen and (max-width: 1024px) {
+  iframe {
+    height: 80vh !important;
+  }
+}

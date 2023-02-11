@@ -9,7 +9,7 @@ const Index: NextPage = () => {
   return (
     <>
       <TradeContextProvider>
-        <div className="grid grid-cols-7 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 xl:grid-cols-7 2xl:grid-cols-7 gap-3">
           <div className="col-span-5 flex flex-col justify-center">
             <Topbar
               amount={1227.5}
@@ -18,21 +18,14 @@ const Index: NextPage = () => {
               high={1226.9}
               low={1226.9}
             />
-            <div className="h-full mt-2 border rounded">
-              {/* <img
-                src="/images/trade/chart_img.png"
-                alt="flaex"
-                className="w-full mt-2"
-              /> */}
+            <div className="mt-2 border rounded h-full">
               <TradingViewWidget />
             </div>
           </div>
-
-          <div className="col-span-2 h-full">
+          <div className="col-span-5 lg:col-span-2 xl:col-span-2 2xl:col-span-2 h-full">
             <Mainbar />
           </div>
         </div>
-
         <BottomInfo />
       </TradeContextProvider>
     </>

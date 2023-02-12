@@ -4,10 +4,12 @@ import RightContent from "./RightContent";
 
 const MainInvest = () => {
   return (
-    <div className="flex gap-8 mt-3.5">
+    <div className="md:flex gap-8 mt-3.5 mb-6">
       <div className="flex-1">
         <LeftContent />
       </div>
+
+      <div className="divider md:hidden" />
       <div className="flex-1">
         <RightContent />
       </div>

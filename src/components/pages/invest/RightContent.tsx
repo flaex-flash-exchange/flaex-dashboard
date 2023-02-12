@@ -15,11 +15,11 @@ const RightContent = () => {
         <InvestTable totalRow={totalRowTerm} detailRows={detailRowsTerm} />
       </div>
 
-      <div className="mt-2 grid grid-cols-3 gap-2.5">
-        <div className="col-span-1">
+      <div className="mt-2 grid grid-cols-5 gap-2.5">
+        <div className="col-span-2 ">
           <AmountInvest />
         </div>
-        <div className="col-span-2">
+        <div className="col-span-3">
           <DrawAmountInvest />
         </div>
       </div>

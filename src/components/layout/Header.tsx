@@ -37,7 +37,7 @@ const Header = ({ toggleCollapse, onChangeToggle }: any): JSX.Element => {
             className="w-12 h-12 md:w-[60px] md:h-[60px] mr-2"
           />
           <span
-            className={` text-[28px] md:text-[30px] leading-[50px] tracking-[3px]`}
+            className={`text-[28px] md:text-[30px] leading-[50px] tracking-[3px]`}
           >
             flæx
           </span>

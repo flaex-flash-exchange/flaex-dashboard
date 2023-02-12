@@ -36,7 +36,7 @@
   }
 
   .divider {
-    @apply border-4 border-flaex-text hover:border-flaex-hover-text duration-500 max-w-2xl  m-auto mt-20 mb-20;
+    @apply border-2 border-flaex-heading w-1/2 max-w-2xl m-auto my-10;
   }
 
   .swiper_custom {
@@ -70,7 +70,7 @@
   }
 
   .button-primary {
-    @apply py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full;
+    @apply py-2.5 text-[12px] lg:text-base font-semibold rounded-[10px] bg-flaex-button w-full;
   }
 
   .button-dark {

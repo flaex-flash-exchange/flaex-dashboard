@@ -3,7 +3,7 @@ import HistoryTable from "./HistoryTable";
 
 const BottomInfo = () => {
   return (
-    <div className="mt-[20px]">
+    <div className="mt-[20px] overflow-auto	">
       <HistoryTable titleRow={titleHistoryRow} data={mockData} />
     </div>
   );

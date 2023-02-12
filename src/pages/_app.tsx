@@ -50,7 +50,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <ConfigProvider
       direction="rtl"
-      theme={{ token: { colorPrimary: "#1da57a" } }}
+      theme={{ token: { colorPrimary: "#1da57a", fontFamily: "inherit" } }}
     >
       <Provider store={store}>
         <WagmiConfig client={flaexWagmiClient}>

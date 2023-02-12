@@ -23,7 +23,9 @@ const LayoutWrapper = ({ children }: { children: any }): JSX.Element => {
             toggleCollapse={toggleCollapse}
             onChangeToggle={handleChangeToggle}
           />
-          <div className="flex-1 flex flex-col p-2 pb-7">{children}</div>
+          <div className="flex-1 flex flex-col p-0 md:p-2 md:pb-7 lg:p-2 lg:pb-7  xl:p-2 xl:pb-7 2xl:p-2 2xl:pb-7">
+            {children}
+          </div>
         </div>
       </div>
 

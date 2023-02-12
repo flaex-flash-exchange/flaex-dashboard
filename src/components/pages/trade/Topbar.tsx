@@ -27,7 +27,7 @@ const Topbar = ({ amount, currency, change, high, low }: ITopBar) => {
     }));
   };
   return (
-    <div className="grid grid-cols-6 border-flaex-border-table items-center rounded-[10px] border-[0.6px] px-5 py-2">
+    <div className="grid grid-cols-6 border-flaex-border-table items-center rounded-[10px] border-[0.6px] px-2 py-2 md:px-5 md:py-2 lg:px-5 lg:py-2 xl:px-5 xl:py-2 2xl:px-5 2xl:py-2 ">
       <div className="col-span-2 h-ful w-10/12 z-10">
         {/* <DropdownCoin data={mockData} /> */}
         <AntSelect onSelection={onSelectCouple} />

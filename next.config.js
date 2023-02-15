@@ -3,7 +3,7 @@
 require("dotenv").config();
 
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false,
   swcMinify: true,
   env: {
     DEV_URL: process.env.DEV_URL,

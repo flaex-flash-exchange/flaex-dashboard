@@ -1,59 +1,23 @@
-import type { AppProps } from "next/app";
+import "@rainbow-me/rainbowkit/styles.css";
+import { ConfigProvider } from "antd";
 import "assets/styles/global.scss";
-import { store } from "../redux/store";
+import LayoutWrapper from "components/layout/LayoutWrapper";
+import { ModalContextProvider } from "context/ModalContext";
+import type { AppProps } from "next/app";
+import RainbowProvider from "providers/Rainbowkit";
 import { Provider } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import LayoutWrapper from "components/layout/LayoutWrapper";
-import { ModalContextProvider } from "context/ModalContext";
-import { ConfigProvider } from "antd";
-import { MetaMaskConnector } from "wagmi/connectors/metaMask";
-import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
-import { publicProvider } from "wagmi/providers/public";
-import { WagmiConfig, createClient, configureChains, mainnet } from "wagmi";
-import { alchemyProvider } from "wagmi/providers/alchemy";
-import { InjectedConnector } from "wagmi/connectors/injected";
+import { store } from "../redux/store";
 
 function MyApp({ Component, pageProps }: AppProps) {
-  const { chains, provider, webSocketProvider } = configureChains(
-    [mainnet],
-    [
-      alchemyProvider({
-        apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY || "",
-      }),
-      publicProvider(),
-    ],
-  );
-
-  const flaexWagmiClient = createClient({
-    autoConnect: true,
-    connectors: [
-      new MetaMaskConnector({ chains }),
-      new CoinbaseWalletConnector({
-        chains,
-        options: {
-          appName: "flaex",
-        },
-      }),
-      // new InjectedConnector({
-      //   chains,
-      //   options: {
-      //     name: "Injected",
-      //     shimDisconnect: true,
-      //   },
-      // }),
-    ],
-    provider,
-    // webSocketProvider,
-  });
-
   return (
     <ConfigProvider
       direction="rtl"
       theme={{ token: { colorPrimary: "#1da57a", fontFamily: "inherit" } }}
     >
       <Provider store={store}>
-        <WagmiConfig client={flaexWagmiClient}>
+        <RainbowProvider>
           <ModalContextProvider>
             <ToastContainer
               position="top-right"
@@ -66,7 +30,7 @@ function MyApp({ Component, pageProps }: AppProps) {
               <Component {...pageProps} />
             </LayoutWrapper>
           </ModalContextProvider>
-        </WagmiConfig>
+        </RainbowProvider>
       </Provider>
     </ConfigProvider>
   );

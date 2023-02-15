@@ -10,13 +10,19 @@ import { ConfigProvider } from "antd";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
 import { publicProvider } from "wagmi/providers/public";
-import { WagmiConfig, createClient, configureChains, mainnet } from "wagmi";
+import { WagmiConfig, createClient, configureChains, goerli } from "wagmi";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { InjectedConnector } from "wagmi/connectors/injected";
+import '@rainbow-me/rainbowkit/styles.css';
+import {
+  getDefaultWallets,
+  RainbowKitProvider,
+} from '@rainbow-me/rainbowkit';
+
 
 function MyApp({ Component, pageProps }: AppProps) {
   const { chains, provider, webSocketProvider } = configureChains(
-    [mainnet],
+    [goerli],
     [
       alchemyProvider({
         apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY || "",
@@ -25,26 +31,37 @@ function MyApp({ Component, pageProps }: AppProps) {
     ],
   );
 
+  // const flaexWagmiClient = createClient({
+  //   autoConnect: true,
+  //   connectors: [
+  //     new MetaMaskConnector({ chains }),
+  //     new CoinbaseWalletConnector({
+  //       chains,
+  //       options: {
+  //         appName: "flaex",
+  //       },
+  //     }),
+  //     // new InjectedConnector({
+  //     //   chains,
+  //     //   options: {
+  //     //     name: "Injected",
+  //     //     shimDisconnect: true,
+  //     //   },
+  //     // }),
+  //   ],
+  //   provider,
+  //   // webSocketProvider,
+  // });
+
+  const { connectors } = getDefaultWallets({
+    appName: 'TheFlaexClient',
+    chains
+  });
+  
   const flaexWagmiClient = createClient({
     autoConnect: true,
-    connectors: [
-      new MetaMaskConnector({ chains }),
-      new CoinbaseWalletConnector({
-        chains,
-        options: {
-          appName: "flaex",
-        },
-      }),
-      // new InjectedConnector({
-      //   chains,
-      //   options: {
-      //     name: "Injected",
-      //     shimDisconnect: true,
-      //   },
-      // }),
-    ],
-    provider,
-    // webSocketProvider,
+    connectors,
+    provider
   });
 
   return (
@@ -54,6 +71,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     >
       <Provider store={store}>
         <WagmiConfig client={flaexWagmiClient}>
+        <RainbowKitProvider chains={chains}>
           <ModalContextProvider>
             <ToastContainer
               position="top-right"
@@ -66,6 +84,7 @@ function MyApp({ Component, pageProps }: AppProps) {
               <Component {...pageProps} />
             </LayoutWrapper>
           </ModalContextProvider>
+        </RainbowKitProvider>
         </WagmiConfig>
       </Provider>
     </ConfigProvider>

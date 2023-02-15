@@ -2,17 +2,25 @@ import Dropdown from "components/common/Dropdown";
 import { useModalContext } from "context/ModalContext";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
-import { Connectbutton } from "./ConnectButton";
+import { useEffect, useState } from "react";
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 import {
   FaAlignRight,
   FaAngleDoubleRight,
   FaTimes,
   FaWallet,
 } from "react-icons/fa";
+import { useAccount } from "wagmi";
+import { Connectbutton } from "./ConnectButton";
 
 const Header = ({ toggleCollapse, onChangeToggle }: any): JSX.Element => {
   const [isSetting, setIsSetting] = useState<boolean>(false);
+  const [mouted , setMouted] = useState(false);
+  const { isConnected } = useAccount();
+
+  useEffect(()=>{
+    setMouted(true);
+  },[]);
 
   return (
     <div className="flex justify-between items-center">
@@ -67,7 +75,7 @@ const Header = ({ toggleCollapse, onChangeToggle }: any): JSX.Element => {
         >
           Connect Wallet
         </button> */}
-        <Connectbutton />
+        {mouted && !isConnected ?  <ConnectButton/> : <Connectbutton/>}
 
         {/* <button
           className="md:hidden"

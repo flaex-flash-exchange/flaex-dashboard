@@ -146,10 +146,9 @@ const LongShort = ({ data = mockData }: ILongShort) => {
       <div className="flex-1 flex flex-col justify-end">
         {btnConnected ? (
           <BaseButton
-            btnLabel={`${btnLabel} ${coupleTradeCoins?.origin}`}
             onButtonClick={() => handleLongShort(btnLabel)}
             moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
-          />
+          >{`${btnLabel} ${coupleTradeCoins?.origin}`}</BaseButton>
         ) : (
           <ConnectWalletBtn extendClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none" />
         )}

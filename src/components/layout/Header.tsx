@@ -3,7 +3,6 @@ import { useModalContext } from "context/ModalContext";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ConnectButton } from '@rainbow-me/rainbowkit';
 import {
   FaAlignRight,
   FaAngleDoubleRight,
@@ -12,6 +11,7 @@ import {
 } from "react-icons/fa";
 import { useAccount } from "wagmi";
 import { Connectbutton } from "./ConnectButton";
+import { CustomedRainbowConnect } from "./CustomedRainbowConnect";
 
 const Header = ({ toggleCollapse, onChangeToggle }: any): JSX.Element => {
   const [isSetting, setIsSetting] = useState<boolean>(false);
@@ -75,7 +75,7 @@ const Header = ({ toggleCollapse, onChangeToggle }: any): JSX.Element => {
         >
           Connect Wallet
         </button> */}
-        {mouted && !isConnected ?  <ConnectButton/> : <Connectbutton/>}
+       <CustomedRainbowConnect/> 
 
         {/* <button
           className="md:hidden"

@@ -20,3 +20,31 @@ export function splitStringOnSlash(str: string) {
     return [null, null];
   }
 }
+
+export function formatNumber(num: number, decimalLength: number = 2) {
+  return num.toFixed(decimalLength);
+}
+
+export function _onLongShortCalculator(
+  leverage: number,
+  amount: number,
+  entryPrice: number = 1,
+  sellPrice: number = 1,
+) {
+  const paying = amount / (1 + leverage);
+  const flashSwap = paying * leverage;
+  const borrowingToRepayFlash = flashSwap * entryPrice * 1.0005;
+  const liquidationPrice = 1.1 * (borrowingToRepayFlash / amount);
+  const marginRatio = (amount / borrowingToRepayFlash) * sellPrice;
+  const commissionFee = flashSwap * entryPrice * 0.0005;
+
+  return {
+    paying: formatNumber(paying) || 0,
+    flashSwap: formatNumber(flashSwap) || 0,
+    borrowingToRepayFlash: formatNumber(borrowingToRepayFlash) || 0,
+    entryPrice: formatNumber(entryPrice) || 0,
+    liquidationPrice: formatNumber(liquidationPrice) || 0,
+    marginRatio: formatNumber(marginRatio) || 0,
+    commissionFee: formatNumber(commissionFee) || 0,
+  };
+}

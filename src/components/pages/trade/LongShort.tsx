@@ -1,18 +1,13 @@
 import { useAccount } from "wagmi";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import BaseButton from "components/common/BaseButton";
 import SliderCustom from "components/common/SliderCustom";
 import { ConnectWalletBtn } from "components/layout/ConnectButton";
 import { useContextTrade } from "context/TradeContext";
+import { _onLongShortCalculator } from "util/commons";
+import { LSBtn } from "util/constants";
 
-type ILongShort = { data?: any };
-
-const LSBtn = {
-  LONG: "Long",
-  SHORT: "Short",
-};
-
-const LongShort = ({ data = mockData }: ILongShort) => {
+const LongShort = () => {
   const { isConnected } = useAccount();
   const { coupleTradeCoins } = useContextTrade();
 
@@ -22,6 +17,9 @@ const LongShort = ({ data = mockData }: ILongShort) => {
   const [balanceValue, setBalanceValue] = useState<number>(4.2);
   const [percentage, setPercentage] = useState<number>(0);
   const [btnConnected, setbtnConnected] = useState(false);
+  const [longShortChanging, setLongShortChanging] = useState(
+    _onLongShortCalculator(0, 0),
+  );
 
   const btnLabel = useMemo(() => (isLong ? LSBtn.LONG : LSBtn.SHORT), [isLong]);
 
@@ -39,7 +37,17 @@ const LongShort = ({ data = mockData }: ILongShort) => {
 
   const handleChangeSlider = (value: number) => {
     setPercentage(value);
+    setLongShortChanging(
+      _onLongShortCalculator(value, amountValue / (1 + value)),
+    );
   };
+  const handleChangeAmount = useCallback(
+    (e: any) => {
+      setAmount(e.target.value);
+      setLongShortChanging(_onLongShortCalculator(percentage, e.target.value));
+    },
+    [percentage],
+  );
 
   const handleLongShort = (type: string) => {
     switch (type) {
@@ -116,17 +124,17 @@ const LongShort = ({ data = mockData }: ILongShort) => {
         <div className="flex justify-between mt-2.5 font-normal text-sm">
           <input
             className="bg-transparent outline-none"
-            onChange={(e: any) => setAmount(e.target.value)}
+            onChange={handleChangeAmount}
             value={amountValue}
           />
-          <span>{data.tokenName}</span>
+          <span>{coupleTradeCoins?.base}</span>
         </div>
       </div>
 
       <div className="rounded-[10px] bg-flaex-border bg-opacity-5 py-2.5 px-4 mt-1">
         <div className="flex justify-between text-[12px] font-light">
           <span>Paying</span>
-          <span>{data.tokenName}</span>
+          <span>{coupleTradeCoins?.base}</span>
         </div>
 
         <div className="flex justify-between mt-2.5 font-normal text-sm">
@@ -135,14 +143,31 @@ const LongShort = ({ data = mockData }: ILongShort) => {
         </div>
       </div>
       <div className="mt-5">
-        {data.descInfo.map((item: any, idx: any) => (
-          <div key={idx} className="flex justify-between">
-            <p className="text-xs font-light italic">{item.title}</p>
-            <p className="text-sm font-semibold">{item.value}</p>
-          </div>
-        ))}
+        <div className="flex justify-between">
+          <p className="text-xs font-light italic">Flash Swap:</p>
+          <p className="text-sm font-semibold">{`${longShortChanging?.flashSwap} ${coupleTradeCoins?.base}`}</p>
+        </div>
+        <div className="flex justify-between">
+          <p className="text-xs font-light italic">Borrowing to Repay Flash:</p>
+          <p className="text-sm font-semibold">{`${longShortChanging?.borrowingToRepayFlash} ${coupleTradeCoins?.quote}`}</p>
+        </div>
+        <div className="flex justify-between">
+          <p className="text-xs font-light italic">Entry Price:</p>
+          <p className="text-sm font-semibold">{`${longShortChanging?.entryPrice}`}</p>
+        </div>
+        <div className="flex justify-between">
+          <p className="text-xs font-light italic">Liquidation Price:</p>
+          <p className="text-sm font-semibold">{`${longShortChanging?.liquidationPrice}`}</p>
+        </div>
+        <div className="flex justify-between">
+          <p className="text-xs font-light italic">Margin Ratio:</p>
+          <p className="text-sm font-semibold">{`${longShortChanging?.marginRatio}`}</p>
+        </div>
+        <div className="flex justify-between">
+          <p className="text-xs font-light italic">Commission Fee:</p>
+          <p className="text-sm font-semibold">{`${longShortChanging?.commissionFee} ${coupleTradeCoins?.quote}`}</p>
+        </div>
       </div>
-
       <div className="flex-1 flex flex-col justify-end">
         {btnConnected ? (
           <BaseButton

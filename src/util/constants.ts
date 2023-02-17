@@ -20,3 +20,8 @@ export const mockSelectCoins = [
     value: "BTC/ETH",
   },
 ];
+
+export const LSBtn = {
+  LONG: "Long",
+  SHORT: "Short",
+};

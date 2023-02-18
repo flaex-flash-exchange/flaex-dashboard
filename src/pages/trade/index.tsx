@@ -10,10 +10,9 @@ import type { NextPage } from "next";
 import { useNetwork } from "wagmi";
 
 const Index: NextPage = () => {
-
   // const { chain } = useNetwork();
   const tokenIn = new Token(
-    5 ,
+    5,
     "0x1D2708636EA8E69f8c3766B973be331D175172aB",
     18,
     "WETH",
@@ -21,17 +20,12 @@ const Index: NextPage = () => {
   );
 
   const tokenOut = new Token(
-    5 ,
+    5,
     "0x61D6aF87F88dd282b07eA7E1de69e27C6ac18Adb",
     18,
     "Dai",
     "Dai",
   );
-
-  const quote = useQuoter(tokenIn,tokenOut,7,18,18,FeeAmount.LOWEST);
-  const entryPrice = useQuoter(tokenIn,tokenOut,7,18,18,FeeAmount.LOWEST);
-
-  
 
   return (
     <>

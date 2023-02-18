@@ -1,15 +1,29 @@
-import { useAccount } from "wagmi";
+import { useAccount, useBlockNumber } from "wagmi";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import BaseButton from "components/common/BaseButton";
 import SliderCustom from "components/common/SliderCustom";
 import { ConnectWalletBtn } from "components/layout/ConnectButton";
 import { useContextTrade } from "context/TradeContext";
 import { _onLongShortCalculator } from "util/commons";
-import { LSBtn } from "util/constants";
+import { LSBtn, tokenPair } from "util/constants";
+import useQuoter from "hooks/useQuote";
 
-const LongShort = () => {
+const LongShort = ({ price }: any) => {
   const { isConnected } = useAccount();
   const { coupleTradeCoins } = useContextTrade();
+
+  // const { token0, token1, fee } = useMemo(() => {
+  //   return tokenPair[coupleTradeCoins.origin || ""];
+  // }, [coupleTradeCoins]);
+
+  // const { quotedAmountOut: entryPrice } = useQuoter(
+  //   token0,
+  //   token1,
+  //   1,
+  //   18,
+  //   18,
+  //   fee,
+  // );
 
   const [isLong, setIsLong] = useState<boolean>(true);
   const [amountValue, setAmount] = useState<number>(10);
@@ -17,11 +31,14 @@ const LongShort = () => {
   const [balanceValue, setBalanceValue] = useState<number>(4.2);
   const [percentage, setPercentage] = useState<number>(0);
   const [btnConnected, setbtnConnected] = useState(false);
-  const [longShortChanging, setLongShortChanging] = useState(
-    _onLongShortCalculator(0, 0),
-  );
 
   const btnLabel = useMemo(() => (isLong ? LSBtn.LONG : LSBtn.SHORT), [isLong]);
+
+  const longShortChanging = useMemo(
+    () => _onLongShortCalculator(percentage, amountValue, price),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [percentage, amountValue],
+  );
 
   const handleChangeLongShort = (clickedLong: boolean) => {
     if (clickedLong) {
@@ -37,17 +54,10 @@ const LongShort = () => {
 
   const handleChangeSlider = (value: number) => {
     setPercentage(value);
-    setLongShortChanging(
-      _onLongShortCalculator(value, amountValue),
-    );
   };
-  const handleChangeAmount = useCallback(
-    (e: any) => {
-      setAmount(e.target.value);
-      setLongShortChanging(_onLongShortCalculator(percentage, e.target.value));
-    },
-    [percentage],
-  );
+  const handleChangeAmount = useCallback((e: any) => {
+    setAmount(e.target.value);
+  }, []);
 
   const handleLongShort = (type: string) => {
     switch (type) {

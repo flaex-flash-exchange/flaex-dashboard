@@ -6,11 +6,11 @@ import { mockSelectCoins } from "util/constants";
 
 interface ISelectProps {
   options?: Array<any>;
-  onSelection?: (item: any) => void;
+  _onhandleselection?: (item: any) => void;
 }
 
 const AntSelect = (props: ISelectProps) => {
-  const { options = mockSelectCoins, onSelection } = props;
+  const { options = mockSelectCoins, _onhandleselection } = props;
 
   const items = useMemo(() => {
     return options.map((item: any, idx: number) => {
@@ -31,33 +31,30 @@ const AntSelect = (props: ISelectProps) => {
   }, [options]);
 
   return (
-    <SelectWrapper>
-      <Select
-        defaultValue={items[0].value}
-        style={{
-          maxWidth: 120,
-          direction: "ltr",
-        }}
-        onChange={onSelection}
-        options={items}
-        suffixIcon={
-          <FaAngleDown
-            style={{
-              color: "white",
-              fontSize: 18,
-              marginRight: "-10px",
-            }}
-          />
-        }
-        {...props}
-      />
-    </SelectWrapper>
+    <Select
+      defaultValue={items[0].value}
+      style={{
+        maxWidth: 120,
+        direction: "ltr",
+      }}
+      onChange={_onhandleselection}
+      options={items}
+      suffixIcon={
+        <FaAngleDown
+          style={{
+            color: "white",
+            fontSize: 18,
+            marginRight: "-10px",
+          }}
+        />
+      }
+      {...props}
+    />
   );
 };
 
 export default AntSelect;
 
-const SelectWrapper = styled.div``;
 const ItemOption = styled.span`
   color: whitesmoke;
   transition: all 0.3s ease-in-out;

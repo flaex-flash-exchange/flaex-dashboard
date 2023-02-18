@@ -1,34 +1,142 @@
 import BaseButton from "components/common/BaseButton";
 import SliderCustom from "components/common/SliderCustom";
 import { ConnectWalletBtn } from "components/layout/ConnectButton";
+import { contractAddress } from "constants/contractAddress";
 import { useContextTrade } from "context/TradeContext";
+import Decimal from "decimal.js";
+import { constants, Contract, Signer } from "ethers";
+import { QuoterReturn } from "hooks/useQuote";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { _onLongCalculator, _onShortCalculator } from "util/commons";
-import { LSBtn } from "util/constants";
-import { useAccount } from "wagmi";
+import { LSBtn, tokenPair } from "util/constants";
+import {
+  useAccount,
+  useContractWrite,
+  usePrepareContractWrite,
+  useProvider,
+  useSigner,
+  useWaitForTransaction,
+} from "wagmi";
+import { testERC20, flaexMain } from "../../../contracts";
 
-const LongShort = ({ price }: { price: string }) => {
-  const { isConnected } = useAccount();
+const LongShort = ({ price }: { price: QuoterReturn }) => {
+  const { address, isConnected } = useAccount();
+  const { data: signer } = useSigner();
   const { coupleTradeCoins } = useContextTrade();
-
+  const [isMouted , setIsMouted] = useState(false);
+  const provider = useProvider();
   const [isLong, setIsLong] = useState<boolean>(true);
+  const [isApprovedLongToken, setIsApprovedLongToken] =
+    useState<boolean>(true);
+  const [isApprovedShortToken, setIsApprovedShortToken] =
+    useState<boolean>(true);
   const [amountValue, setAmount] = useState<number>(0);
-  const [payingValue, setPayingValue] = useState<number>(2.941);
   const [balanceValue, setBalanceValue] = useState<number>(4.2);
   const [percentage, setPercentage] = useState<number>(0);
   const [btnConnected, setbtnConnected] = useState(false);
-
   const isActiveBtn = useMemo(() => amountValue > 0, [amountValue]);
+
+  const { token0, token1, fee } = useMemo(() => {
+    return tokenPair[coupleTradeCoins.origin || ""];
+  }, [coupleTradeCoins]);
 
   const btnLabel = useMemo(() => (isLong ? LSBtn.LONG : LSBtn.SHORT), [isLong]);
 
   const longShortChanging = useMemo(
     () =>
       isLong
-        ? _onLongCalculator(percentage, amountValue, price)
-        : _onShortCalculator(percentage, amountValue, price),
+        ? _onLongCalculator(percentage, amountValue, price.priceExactOutputToken1)
+        : _onShortCalculator(percentage, amountValue, price.priceExactInputToken0),
     [percentage, amountValue, price, isLong],
   );
+
+  const fetchAllowance = useCallback(async () => {
+    const longToken = new Contract(token0.address, testERC20.abi, provider);
+    const shortToken = new Contract(token1.address, testERC20.abi, provider);
+    if (!longToken || !address || !shortToken) {
+      return;
+    } else {
+      const allowanceLongToken = await longToken.allowance(
+        address,
+        contractAddress.FlaexMain,
+      );
+      const allowanceShortToken = await shortToken.allowance(
+        address,
+        contractAddress.FlaexMain,
+      );
+      if (new Decimal(allowanceLongToken._hex || 0).equals(0)) {
+        setIsApprovedLongToken(false);
+      }
+      if (new Decimal(allowanceShortToken._hex || 0).equals(0)) {
+        setIsApprovedShortToken(false);
+      }
+    }
+  }, [address, provider, token0.address, token1.address]);
+
+  const { config: configApprovalShortToken  } = usePrepareContractWrite({
+    address: token1.address,
+    abi: testERC20.abi,
+    functionName: "approve",
+    args: [contractAddress.FlaexMain, constants.MaxUint256],
+  });
+
+  const {
+    data: approvalShortTokenData,
+    isLoading:isApprovalShortLoading,
+    isSuccess:isApprovalShortSuccess,
+    write: approvalShortTokenFunc,
+  } = useContractWrite(configApprovalShortToken);
+
+  useWaitForTransaction({
+    hash: approvalShortTokenData?.hash,
+    confirmations: 1,
+    onSuccess() {
+      setIsApprovedShortToken(true);
+    },
+  });
+
+  const { config: configApprovalLongToken } = usePrepareContractWrite({
+    address: token0.address,
+    abi: testERC20.abi,
+    functionName: "approve",
+    args: [contractAddress.FlaexMain,constants.MaxUint256],
+  });
+  const {
+    data: approvalLongTokenData,
+    isLoading:isApprovalLongLoading,
+    isSuccess:isApprovalLongSuccess,
+    write: approvalLongTokenFunc,
+  } = useContractWrite(configApprovalLongToken);
+
+  useWaitForTransaction({
+    hash: approvalLongTokenData?.hash,
+    confirmations: 1,
+    onSuccess() {
+      setIsApprovedLongToken(true);
+    },
+  });
+
+
+  const { config: configLong } = usePrepareContractWrite({
+    address: contractAddress.FlaexMain as `0x${string}`,
+    abi: flaexMain.abi,
+    functionName: "openExactOutput",
+    args: [token0.address,token1.address,new Decimal(longShortChanging.paying).mul(new Decimal(10).pow(token0.decimals)).toHex(),constants.MaxUint256,fee,new Decimal(percentage).mul(100).toHex()],
+  });
+  const {
+    data: longData,
+    isLoading:isLongLoading,
+    isSuccess:isLongSuccess,
+    write: longFunc,
+  } = useContractWrite(configLong);
+
+  const {isSuccess: isLongConfirmed}=useWaitForTransaction({
+    hash: longData?.hash,
+    confirmations: 1,
+    onSuccess() {
+      console.log("Long success");
+    },
+  });
 
   const handleChangeLongShort = (clickedLong: boolean) => {
     if (clickedLong) {
@@ -37,7 +145,6 @@ const LongShort = ({ price }: { price: string }) => {
       setIsLong(false);
     }
     setAmount(0);
-    setPayingValue(0);
     setBalanceValue(0);
     setPercentage(0);
   };
@@ -73,11 +180,18 @@ const LongShort = ({ price }: { price: string }) => {
   }, []);
 
   useEffect(() => {
-    setbtnConnected(isConnected);
-  }, [isConnected]);
+    if(isMouted){
+      setbtnConnected(isConnected);
+      fetchAllowance();
+    } else {
+      setIsMouted(true);
+    }
+  }, [isConnected, fetchAllowance, isMouted]);
 
   return (
-    <div className="flex h-full flex-col">
+    <>
+    {isMouted && (
+      <div className="flex h-full flex-col">
       <div className="flex text-base font-semibold bg-flaex-border bg-opacity-5 rounded-[10px]">
         <button
           onClick={() => {
@@ -151,7 +265,7 @@ const LongShort = ({ price }: { price: string }) => {
           className="flex justify-between mt-2.5 font-normal text-sm cursor-pointer"
           onClick={() => _onSetBalance(balanceValue)}
         >
-          <span>{payingValue}</span>
+          <span>{longShortChanging.paying}</span>
           <span>Balance: {balanceValue}</span>
         </div>
       </div>
@@ -183,15 +297,68 @@ const LongShort = ({ price }: { price: string }) => {
       </div>
       <div className="flex-1 flex flex-col justify-end">
         {btnConnected ? (
-          <BaseButton
-            onButtonClick={() => handleLongShort(btnLabel)}
-            moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
-          >{`${btnLabel} ${coupleTradeCoins?.origin}`}</BaseButton>
+          <>
+            {isMouted && isLong && !isApprovedLongToken ? (
+              <>
+                <BaseButton
+                  disable={!approvalLongTokenFunc || !isApprovalLongLoading || isApprovalLongSuccess}
+                  onButtonClick={() => approvalLongTokenFunc?.()}
+                  moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
+                >
+                  {!isApprovalLongLoading &&
+                    !isApprovalLongSuccess &&
+                    `Approval ${token0.name}`}
+                  {isApprovalLongLoading && `Waiting for signing`}
+                  {isApprovalLongSuccess && `Waiting for network`}
+                </BaseButton>
+              </>
+            ) : (
+              <>
+                {isMouted && !isLong && !isApprovedShortToken ? (
+                  <BaseButton
+                    disable={!approvalShortTokenFunc || !isApprovalShortLoading || isApprovalShortSuccess}
+                    onButtonClick={() => approvalShortTokenFunc?.()}
+                    moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
+                  >
+                    {!isApprovalShortLoading &&
+                      !isApprovalShortSuccess &&
+                      `Approval ${token1.name}`}
+                    {isApprovalShortLoading && `Waiting for signing`}
+                    {isApprovalShortSuccess && `Waiting for network`}
+                  </BaseButton>
+                ) :  
+                <>
+                {isMouted &&isLong && isApprovedShortToken ? (
+                   <BaseButton
+                    disable={!longFunc || !isLongLoading || isLongSuccess}
+                    onButtonClick={() => longFunc?.()}
+                    moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
+                    >
+                      {!isLongLoading &&
+                        !isLongSuccess &&
+                        `${btnLabel} ${coupleTradeCoins?.origin}`}
+                      {isLongLoading && `Waiting for signing`}
+                      {isLongSuccess && `Waiting for network`}
+                    </BaseButton>
+                ):
+                (
+                  <BaseButton
+                    onButtonClick={() => handleLongShort(btnLabel)}
+                    moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
+                  >{`${btnLabel} ${coupleTradeCoins?.origin}`}</BaseButton>
+                )}
+                </>
+                }
+              </>
+            )}
+          </>
         ) : (
           <ConnectWalletBtn extendClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none" />
         )}
       </div>
     </div>
+    )}
+    </>
   );
 };
 

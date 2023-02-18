@@ -30,6 +30,11 @@ export const POOL_FACTORY_CONTRACT_ADDRESS =
 export const QUOTER_CONTRACT_ADDRESS =
   "0xb27308f9F90D607463bb33eA1BeBb41C27CE5AB6";
 
+export interface QuoterReturn {
+  priceExactOutputToken1: string,
+  priceExactInputToken0: string,
+}
+
 const useQuoter = (
   tokenIn: Token,
   tokenOut: Token,
@@ -38,7 +43,10 @@ const useQuoter = (
   tokenOuntDecimals: number,
   fee: number,
 ) => {
-  const [quotedAmountOut, setQuotedAmountOut] = useState("");
+  const [quotedAmountOut, setQuotedAmountOut] = useState<QuoterReturn>({
+    priceExactOutputToken1: "0",
+    priceExactInputToken0: "0",
+  });
   const provider = useProvider();
   const { data: blockNumber } = useBlockNumber({
     watch: true,
@@ -52,16 +60,26 @@ const useQuoter = (
     );
     const hexAmountIn = fromReadableAmount(amountIn, tokenInDecimals);
 
-    const result = await quoterContract.callStatic.quoteExactInputSingle(
+    const result = await quoterContract.callStatic.quoteExactOutputSingle(
       tokenIn.address,
       tokenOut.address,
       fee,
       hexAmountIn,
       0,
     );
+    const result2 = await quoterContract.callStatic.quoteExactInputSingle(
+      tokenOut.address,
+      tokenIn.address,
+      fee,
+      hexAmountIn,
+      0,
+    );
 
-    const quotedAmount = toReadableAmount(result, tokenOuntDecimals);
-    setQuotedAmountOut(quotedAmount);
+
+    const priceExactOutputToken1 = toReadableAmount(result, tokenOuntDecimals);
+    const priceExactInputToken0 = toReadableAmount(result2, tokenOuntDecimals);
+
+    setQuotedAmountOut({priceExactOutputToken1:priceExactOutputToken1,priceExactInputToken0:priceExactInputToken0});
   }, [
     amountIn,
     fee,

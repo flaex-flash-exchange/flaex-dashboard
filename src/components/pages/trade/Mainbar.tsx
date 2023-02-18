@@ -15,7 +15,7 @@ const Mainbar = () => {
     return tokenPair[coupleTradeCoins.origin || ""];
   }, [coupleTradeCoins]);
 
-  const quotedAmountOut = useQuoter(token0, token1, 1, 18, 18, fee);
+  const quotedAmountOut = useQuoter(token1, token0, 1, 18, 18, fee);
 
   return (
     <div className="rounded-[10px] border-[0.2px] h-full px-4 py-3">

@@ -1,43 +1,33 @@
-import { useAccount, useBlockNumber } from "wagmi";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
 import BaseButton from "components/common/BaseButton";
 import SliderCustom from "components/common/SliderCustom";
 import { ConnectWalletBtn } from "components/layout/ConnectButton";
 import { useContextTrade } from "context/TradeContext";
-import { _onLongShortCalculator } from "util/commons";
-import { LSBtn, tokenPair } from "util/constants";
-import useQuoter from "hooks/useQuote";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { _onLongCalculator, _onShortCalculator } from "util/commons";
+import { LSBtn } from "util/constants";
+import { useAccount } from "wagmi";
 
-const LongShort = ({ price }: any) => {
+const LongShort = ({ price }: { price: string }) => {
   const { isConnected } = useAccount();
   const { coupleTradeCoins } = useContextTrade();
 
-  // const { token0, token1, fee } = useMemo(() => {
-  //   return tokenPair[coupleTradeCoins.origin || ""];
-  // }, [coupleTradeCoins]);
-
-  // const { quotedAmountOut: entryPrice } = useQuoter(
-  //   token0,
-  //   token1,
-  //   1,
-  //   18,
-  //   18,
-  //   fee,
-  // );
-
   const [isLong, setIsLong] = useState<boolean>(true);
-  const [amountValue, setAmount] = useState<number>(10);
+  const [amountValue, setAmount] = useState<number>(0);
   const [payingValue, setPayingValue] = useState<number>(2.941);
   const [balanceValue, setBalanceValue] = useState<number>(4.2);
   const [percentage, setPercentage] = useState<number>(0);
   const [btnConnected, setbtnConnected] = useState(false);
 
+  const isActiveBtn = useMemo(() => amountValue > 0, [amountValue]);
+
   const btnLabel = useMemo(() => (isLong ? LSBtn.LONG : LSBtn.SHORT), [isLong]);
 
   const longShortChanging = useMemo(
-    () => _onLongShortCalculator(percentage, amountValue, price),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [percentage, amountValue, price],
+    () =>
+      isLong
+        ? _onLongCalculator(percentage, amountValue, price)
+        : _onShortCalculator(percentage, amountValue, price),
+    [percentage, amountValue, price, isLong],
   );
 
   const handleChangeLongShort = (clickedLong: boolean) => {
@@ -59,18 +49,28 @@ const LongShort = ({ price }: any) => {
     setAmount(e.target.value);
   }, []);
 
-  const handleLongShort = (type: string) => {
-    switch (type) {
-      case LSBtn.LONG:
-        console.log("click", type);
-        break;
-      case LSBtn.SHORT:
-        console.log("click", type);
-        break;
-      default:
-        break;
-    }
-  };
+  const handleLongShort = useCallback(
+    (type: string) => {
+      if (!isActiveBtn) {
+        return;
+      }
+      switch (type) {
+        case LSBtn.LONG:
+          console.log("click", type);
+          break;
+        case LSBtn.SHORT:
+          console.log("click", type);
+          break;
+        default:
+          break;
+      }
+    },
+    [isActiveBtn],
+  );
+
+  const _onSetBalance = useCallback((_balance: number) => {
+    setAmount(_balance);
+  }, []);
 
   useEffect(() => {
     setbtnConnected(isConnected);
@@ -147,7 +147,10 @@ const LongShort = ({ price }: any) => {
           <span>{coupleTradeCoins?.base}</span>
         </div>
 
-        <div className="flex justify-between mt-2.5 font-normal text-sm">
+        <div
+          className="flex justify-between mt-2.5 font-normal text-sm cursor-pointer"
+          onClick={() => _onSetBalance(balanceValue)}
+        >
           <span>{payingValue}</span>
           <span>Balance: {balanceValue}</span>
         </div>

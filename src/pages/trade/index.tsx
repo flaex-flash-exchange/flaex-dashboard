@@ -1,17 +1,11 @@
-import { Token } from "@uniswap/sdk-core";
-import { FeeAmount } from "@uniswap/v3-sdk";
 import BottomInfo from "components/pages/trade/BottomInfo";
 import Mainbar from "components/pages/trade/Mainbar";
 import Topbar from "components/pages/trade/Topbar";
 import TradingViewWidget from "components/pages/trade/TradingViewWidget";
 import { TradeContextProvider } from "context/TradeContext";
-import useQuoter from "hooks/useQuote";
 import type { NextPage } from "next";
-import { useNetwork } from "wagmi";
 
 const Index: NextPage = () => {
-
-
   return (
     <>
       <TradeContextProvider>

@@ -1,13 +1,13 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { computePoolAddress, FeeAmount } from "@uniswap/v3-sdk";
-import Quoter from "@uniswap/v3-periphery/artifacts/contracts/lens/Quoter.sol/Quoter.json";
 import IUniswapV3PoolABI from "@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json";
+import Quoter from "@uniswap/v3-periphery/artifacts/contracts/lens/Quoter.sol/Quoter.json";
+import { computePoolAddress } from "@uniswap/v3-sdk";
+import { useCallback, useEffect, useState } from "react";
 
-import { SupportedChainId, Token } from "@uniswap/sdk-core";
-import { BigNumber, ethers, providers } from "ethers";
-import { useBlockNumber, useProvider } from "wagmi";
+import { Token } from "@uniswap/sdk-core";
 import { Provider } from "@wagmi/core";
 import { Decimal } from "decimal.js";
+import { BigNumber, ethers } from "ethers";
+import { useBlockNumber, useProvider } from "wagmi";
 const READABLE_FORM_LEN = 4;
 
 export function fromReadableAmount(amount: number, decimals: number): string {
@@ -18,7 +18,9 @@ export function toReadableAmount(
   rawAmount: BigNumber,
   decimals: number,
 ): string {
-  return new Decimal(rawAmount._hex).div(new Decimal(10).pow(18)).toFixed(4);
+  return new Decimal(rawAmount._hex)
+    .div(new Decimal(10).pow(18))
+    .toFixed(READABLE_FORM_LEN);
 }
 
 // Addresses
@@ -38,8 +40,8 @@ const useQuoter = (
 ) => {
   const [quotedAmountOut, setQuotedAmountOut] = useState("");
   const provider = useProvider();
-  const {data: blockNumber} = useBlockNumber({
-    watch:true
+  const { data: blockNumber } = useBlockNumber({
+    watch: true,
   });
 
   const fetchQuotedAmountOut = useCallback(async () => {
@@ -69,9 +71,6 @@ const useQuoter = (
     tokenOuntDecimals,
     tokenOut,
   ]);
-
-  
-
 
   useEffect(() => {
     fetchQuotedAmountOut();

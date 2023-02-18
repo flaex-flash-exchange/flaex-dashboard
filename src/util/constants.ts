@@ -12,6 +12,10 @@ export enum FeeAmount {
   MEDIUM = 3000,
   HIGH = 10000,
 }
+export enum S_LONG_SHORT_TYPE {
+  LONG = "LONG",
+  SHORT = "SHORT",
+}
 
 export const mockSelectCoins = [
   {

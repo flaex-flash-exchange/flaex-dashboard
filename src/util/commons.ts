@@ -1,4 +1,5 @@
 import { toast } from "react-toastify";
+import { S_LONG_SHORT_TYPE } from "./constants";
 
 export function handleCopyToClipboard(text: string) {
   const notify = () => toast.success("Copied Successfully", { theme: "dark" });
@@ -25,27 +26,63 @@ export function formatNumber(num: number, decimalLength: number = 2) {
   return num.toFixed(decimalLength);
 }
 
-export function _onLongShortCalculator(
+export function _onLongCalculator(
   leverage: number,
   amount: number,
   entryPrice: string,
 ) {
-  const onParseLeverage = leverage / 100;
-  const onParseEntryPrice = Number(entryPrice);
-  const paying = amount / (1 + onParseLeverage);
-  const flashSwap = paying * onParseLeverage;
-  const borrowingToRepayFlash = flashSwap * onParseEntryPrice * 1.0005;
-  const liquidationPrice = 1.1 * (borrowingToRepayFlash / amount);
-  const marginRatio = amount / (borrowingToRepayFlash / onParseEntryPrice);
-  const commissionFee = flashSwap * onParseEntryPrice * 0.0005;
+  if (leverage / 100 >= 1) {
+    const onParseLeverage = leverage / 100 || 1;
+    const onParseEntryPrice = Number(entryPrice) || 0;
+    const paying = amount / (1 + onParseLeverage) || 0;
+    const flashSwap = paying * onParseLeverage || 0;
+    const borrowingToRepayFlash = flashSwap * onParseEntryPrice * 1.0005 || 0;
+    const liquidationPrice = 1.1 * (borrowingToRepayFlash / amount) || 0;
+    const marginRatio =
+      amount / (borrowingToRepayFlash / onParseEntryPrice) || 0;
+    const commissionFee = flashSwap * onParseEntryPrice * 0.0005 || 0;
+    return {
+      paying: formatNumber(paying),
+      flashSwap: formatNumber(flashSwap),
+      borrowingToRepayFlash: formatNumber(borrowingToRepayFlash),
+      entryPrice: formatNumber(onParseEntryPrice),
+      liquidationPrice: formatNumber(liquidationPrice),
+      marginRatio: formatNumber(marginRatio),
+      commissionFee: formatNumber(commissionFee),
+    };
+  }
+  return {
+    paying: formatNumber(0),
+    flashSwap: formatNumber(0),
+    borrowingToRepayFlash: formatNumber(0),
+    entryPrice: formatNumber(0),
+    liquidationPrice: formatNumber(0),
+    marginRatio: formatNumber(0),
+    commissionFee: formatNumber(0),
+  };
+}
+export function _onShortCalculator(
+  leverage: number,
+  amount: number,
+  entryPrice: string,
+) {
+  const onParseLeverage = leverage / 100 || 0;
+  const onParseEntryPrice = Number(entryPrice) || 0;
+  const paying = (amount * onParseEntryPrice) / (1 + onParseLeverage) || 0;
+  const flashSwap = paying * onParseLeverage || 0;
+  const borrowingToRepayFlash = (flashSwap / onParseEntryPrice) * 1.0005 || 0;
+  const liquidationPrice =
+    1 / (1.1 * (borrowingToRepayFlash / (amount * onParseEntryPrice))) || 0;
+  const marginRatio = amount / (borrowingToRepayFlash / onParseEntryPrice) || 0;
+  const commissionFee = (flashSwap / onParseEntryPrice) * 0.0005 || 0;
 
   return {
-    paying: formatNumber(paying) || 0,
-    flashSwap: formatNumber(flashSwap) || 0,
-    borrowingToRepayFlash: formatNumber(borrowingToRepayFlash) || 0,
-    entryPrice: formatNumber(onParseEntryPrice) || 0,
-    liquidationPrice: formatNumber(liquidationPrice) || 0,
-    marginRatio: formatNumber(marginRatio) || 0,
-    commissionFee: formatNumber(commissionFee) || 0,
+    paying: formatNumber(paying),
+    flashSwap: formatNumber(flashSwap),
+    borrowingToRepayFlash: formatNumber(borrowingToRepayFlash),
+    entryPrice: formatNumber(onParseEntryPrice),
+    liquidationPrice: formatNumber(liquidationPrice),
+    marginRatio: formatNumber(marginRatio),
+    commissionFee: formatNumber(commissionFee),
   };
 }

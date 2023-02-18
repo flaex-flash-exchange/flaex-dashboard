@@ -21,20 +21,19 @@ const Mainbar = () => {
     return tokenPair[coupleTradeCoins.origin || ""];
   }, [coupleTradeCoins]);
 
-  const { quotedAmountOut: entryPrice } = useQuoter(
+  const quotedAmountOut = useQuoter(
     token0,
     token1,
     1,
     18,
     18,
     fee,
-    blockNumber as unknown as number,
   );
 
   return (
     <div className="rounded-[10px] border-[0.2px] h-full px-4 py-3">
       {isShowLong === undefined ? (
-        <LongShort price={entryPrice} />
+        <LongShort price={quotedAmountOut} />
       ) : (
         <CloseRepay />
       )}

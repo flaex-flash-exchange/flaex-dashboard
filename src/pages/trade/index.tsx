@@ -10,22 +10,7 @@ import type { NextPage } from "next";
 import { useNetwork } from "wagmi";
 
 const Index: NextPage = () => {
-  // const { chain } = useNetwork();
-  const tokenIn = new Token(
-    5,
-    "0x1D2708636EA8E69f8c3766B973be331D175172aB",
-    18,
-    "WETH",
-    "Wrapped Ether",
-  );
 
-  const tokenOut = new Token(
-    5,
-    "0x61D6aF87F88dd282b07eA7E1de69e27C6ac18Adb",
-    18,
-    "Dai",
-    "Dai",
-  );
 
   return (
     <>

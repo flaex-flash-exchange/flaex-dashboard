@@ -35,10 +35,12 @@ const useQuoter = (
   tokenInDecimals: number,
   tokenOuntDecimals: number,
   fee: number,
-  blockNumber: number,
 ) => {
   const [quotedAmountOut, setQuotedAmountOut] = useState("");
   const provider = useProvider();
+  const {data: blockNumber} = useBlockNumber({
+    watch:true
+  });
 
   const fetchQuotedAmountOut = useCallback(async () => {
     const quoterContract = new ethers.Contract(
@@ -55,7 +57,6 @@ const useQuoter = (
       hexAmountIn,
       0,
     );
-    console.log({ result });
 
     const quotedAmount = toReadableAmount(result, tokenOuntDecimals);
     setQuotedAmountOut(quotedAmount);
@@ -69,19 +70,15 @@ const useQuoter = (
     tokenOut,
   ]);
 
-  console.log("runnnn-before", { blockNumber });
-  const refNumber = useRef(blockNumber);
-  if (refNumber.current !== blockNumber) {
-    console.log("runnnn-after", { blockNumber });
-    fetchQuotedAmountOut();
-  }
+  
+
 
   useEffect(() => {
     fetchQuotedAmountOut();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [blockNumber]);
 
-  return { quotedAmountOut };
+  return quotedAmountOut;
 };
 
 export default useQuoter;

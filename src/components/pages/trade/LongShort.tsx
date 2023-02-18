@@ -37,7 +37,7 @@ const LongShort = ({ price }: any) => {
   const longShortChanging = useMemo(
     () => _onLongShortCalculator(percentage, amountValue, price),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [percentage, amountValue],
+    [percentage, amountValue, price],
   );
 
   const handleChangeLongShort = (clickedLong: boolean) => {

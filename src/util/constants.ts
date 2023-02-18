@@ -6,6 +6,12 @@ export const mockData: CoupleCoin[] = [
   { firstCoin: "BTC", secondCoin: "ETH" },
 ];
 
+export enum FeeAmount {
+  LOW = 500,
+  MEDIUM = 3000,
+  HIGH = 10000,
+}
+
 export const mockSelectCoins = [
   {
     label: "ETH/USDC",

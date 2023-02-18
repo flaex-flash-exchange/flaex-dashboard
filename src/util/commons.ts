@@ -31,8 +31,8 @@ export function _onLongShortCalculator(
   entryPrice: number = 1,
   sellPrice: number = 1,
 ) {
-  const paying = amount / (1 + leverage);
-  const flashSwap = paying * leverage;
+  const paying = amount / (1 + leverage/100);
+  const flashSwap = paying * leverage/100;
   const borrowingToRepayFlash = flashSwap * entryPrice * 1.0005;
   const liquidationPrice = 1.1 * (borrowingToRepayFlash / amount);
   const marginRatio = (amount / borrowingToRepayFlash) * sellPrice;

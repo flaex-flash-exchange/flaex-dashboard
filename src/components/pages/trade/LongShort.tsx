@@ -38,7 +38,7 @@ const LongShort = () => {
   const handleChangeSlider = (value: number) => {
     setPercentage(value);
     setLongShortChanging(
-      _onLongShortCalculator(value, amountValue / (1 + value)),
+      _onLongShortCalculator(value, amountValue),
     );
   };
   const handleChangeAmount = useCallback(

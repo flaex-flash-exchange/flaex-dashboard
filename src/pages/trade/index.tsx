@@ -1,11 +1,38 @@
+import { Token } from "@uniswap/sdk-core";
+import { FeeAmount } from "@uniswap/v3-sdk";
 import BottomInfo from "components/pages/trade/BottomInfo";
 import Mainbar from "components/pages/trade/Mainbar";
 import Topbar from "components/pages/trade/Topbar";
 import TradingViewWidget from "components/pages/trade/TradingViewWidget";
 import { TradeContextProvider } from "context/TradeContext";
+import useQuoter from "hooks/useQuote";
 import type { NextPage } from "next";
+import { useNetwork } from "wagmi";
 
 const Index: NextPage = () => {
+
+  // const { chain } = useNetwork();
+  const tokenIn = new Token(
+    5 ,
+    "0x1D2708636EA8E69f8c3766B973be331D175172aB",
+    18,
+    "WETH",
+    "Wrapped Ether",
+  );
+
+  const tokenOut = new Token(
+    5 ,
+    "0x61D6aF87F88dd282b07eA7E1de69e27C6ac18Adb",
+    18,
+    "Dai",
+    "Dai",
+  );
+
+  const quote = useQuoter(tokenIn,tokenOut,7,18,18,FeeAmount.LOWEST);
+  const entryPrice = useQuoter(tokenIn,tokenOut,7,18,18,FeeAmount.LOWEST);
+
+  
+
   return (
     <>
       <TradeContextProvider>

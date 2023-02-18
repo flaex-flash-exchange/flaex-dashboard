@@ -31,8 +31,8 @@ export function _onLongCalculator(
   amount: number,
   entryPrice: string,
 ) {
-  if (leverage / 100 >= 1) {
-    const onParseLeverage = leverage / 100 || 1;
+  const onParseLeverage = leverage / 100;
+  if (onParseLeverage >= 1) {
     const onParseEntryPrice = Number(entryPrice) || 0;
     const paying = amount / (1 + onParseLeverage) || 0;
     const flashSwap = paying * onParseLeverage || 0;
@@ -67,22 +67,35 @@ export function _onShortCalculator(
   entryPrice: string,
 ) {
   const onParseLeverage = leverage / 100 || 0;
-  const onParseEntryPrice = Number(entryPrice) || 0;
-  const paying = (amount * onParseEntryPrice) / (1 + onParseLeverage) || 0;
-  const flashSwap = paying * onParseLeverage || 0;
-  const borrowingToRepayFlash = (flashSwap / onParseEntryPrice) * 1.0005 || 0;
-  const liquidationPrice =
-    1 / (1.1 * (borrowingToRepayFlash / (amount * onParseEntryPrice))) || 0;
-  const marginRatio = amount / (borrowingToRepayFlash / onParseEntryPrice) || 0;
-  const commissionFee = (flashSwap / onParseEntryPrice) * 0.0005 || 0;
+  if (onParseLeverage >= 1) {
+    const onParseEntryPrice = Number(entryPrice) || 0;
+    const paying = (amount * onParseEntryPrice) / (1 + onParseLeverage) || 0;
+    const flashSwap = paying * onParseLeverage || 0;
+    const borrowingToRepayFlash = (flashSwap / onParseEntryPrice) * 1.0005 || 0;
+    const liquidationPrice =
+      1 / (1.1 * (borrowingToRepayFlash / (amount * onParseEntryPrice))) || 0;
+    const marginRatio =
+      amount / (borrowingToRepayFlash / onParseEntryPrice) || 0;
+    const commissionFee = (flashSwap / onParseEntryPrice) * 0.0005 || 0;
+
+    return {
+      paying: formatNumber(paying),
+      flashSwap: formatNumber(flashSwap),
+      borrowingToRepayFlash: formatNumber(borrowingToRepayFlash),
+      entryPrice: formatNumber(onParseEntryPrice),
+      liquidationPrice: formatNumber(liquidationPrice),
+      marginRatio: formatNumber(marginRatio),
+      commissionFee: formatNumber(commissionFee),
+    };
+  }
 
   return {
-    paying: formatNumber(paying),
-    flashSwap: formatNumber(flashSwap),
-    borrowingToRepayFlash: formatNumber(borrowingToRepayFlash),
-    entryPrice: formatNumber(onParseEntryPrice),
-    liquidationPrice: formatNumber(liquidationPrice),
-    marginRatio: formatNumber(marginRatio),
-    commissionFee: formatNumber(commissionFee),
+    paying: formatNumber(0),
+    flashSwap: formatNumber(0),
+    borrowingToRepayFlash: formatNumber(0),
+    entryPrice: formatNumber(0),
+    liquidationPrice: formatNumber(0),
+    marginRatio: formatNumber(0),
+    commissionFee: formatNumber(0),
   };
 }

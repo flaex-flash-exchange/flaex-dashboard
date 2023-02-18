@@ -22,7 +22,7 @@ export function splitStringOnSlash(str: string) {
   }
 }
 
-export function formatNumber(num: number, decimalLength: number = 2) {
+export function formatNumber(num: number, decimalLength: number = 4) {
   return num.toFixed(decimalLength);
 }
 
@@ -75,7 +75,7 @@ export function _onShortCalculator(
     const liquidationPrice =
       1 / (1.1 * (borrowingToRepayFlash / (amount * onParseEntryPrice))) || 0;
     const marginRatio =
-      amount / (borrowingToRepayFlash / onParseEntryPrice) || 0;
+      amount / (borrowingToRepayFlash) || 0;
     const commissionFee = (flashSwap / onParseEntryPrice) * 0.0005 || 0;
 
     return {

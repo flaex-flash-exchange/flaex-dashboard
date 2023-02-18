@@ -138,6 +138,27 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
     },
   });
 
+  const { config: configShort } = usePrepareContractWrite({
+    address: contractAddress.FlaexMain as `0x${string}`,
+    abi: flaexMain.abi,
+    functionName: "openExactOutput",
+    args: [token1.address,token0.address,new Decimal(longShortChanging.paying).mul(new Decimal(10).pow(token0.decimals)).toHex(),constants.MaxUint256,fee,new Decimal(percentage).mul(100).toHex()],
+  });
+  const {
+    data: dataShort,
+    isLoading:isShortLoading,
+    isSuccess:isShortSuccess,
+    write: shortFunc,
+  } = useContractWrite(configShort);
+
+  const {isSuccess: isShortConfirmed}=useWaitForTransaction({
+    hash: dataShort?.hash,
+    confirmations: 1,
+    onSuccess() {
+      console.log("Long success");
+    },
+  });
+
   const handleChangeLongShort = (clickedLong: boolean) => {
     if (clickedLong) {
       setIsLong(true);
@@ -272,11 +293,11 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
       <div className="mt-5">
         <div className="flex justify-between">
           <p className="text-xs font-light italic">Flash Swap:</p>
-          <p className="text-sm font-semibold">{`${longShortChanging?.flashSwap} ${coupleTradeCoins?.base}`}</p>
+          <p className="text-sm font-semibold">{`${longShortChanging?.flashSwap} ${isLong?coupleTradeCoins?.base:coupleTradeCoins?.quote}`}</p>
         </div>
         <div className="flex justify-between">
           <p className="text-xs font-light italic">Borrowing to Repay Flash:</p>
-          <p className="text-sm font-semibold">{`${longShortChanging?.borrowingToRepayFlash} ${coupleTradeCoins?.quote}`}</p>
+          <p className="text-sm font-semibold">{`${longShortChanging?.borrowingToRepayFlash} ${isLong?coupleTradeCoins?.quote:coupleTradeCoins.base}`}</p>
         </div>
         <div className="flex justify-between">
           <p className="text-xs font-light italic">Entry Price:</p>
@@ -292,7 +313,7 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
         </div>
         <div className="flex justify-between">
           <p className="text-xs font-light italic">Commission Fee:</p>
-          <p className="text-sm font-semibold">{`${longShortChanging?.commissionFee} ${coupleTradeCoins?.quote}`}</p>
+          <p className="text-sm font-semibold">{`${longShortChanging?.commissionFee} ${isLong?coupleTradeCoins?.quote:coupleTradeCoins?.base}`}</p>
         </div>
       </div>
       <div className="flex-1 flex flex-col justify-end">
@@ -343,9 +364,16 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
                 ):
                 (
                   <BaseButton
-                    onButtonClick={() => handleLongShort(btnLabel)}
+                    disable={!shortFunc || !isShortLoading || isShortSuccess}
+                    onButtonClick={() => shortFunc?.()}
                     moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
-                  >{`${btnLabel} ${coupleTradeCoins?.origin}`}</BaseButton>
+                    >
+                      {!isShortLoading &&
+                        !isShortSuccess &&
+                        `${btnLabel} ${coupleTradeCoins?.origin}`}
+                      {isShortLoading && `Waiting for signing`}
+                      {isShortSuccess && `Waiting for network`}
+                    </BaseButton>
                 )}
                 </>
                 }

@@ -9,19 +9,12 @@ interface ITradeContext {
 }
 export const TradeContext = createContext<ITradeContext | null>(null);
 export const TradeContextProvider = ({ children }: any) => {
-  const [isShowLong, setIsShowLong] = useState<boolean | undefined>(false);
+  const [isShowLong, setIsShowLong] = useState<boolean>(true);
   const [coupleTradeCoins, setCoupleTradeCoins] = useState<TCoupleCoin>({
     base: "wETH",
     quote: "DAI",
     origin: "wETH/DAI",
   });
-
-  // const value = {
-  //   isShowLong,
-  //   setIsShowLong,
-  //   coupleTradeCoins,
-  //   setCoupleTradeCoins,
-  // };
 
   return (
     <TradeContext.Provider

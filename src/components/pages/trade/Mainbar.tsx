@@ -19,11 +19,7 @@ const Mainbar = () => {
 
   return (
     <div className="rounded-[10px] border-[0.2px] h-full px-4 py-3">
-      {isShowLong === undefined ? (
-        <LongShort price={quotedAmountOut} />
-      ) : (
-        <CloseRepay />
-      )}
+      {isShowLong ? <LongShort price={quotedAmountOut} /> : <CloseRepay />}
     </div>
   );
 };

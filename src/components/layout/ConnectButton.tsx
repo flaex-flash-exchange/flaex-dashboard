@@ -1,14 +1,7 @@
-// import Image from "next/image";
 import { useModalContext } from "context/ModalContext";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import {
-  useAccount,
-  useConnect,
-  useDisconnect,
-  //   useEnsAvatar,
-  useEnsName,
-} from "wagmi";
+import { useAccount, useConnect, useDisconnect, useEnsName } from "wagmi";
 
 import AntDropDown from "components/common/AntCommon/AntDropdown";
 import AntImage from "components/common/AntCommon/AntImages";
@@ -17,10 +10,10 @@ import { IConnectWalletBtn } from "constants/interface";
 import Link from "next/link";
 import styled from "styled-components";
 import { handleCopyToClipboard } from "util/commons";
+import { ConnectButton as LiteConnectButton } from "@rainbow-me/rainbowkit";
 
 export function Connectbutton() {
   const { address, isConnected } = useAccount();
-  //   const { data: ensAvatar } = useEnsAvatar({ address });
   const { data: ensName } = useEnsName({ address });
   const { disconnect } = useDisconnect();
 
@@ -86,27 +79,6 @@ export function Connectbutton() {
         </div>
       </div>
     );
-    // return (
-    //   <div>
-    //     <Dropdown
-    //       title={
-    //         <div className="flex items-center px-2 font-semibold duration-200 rounded-xl py-1 text-[18px] lg:px-6 lg:py-2 border ease-in cursor-pointer border-text-flaex-border ">
-    //           <div className="overflow-hidden truncate w-32">
-    //             {ensName ? `${ensName} (${address})` : address}
-    //           </div>
-    //           <div>
-    //             <FaAngleDown />
-    //           </div>
-    //         </div>
-    //       }
-    //       data={mockDataSetting}
-    //       width={"min-w-[120px]"}
-    //       classItem="py-2 px-4 cursor-pointer hover:text-flaex-primary duration-200 text-sm"
-    //       sizeIcon={18}
-    //       bottomLength="-bottom-5"
-    //     />
-    //   </div>
-    // );
   }
 
   return <ConnectWalletBtn />;
@@ -165,6 +137,61 @@ const ModalConnectWallet = () => {
         {error && <div>{error.message}</div>}
       </div>
     </div>
+  );
+};
+
+export const LiteWagmiBtnConnect = () => {
+  return (
+    <LiteConnectButton.Custom>
+      {({
+        account,
+        chain,
+        openChainModal,
+        openConnectModal,
+        authenticationStatus,
+        mounted,
+      }) => {
+        // Note: If your app doesn't use authentication, you
+        // can remove all 'authenticationStatus' checks
+        const ready = mounted && authenticationStatus !== "loading";
+        const connected =
+          ready &&
+          account &&
+          chain &&
+          (!authenticationStatus || authenticationStatus === "authenticated");
+
+        return (
+          <div
+            {...(!ready && {
+              "aria-hidden": true,
+              style: {
+                opacity: 0,
+                pointerEvents: "none",
+                userSelect: "none",
+              },
+            })}
+          >
+            {(() => {
+              if (!connected) {
+                return (
+                  <BaseButton
+                    onButtonClick={openConnectModal}
+                    moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
+                  />
+                );
+              }
+              if (chain.unsupported) {
+                return (
+                  <BaseButton onButtonClick={openChainModal}>
+                    Wrong network
+                  </BaseButton>
+                );
+              }
+            })()}
+          </div>
+        );
+      }}
+    </LiteConnectButton.Custom>
   );
 };
 

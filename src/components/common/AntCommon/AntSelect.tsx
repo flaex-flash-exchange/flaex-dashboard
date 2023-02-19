@@ -48,7 +48,6 @@ const AntSelect = (props: ISelectProps) => {
           }}
         />
       }
-      {...props}
     />
   );
 };

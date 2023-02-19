@@ -10,29 +10,27 @@ const styleTitleColDefault =
 const styleColDefault = "px-3.5 py-[5px] text-center text-sm font-light";
 
 const HistoryTable = ({ data, titleRow }: TableCustom): JSX.Element => {
-  const { isShowLong, setIsShowLong } = useContextTrade();
+  const { setIsShowLong, isShowLong = false } = useContextTrade();
+  const [isActiveRow, setIsActiveRow] = useState(2);
 
   const handleClickRow = useCallback(
-    (data: any) => {
-      if (data.direction.toLowerCase() === "long") {
-        setIsShowLong(true);
-      } else {
-        setIsShowLong(false);
-      }
+    (index: number) => {
+      setIsActiveRow(index);
+      setIsShowLong(false);
     },
     [setIsShowLong],
   );
 
-  const handleActiveRow = (data: any) => {
-    if (isShowLong === undefined) return;
-
-    if (data.direction.toLowerCase() === "long" && isShowLong) {
-      return "bg-flaex-primary bg-opacity-50";
-    }
-    if (data.direction.toLowerCase() === "short" && !isShowLong) {
-      return "bg-flaex-primary bg-opacity-50";
-    }
-  };
+  const _onActiveRow = (
+    isLong: boolean,
+    isRowSelected: number,
+    index: number,
+  ) =>
+    isLong
+      ? ""
+      : isRowSelected === index
+      ? "bg-flaex-primary bg-opacity-50"
+      : "";
 
   return (
     <table className="w-full border-[0.2px] border-flaex-border rounded-[10px] py-[8px]">
@@ -56,10 +54,12 @@ const HistoryTable = ({ data, titleRow }: TableCustom): JSX.Element => {
         {data.map((row: any, idx: number) => (
           <tr
             key={idx}
-            className={`hover:bg-flaex-primary hover:bg-opacity-30 ${handleActiveRow(
-              row,
+            className={`hover:bg-flaex-primary hover:bg-opacity-30 ${_onActiveRow(
+              isShowLong,
+              isActiveRow,
+              idx,
             )} cursor-pointer`}
-            onClick={() => handleClickRow(row)}
+            onClick={() => handleClickRow(idx)}
           >
             {titleRow.map((col: any, idx: number) => {
               const styleCol = twMerge(

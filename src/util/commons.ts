@@ -34,15 +34,15 @@ export function _onLongCalculator(
   const onParseLeverage = leverage / 100;
   if (onParseLeverage >= 1) {
     const onParseEntryPrice = Number(entryPrice) || 0;
-    const paying = amount / (1 + onParseLeverage) || 0;
-    const flashSwap = paying * onParseLeverage || 0;
+    const onPaying = amount / (1 + onParseLeverage) || 0;
+    const flashSwap = onPaying * onParseLeverage || 0;
     const borrowingToRepayFlash = flashSwap * onParseEntryPrice * 1.0005 || 0;
     const liquidationPrice = 1.1 * (borrowingToRepayFlash / amount) || 0;
     const marginRatio =
       amount / (borrowingToRepayFlash / onParseEntryPrice) || 0;
     const commissionFee = flashSwap * onParseEntryPrice * 0.0005 || 0;
     return {
-      paying: formatNumber(paying),
+      paying: formatNumber(onPaying),
       flashSwap: formatNumber(flashSwap),
       borrowingToRepayFlash: formatNumber(borrowingToRepayFlash),
       entryPrice: formatNumber(onParseEntryPrice),
@@ -74,8 +74,7 @@ export function _onShortCalculator(
     const borrowingToRepayFlash = (flashSwap / onParseEntryPrice) * 1.0005 || 0;
     const liquidationPrice =
       1 / (1.1 * (borrowingToRepayFlash / (amount * onParseEntryPrice))) || 0;
-    const marginRatio =
-      amount / (borrowingToRepayFlash) || 0;
+    const marginRatio = amount / borrowingToRepayFlash || 0;
     const commissionFee = (flashSwap / onParseEntryPrice) * 0.0005 || 0;
 
     return {

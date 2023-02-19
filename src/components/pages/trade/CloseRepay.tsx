@@ -1,15 +1,19 @@
 import SliderCustom from "components/common/SliderCustom";
+import { LiteWagmiBtnConnect } from "components/layout/ConnectButton";
 import { useContextTrade } from "context/TradeContext";
 import React, { useEffect, useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
+import { useAccount } from "wagmi";
 
 type ICloseRepay = { data?: any };
 
 const CloseRepay = ({ data = mockData }: ICloseRepay) => {
-  const [isRepay, setIsPay] = useState<boolean>(false);
+  const { isConnected } = useAccount();
 
+  const [isRepay, setIsPay] = useState<boolean>(false);
   const [amountValue, setAmount] = useState<number>(10);
   const [percentage, setPercentage] = useState<number>(0);
+  const [btnConnected, setbtnConnected] = useState(false);
 
   const { setIsShowLong } = useContextTrade();
 
@@ -19,7 +23,6 @@ const CloseRepay = ({ data = mockData }: ICloseRepay) => {
     } else {
       setIsPay(false);
     }
-
     setAmount(0);
   };
 
@@ -28,8 +31,12 @@ const CloseRepay = ({ data = mockData }: ICloseRepay) => {
   };
 
   const handleBackToTrade = () => {
-    setIsShowLong(undefined);
+    setIsShowLong(true);
   };
+
+  useEffect(() => {
+    setbtnConnected(isConnected);
+  }, [isConnected]);
 
   return (
     <div className="flex flex-col h-full">
@@ -129,9 +136,13 @@ const CloseRepay = ({ data = mockData }: ICloseRepay) => {
             ))}
       </div>
       <div className="flex-1 flex flex-col justify-end">
-        <button className="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full">
-          {isRepay ? "Repay Partial Debt" : "Close Position"}
-        </button>
+        {btnConnected ? (
+          <button className="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full">
+            {isRepay ? "Repay Partial Debt" : "Close Position"}
+          </button>
+        ) : (
+          <LiteWagmiBtnConnect />
+        )}
       </div>
     </div>
   );

@@ -1,11 +1,11 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import AntDropDown from "components/common/AntCommon/AntDropdown";
-import { useAccount, useDisconnect, useEnsName } from "wagmi";
-import { handleCopyToClipboard } from "util/commons";
-import styled from "styled-components";
 import AntImage from "components/common/AntCommon/AntImages";
-import Link from "next/link";
 import BaseButton from "components/common/BaseButton";
+import Link from "next/link";
+import styled from "styled-components";
+import { handleCopyToClipboard } from "util/commons";
+import { useAccount, useDisconnect, useEnsName } from "wagmi";
 
 export function CustomedRainbowConnect() {
   const { address } = useAccount();
@@ -116,25 +116,6 @@ export function CustomedRainbowConnect() {
   );
 }
 
-const BtnInModalConnect = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  .img-wrapper {
-    background-color: white;
-    border-radius: 5px;
-    padding: 5px 5px 0 5px;
-  }
-  &:not(:last-child) {
-    margin-bottom: 15px;
-  }
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.1);
-  }
-`;
-
 const DropboxItem = styled.div`
   color: white;
   gap: 15px;
@@ -142,16 +123,3 @@ const DropboxItem = styled.div`
   align-items: center;
   flex-direction: row-reverse;
 `;
-
-const mockDataWallet = [
-  {
-    value: "metamask",
-    label: "MetaMask Wallet",
-    icon: "/images/metamask_icon.png",
-  },
-  {
-    value: "coinbase",
-    label: "Coinbase Wallet",
-    icon: "/images/coinbase_icon.png",
-  },
-];

@@ -1,9 +1,6 @@
 import BaseButton from "components/common/BaseButton";
 import SliderCustom from "components/common/SliderCustom";
-import {
-  ConnectWalletBtn,
-  LiteWagmiBtnConnect,
-} from "components/layout/ConnectButton";
+import { LiteWagmiBtnConnect } from "components/layout/ConnectButton";
 import { contractAddress } from "constants/contractAddress";
 import { useContextTrade } from "context/TradeContext";
 import Decimal from "decimal.js";
@@ -17,14 +14,12 @@ import {
   useContractWrite,
   usePrepareContractWrite,
   useProvider,
-  useSigner,
   useWaitForTransaction,
 } from "wagmi";
 import { flaexMain, testERC20 } from "../../../contracts";
 
 const LongShort = ({ price }: { price: QuoterReturn }) => {
   const { address, isConnected } = useAccount();
-  const { data: signer } = useSigner();
   const { coupleTradeCoins } = useContextTrade();
   const [isMouted, setIsMouted] = useState(false);
   const provider = useProvider();

@@ -61,7 +61,7 @@ export function CustomedRainbowConnect() {
 
               return (
                 <div className="flex items-center px-2 font-semibold duration-200 rounded-xl py-1 text-[18px] lg:px-6 lg:py-2 border ease-in cursor-pointer border-text-flaex-border ">
-                  <div className="overflow-hidden truncate w-32">
+                  <div className="overflow-hidden truncate w-42">
                     <AntDropDown
                       className="test-motmi"
                       title={ensName ? `${ensName} (${address})` : address}

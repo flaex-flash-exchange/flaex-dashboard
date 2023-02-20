@@ -10,15 +10,20 @@ const styleTitleColDefault =
 const styleColDefault = "px-3.5 py-[5px] text-center text-sm font-light";
 
 const HistoryTable = ({ data, titleRow }: TableCustom): JSX.Element => {
-  const { setIsShowLong, isShowLong = false } = useContextTrade();
+  const {
+    setIsShowLong,
+    isShowLong = false,
+    setRepayClodeData,
+  } = useContextTrade();
   const [isActiveRow, setIsActiveRow] = useState(2);
 
   const handleClickRow = useCallback(
-    (index: number) => {
+    (index: number, data: any) => {
       setIsActiveRow(index);
       setIsShowLong(false);
+      setRepayClodeData(data);
     },
-    [setIsShowLong],
+    [setIsShowLong, setRepayClodeData],
   );
 
   const _onActiveRow = (
@@ -51,34 +56,39 @@ const HistoryTable = ({ data, titleRow }: TableCustom): JSX.Element => {
       </thead>
 
       <tbody className="">
-        {data.map((row: any, idx: number) => (
-          <tr
-            key={idx}
-            className={`hover:bg-flaex-primary hover:bg-opacity-30 ${_onActiveRow(
-              isShowLong,
-              isActiveRow,
-              idx,
-            )} cursor-pointer`}
-            onClick={() => handleClickRow(idx)}
-          >
-            {titleRow.map((col: any, idx: number) => {
-              const styleCol = twMerge(
-                styleColDefault,
-                col.classNameCustom || "",
-              );
+        {data.map((row: any, idx: number) => {
+          // console.log({ row });
 
-              return (
-                <td className={styleCol} key={idx}>
-                  {typeof col.field === "string" ? (
-                    <div>{row[col.field]}</div>
-                  ) : (
-                    col.field(row, col.field)
-                  )}
-                </td>
-              );
-            })}
-          </tr>
-        ))}
+          return (
+            <tr
+              key={idx}
+              className={`hover:bg-flaex-primary hover:bg-opacity-30 ${_onActiveRow(
+                isShowLong,
+                isActiveRow,
+                idx,
+              )} cursor-pointer`}
+              onClick={() => handleClickRow(idx, row)}
+            >
+              {titleRow.map((col: any, idx: number) => {
+                const styleCol = twMerge(
+                  styleColDefault,
+                  col.classNameCustom || "",
+                );
+                // console.log("{ col }", typeof col.field);
+
+                return (
+                  <td className={styleCol} key={idx}>
+                    {typeof col.field === "string" ? (
+                      <div>{row[col.field]}</div>
+                    ) : (
+                      col.field(row, col.field)
+                    )}
+                  </td>
+                );
+              })}
+            </tr>
+          );
+        })}
       </tbody>
     </table>
   );

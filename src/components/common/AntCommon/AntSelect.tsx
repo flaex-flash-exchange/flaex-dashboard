@@ -6,11 +6,20 @@ import { mockSelectCoins } from "util/constants";
 
 interface ISelectProps {
   options?: Array<any>;
+  width?: number;
+  style?: any;
+  optionStyle?: any;
   _onhandleselection?: (item: any) => void;
 }
 
 const AntSelect = (props: ISelectProps) => {
-  const { options = mockSelectCoins, _onhandleselection } = props;
+  const {
+    options = mockSelectCoins,
+    _onhandleselection,
+    width = 120,
+    style,
+    optionStyle,
+  } = props;
 
   const items = useMemo(() => {
     return options.map((item: any, idx: number) => {
@@ -19,6 +28,7 @@ const AntSelect = (props: ISelectProps) => {
           <ItemOption
             style={{
               color: "white",
+              ...optionStyle,
             }}
             key={idx}
           >
@@ -28,14 +38,15 @@ const AntSelect = (props: ISelectProps) => {
         value: item?.value,
       };
     });
-  }, [options]);
+  }, [optionStyle, options]);
 
   return (
     <Select
       defaultValue={items[0].value}
       style={{
-        maxWidth: 120,
+        maxWidth: width,
         direction: "ltr",
+        ...style,
       }}
       onChange={_onhandleselection}
       options={items}

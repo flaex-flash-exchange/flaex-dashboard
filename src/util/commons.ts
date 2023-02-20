@@ -98,3 +98,14 @@ export function _onShortCalculator(
     commissionFee: formatNumber(0),
   };
 }
+
+export const splitString = (
+  str: string,
+  countStart: number = 6,
+  countEnd = 4,
+) => {
+  return `${str.substr(0, countStart)}...${str.substr(
+    str.length - countEnd,
+    str.length,
+  )}`;
+};

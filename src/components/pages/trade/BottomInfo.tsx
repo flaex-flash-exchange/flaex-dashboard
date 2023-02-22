@@ -1,7 +1,8 @@
 import React from "react";
+import type { FormatedUserData } from "util/types";
 import HistoryTable from "./HistoryTable";
 
-const BottomInfo = () => {
+const BottomInfo =({ data}: { data:Array<FormatedUserData> }) => {
   return (
     <div className="mt-[20px] overflow-auto	">
       <HistoryTable titleRow={titleHistoryRow} data={mockData} />

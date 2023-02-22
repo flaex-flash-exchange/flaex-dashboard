@@ -1,3 +1,5 @@
+import Decimal from "decimal.js";
+import { BigNumber } from "ethers";
 import { toast } from "react-toastify";
 import { S_LONG_SHORT_TYPE } from "./constants";
 
@@ -24,6 +26,15 @@ export function splitStringOnSlash(str: string) {
 
 export function formatNumber(num: number, decimalLength: number = 4) {
   return num.toFixed(decimalLength);
+}
+
+export function amountToHex(num: number | string, decimals: number){
+  return new Decimal(num).mul(new Decimal(10).pow(decimals)).toHex();
+}
+
+
+export function BigNumberToReadableAmount(num: BigNumber, decimals: number){
+  return new Decimal(num._hex).div(new Decimal(10).pow(decimals)).toFixed(4);
 }
 
 export function _onLongCalculator(

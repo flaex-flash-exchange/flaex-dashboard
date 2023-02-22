@@ -1,16 +1,19 @@
+import { ADDRESS_ZERO } from "@uniswap/v3-sdk";
 import BaseButton from "components/common/BaseButton";
 import SliderCustom from "components/common/SliderCustom";
 import { LiteWagmiBtnConnect } from "components/layout/ConnectButton";
 import { contractAddress } from "constants/contractAddress";
 import { useContextTrade } from "context/TradeContext";
 import Decimal from "decimal.js";
-import { constants, Contract } from "ethers";
+import { BigNumber, constants, Contract } from "ethers";
 import { QuoterReturn } from "hooks/useQuote";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { _onLongCalculator, _onShortCalculator } from "util/commons";
+import { amountToHex, BigNumberToReadableAmount, _onLongCalculator, _onShortCalculator } from "util/commons";
 import { LSBtn, tokenPair } from "util/constants";
+import type { FormatedUserData, UserData } from "../../../util/types";
 import {
   useAccount,
+  useContractRead,
   useContractWrite,
   usePrepareContractWrite,
   useProvider,
@@ -28,11 +31,10 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
   const [isApprovedShortToken, setIsApprovedShortToken] =
     useState<boolean>(true);
   const [amountValue, setAmount] = useState<number>(0);
-  const [payingValue, setPayingValue] = useState(0);
   const [balanceValue, setBalanceValue] = useState<number>(4.2);
   const [percentage, setPercentage] = useState<number>(0);
   const [btnConnected, setbtnConnected] = useState(false);
-
+  const [userData, setUserData] = useState<Array<FormatedUserData>>([]);
   const { token0, token1, fee } = useMemo(() => {
     return tokenPair[coupleTradeCoins.origin || ""];
   }, [coupleTradeCoins]);
@@ -77,6 +79,23 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
       }
     }
   }, [address, provider, token0.address, token1.address]);
+
+
+  const { data : baseBalance } = useContractRead({
+    abi:testERC20.abi,
+    address:token0.address,
+    functionName:"balanceOf",
+    args:[address?address:ADDRESS_ZERO]
+  });
+
+
+  const { data : quoteBalance } = useContractRead({
+    abi:testERC20.abi,
+    address:token1.address,
+    functionName:"balanceOf",
+    args:[address?address:ADDRESS_ZERO]
+  });
+
 
   const { config: configApprovalShortToken } = usePrepareContractWrite({
     address: token1.address,
@@ -128,13 +147,12 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
     args: [
       token0.address,
       token1.address,
-      new Decimal(longShortChanging.paying)
-        .mul(new Decimal(10).pow(token0.decimals))
-        .toHex(),
+      amountToHex(longShortChanging.paying,token0.decimals),
       constants.MaxUint256,
       fee,
       new Decimal(percentage).mul(100).toHex(),
     ],
+    enabled: Boolean(new Decimal(longShortChanging.paying).greaterThan(0)),
   });
   const {
     data: longData,
@@ -148,6 +166,7 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
     confirmations: 1,
     onSuccess() {
       console.log("Long success");
+      // getData();
     },
   });
 
@@ -158,13 +177,12 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
     args: [
       token1.address,
       token0.address,
-      new Decimal(longShortChanging.paying)
-        .mul(new Decimal(10).pow(token0.decimals))
-        .toHex(),
+      amountToHex(longShortChanging.paying,token1.decimals),
       constants.MaxUint256,
       fee,
       new Decimal(percentage).mul(100).toHex(),
     ],
+    enabled: Boolean(new Decimal(longShortChanging.paying).greaterThan(0)),
   });
   const {
     data: dataShort,
@@ -178,6 +196,7 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
     confirmations: 1,
     onSuccess() {
       console.log("Long success");
+      // getData();
     },
   });
 
@@ -190,7 +209,6 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
     setAmount(0);
     setBalanceValue(0);
     setPercentage(0);
-    setPayingValue(0);
   };
 
   const handleChangeSlider = (value: number) => {
@@ -200,7 +218,6 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
     (e: any) => {
       const eAmount = e.target.value;
       setAmount(eAmount);
-      setPayingValue(eAmount / (1 + percentage / 100));
     },
     [percentage],
   );
@@ -208,7 +225,6 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
   const handleChangePaying = useCallback(
     (e: any) => {
       const ePaying = e.target.value;
-      setPayingValue(ePaying);
       setAmount(ePaying * (1 + percentage / 100));
     },
     [percentage],
@@ -305,7 +321,7 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
               <input
                 className="bg-transparent outline-none"
                 onChange={handleChangePaying}
-                value={payingValue}
+                value={longShortChanging.paying}
                 max={1000}
                 type="number"
               />
@@ -313,7 +329,7 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
                 className="cursor-pointer whitespace-nowrap"
                 onClick={() => _onSetBalance(balanceValue)}
               >
-                Balance: {balanceValue}
+                Balance: {isLong?BigNumberToReadableAmount(baseBalance?baseBalance as BigNumber:BigNumber.from(0),token0.decimals):BigNumberToReadableAmount(quoteBalance?quoteBalance as BigNumber:BigNumber.from(0),token1.decimals)}
               </span>
             </div>
           </div>
@@ -365,7 +381,7 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
                     <BaseButton
                       disabled={
                         !approvalLongTokenFunc ||
-                        !isApprovalLongLoading ||
+                        isApprovalLongLoading ||
                         isApprovalLongSuccess
                       }
                       onButtonClick={() => approvalLongTokenFunc?.()}
@@ -384,7 +400,7 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
                       <BaseButton
                         disabled={
                           !approvalShortTokenFunc ||
-                          !isApprovalShortLoading ||
+                          isApprovalShortLoading ||
                           isApprovalShortSuccess
                         }
                         onButtonClick={() => approvalShortTokenFunc?.()}
@@ -401,7 +417,7 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
                         {isMouted && isLong && isApprovedShortToken ? (
                           <BaseButton
                             disabled={
-                              !longFunc || !isLongLoading || isLongSuccess
+                              !longFunc || isLongLoading || isLongSuccess
                             }
                             onButtonClick={() => longFunc?.()}
                             moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
@@ -415,7 +431,7 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
                         ) : (
                           <BaseButton
                             disabled={
-                              !shortFunc || !isShortLoading || isShortSuccess
+                              !shortFunc || isShortLoading || isShortSuccess
                             }
                             onButtonClick={() => shortFunc?.()}
                             moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"

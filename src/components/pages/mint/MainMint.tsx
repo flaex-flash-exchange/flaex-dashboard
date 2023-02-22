@@ -12,11 +12,11 @@ const MainMint = () => {
 
   return (
     <div className="w-2/5 bg-border-flaex p-6">
-      <div className="flex items-center w-full justify-between">
-        <span className="font-medium text-[20px]">Swap</span>
-        <button>
+      <div className="flex items-center w-full">
+        <span className="font-semibold text-[20px]">Mint</span>
+        {/* <button>
           <FaCog size={20} />
-        </button>
+        </button> */}
       </div>
 
       <div className="bg-border-flaex p-6 mt-6 flex items-center justify-between">
@@ -32,7 +32,7 @@ const MainMint = () => {
         </div>
       </div>
 
-      <button className="button-primary mt-10">Mint</button>
+      <button className="button-primary mt-10 text-[20px] py-4">Mint</button>
     </div>
   );
 };

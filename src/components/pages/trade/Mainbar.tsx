@@ -1,16 +1,28 @@
-import React from "react";
-import "rc-slider/assets/index.css";
-import LongShort from "./LongShort";
-import CloseRepay from "./CloseRepay";
 import { useContextTrade } from "context/TradeContext";
+import useQuoter from "hooks/useQuote";
+import "rc-slider/assets/index.css";
+import { useMemo } from "react";
+import { tokenPair } from "util/constants";
+import CloseRepay from "./CloseRepay";
+import LongShort from "./LongShort";
 
-const Mainbar = () => {
+const Mainbar = (getData:any) => {
   const { isShowLong } = useContextTrade();
 
+  const { coupleTradeCoins } = useContextTrade();
+
+  const { token0, token1, fee } = useMemo(() => {
+    return tokenPair[coupleTradeCoins.origin || ""];
+  }, [coupleTradeCoins]);
+
+  const quotedAmountOut = useQuoter(token1, token0, 1, 18, 18, fee);
+
   return (
+    <>
     <div className="rounded-[10px] border-[0.2px] h-full px-4 py-3">
-      {isShowLong === undefined ? <LongShort /> : <CloseRepay />}
+      {isShowLong ? <LongShort price={quotedAmountOut} getData={getData} /> : <CloseRepay />}
     </div>
+    </>
   );
 };
 

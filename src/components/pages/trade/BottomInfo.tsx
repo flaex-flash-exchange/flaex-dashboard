@@ -1,7 +1,8 @@
 import React from "react";
+import type { FormatedUserData } from "util/types";
 import HistoryTable from "./HistoryTable";
 
-const BottomInfo = () => {
+const BottomInfo =({ data}: { data:Array<FormatedUserData> }) => {
   return (
     <div className="mt-[20px] overflow-auto	">
       <HistoryTable titleRow={titleHistoryRow} data={mockData} />
@@ -83,3 +84,40 @@ const mockData = [
     pnlPercent: -67,
   },
 ];
+
+// const mockData = [
+//   {
+//     direction: "Long",
+//     leverage: 500,
+//     collateral: {
+//       value: 12,
+//       unit: "ETH",
+//     },
+//     debt: {
+//       value: 8000,
+//       unit: "USDC",
+//     },
+//     entryPrice: 1100,
+//     markPrice: 1227.1,
+//     liquidPrice: 990.7,
+//     marginRatio: 1.6,
+//     pnlPercent: 150,
+//   },
+//   {
+//     direction: "Short",
+//     leverage: 400,
+//     collateral: {
+//       value: 12000,
+//       unit: "USDC",
+//     },
+//     debt: {
+//       value: 4,
+//       unit: "ETH",
+//     },
+//     entryPrice: 1321.6,
+//     markPrice: 1227.1,
+//     liquidPrice: 1406.8,
+//     marginRatio: 1.23,
+//     pnlPercent: -67,
+//   },
+// ];

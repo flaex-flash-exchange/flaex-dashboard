@@ -1,45 +1,61 @@
 import type { NextPage } from "next";
-import { SupportedLocale, SUPPORTED_LOCALES, SwapWidget } from '@uniswap/widgets';
+import {
+  SupportedLocale,
+  SUPPORTED_LOCALES,
+  SwapWidget,
+} from "@uniswap/widgets";
 
 // ↓↓↓ Don't forget to import the widgets' fonts! ↓↓↓
-import '@uniswap/widgets/fonts.css';
+import "@uniswap/widgets/fonts.css";
 import { useProvider, useSigner } from "wagmi";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Web3Provider } from '@ethersproject/providers';
+import type { Web3Provider } from "@ethersproject/providers";
 
-import {
-  useConnectModal,
-} from '@rainbow-me/rainbowkit';
+import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { contractAddress } from "constants/contractAddress";
 import tokenList from "./tokenList";
-const TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org';
-const UNI = '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984';
-const JSON_RPC_URL = 'https://cloudflare-eth.com';
-
+const TOKEN_LIST = "https://gateway.ipfs.io/ipns/tokens.uniswap.org";
+const UNI = "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984";
+const JSON_RPC_URL = "https://cloudflare-eth.com";
 
 const Index: NextPage = () => {
   const { openConnectModal } = useConnectModal();
   const [isMouted, setIsMouted] = useState(false);
 
-  useEffect(()=>{
+  useEffect(() => {
     setIsMouted(true);
-  },[]);
+  }, []);
 
-  const { data : signer} = useSigner();
-  return ( 
-    <>
-    {isMouted && (
-      <div >
-            <SwapWidget 
-                tokenList={tokenList.tokens}
-                onConnectWalletClick={openConnectModal}
-                provider={signer?.provider as Web3Provider}
-                defaultOutputTokenAddress={contractAddress.WETH}
-                defaultInputTokenAddress={contractAddress.DAI}
-           />
-          </div>
-    )}
-  </>
+  const { data: signer } = useSigner();
+
+  const theme = {
+    accent: "#BD905A",
+    primary: "#FFF",
+    secondary: "#666",
+    interactive: "#BD905A",
+    container: "transparent",
+    module: "#E7E7E7",
+    outline: "#343D3A",
+    dialog: "#FFF",
+    fontFamily: "Verdana",
+    borderRadius: 0.8,
+    opacity: 0,
+  };
+  return (
+    <div className="center-all">
+      {isMouted && (
+        <div className="bg-border-flaex flex justify-center w-fit p-6">
+          <SwapWidget
+            tokenList={tokenList.tokens}
+            onConnectWalletClick={openConnectModal}
+            provider={signer?.provider as Web3Provider}
+            defaultOutputTokenAddress={contractAddress.WETH}
+            defaultInputTokenAddress={contractAddress.DAI}
+            theme={theme}
+          />
+        </div>
+      )}
+    </div>
   );
 };
 

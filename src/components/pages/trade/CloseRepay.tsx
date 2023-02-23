@@ -1,17 +1,21 @@
 import SliderCustom from "components/common/SliderCustom";
+import { LiteWagmiBtnConnect } from "components/layout/ConnectButton";
 import { useContextTrade } from "context/TradeContext";
 import React, { useEffect, useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
+import { useAccount } from "wagmi";
 
 type ICloseRepay = { data?: any };
 
 const CloseRepay = ({ data = mockData }: ICloseRepay) => {
-  const [isRepay, setIsPay] = useState<boolean>(false);
+  const { isConnected } = useAccount();
 
-  const [amountValue, setAmount] = useState<number>(10);
+  const [isRepay, setIsPay] = useState<boolean>(true);
+  const [amountValue, setAmount] = useState<number>(0);
   const [percentage, setPercentage] = useState<number>(0);
+  const [btnConnected, setbtnConnected] = useState(false);
 
-  const { setIsShowLong } = useContextTrade();
+  const { setIsShowLong, repayClodeData } = useContextTrade();
 
   const handleChangeLongShort = (clicked: boolean) => {
     if (clicked) {
@@ -19,7 +23,6 @@ const CloseRepay = ({ data = mockData }: ICloseRepay) => {
     } else {
       setIsPay(false);
     }
-
     setAmount(0);
   };
 
@@ -28,8 +31,14 @@ const CloseRepay = ({ data = mockData }: ICloseRepay) => {
   };
 
   const handleBackToTrade = () => {
-    setIsShowLong(undefined);
+    setIsShowLong(true);
   };
+
+  // const
+
+  useEffect(() => {
+    setbtnConnected(isConnected);
+  }, [isConnected]);
 
   return (
     <div className="flex flex-col h-full">
@@ -78,7 +87,7 @@ const CloseRepay = ({ data = mockData }: ICloseRepay) => {
               className="bg-transparent outline-none"
               onChange={(e: any) => handleChangeSlider(e.target.value)}
               value={percentage}
-              max={100}
+              max={99.99}
               type="number"
             />
             <div className="mr-2">%</div>
@@ -114,6 +123,47 @@ const CloseRepay = ({ data = mockData }: ICloseRepay) => {
       </div>
 
       <div className="mt-5">
+        {/* {isRepay ? (
+          <>
+            <div className="flex justify-between">
+              <p className="text-xs font-light italic">Entry Price:</p>
+              <p className="text-sm font-semibold">
+                {repayClodeData.entryPrice}
+              </p>
+            </div>
+            <div className="flex justify-between">
+              <p className="text-xs font-light italic">Current Price:</p>
+              <p className="text-sm font-semibold">
+                {repayClodeData.entryPrice}
+              </p>
+            </div>
+            <div className="flex justify-between">
+              <p className="text-xs font-light italic">Liquidation Price:</p>
+              <p className="text-sm font-semibold">
+                {repayClodeData.entryPrice}
+              </p>
+            </div>
+            <div className="flex justify-between">
+              <p className="text-xs font-light italic">Current Margin Ratio:</p>
+              <p className="text-sm font-semibold">
+                {repayClodeData.entryPrice}
+              </p>
+            </div>
+            <div className="flex justify-between">
+              <p className="text-xs font-light italic">Margin Ratio After:</p>
+              <p className="text-sm font-semibold">
+                {repayClodeData.entryPrice}
+              </p>
+            </div>
+          </>
+        ) : (
+          data.descInfo.close.map((item: any, idx: any) => (
+            <div key={idx} className="flex justify-between">
+              <p className="text-xs font-light italic">{item.title}</p>
+              <p className="text-sm font-semibold">{item.value}</p>
+            </div>
+          ))
+        )} */}
         {isRepay
           ? data.descInfo.repay.map((item: any, idx: any) => (
               <div key={idx} className="flex justify-between">
@@ -129,9 +179,13 @@ const CloseRepay = ({ data = mockData }: ICloseRepay) => {
             ))}
       </div>
       <div className="flex-1 flex flex-col justify-end">
-        <button className="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full">
-          {isRepay ? "Repay Partial Debt" : "Close Position"}
-        </button>
+        {btnConnected ? (
+          <button className="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full">
+            {isRepay ? "Repay Partial Debt" : "Close Position"}
+          </button>
+        ) : (
+          <LiteWagmiBtnConnect />
+        )}
       </div>
     </div>
   );
@@ -159,7 +213,7 @@ const mockData = {
     repay: [
       { title: "Entry Price:", value: "1000" },
       { title: "Current Price:", value: "1127.65" },
-      { title: "Entry Price:", value: "1227.65" },
+      { title: "Liquidation Price:", value: "1227.65" },
       { title: "Current Margin Ratio:", value: "1.2" },
       { title: "Margin Ratio After:", value: "1.4" },
       { title: "PnL:", value: "12.27 %" },
@@ -178,10 +232,16 @@ const marks = {
   70: "70%",
   80: "80%",
   90: "90%",
-  100: {
+  99.99: {
     style: {
       color: "red",
     },
-    label: <strong>100%</strong>,
+    label: <strong>99.99%</strong>,
   },
 };
+
+// PNL = markPrice/entryPrice * leverage
+// marginRatio = colateral/debt (same unit)
+// marginRatioAfter = colateral/(debt - amount) (same unit)
+// wallet 6xx...4xx
+// block number at  bottom

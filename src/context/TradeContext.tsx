@@ -1,24 +1,38 @@
 import { TCoupleCoin } from "constants/interface";
 import React, { createContext, useContext, useState } from "react";
 
-export const TradeContext = createContext<any>({});
+interface ITradeContext {
+  coupleTradeCoins: TCoupleCoin;
+  isShowLong: boolean | undefined;
+  repayClodeData: any | undefined;
+  setIsShowLong: (item: any) => void;
+  setRepayClodeData: (item: any) => void;
+  setCoupleTradeCoins: (item: any) => void;
+}
+export const TradeContext = createContext<ITradeContext | null>(null);
 export const TradeContextProvider = ({ children }: any) => {
-  const [isShowLong, setIsShowLong] = useState<boolean | undefined>(undefined);
+  const [isShowLong, setIsShowLong] = useState<boolean>(true);
   const [coupleTradeCoins, setCoupleTradeCoins] = useState<TCoupleCoin>({
-    base: "BTC",
-    quote: "USDC",
-    origin: "BTC/USDC",
+    base: "wETH",
+    quote: "DAI",
+    origin: "wETH/DAI",
   });
-  const value = {
-    isShowLong,
-    setIsShowLong,
-    coupleTradeCoins,
-    setCoupleTradeCoins,
-  };
+  const [repayClodeData, setRepayClodeData] = useState<any>(null);
 
   return (
-    <TradeContext.Provider value={value}>{children}</TradeContext.Provider>
+    <TradeContext.Provider
+      value={{
+        isShowLong,
+        setIsShowLong,
+        repayClodeData,
+        coupleTradeCoins,
+        setCoupleTradeCoins,
+        setRepayClodeData,
+      }}
+    >
+      {children}
+    </TradeContext.Provider>
   );
 };
 
-export const useContextTrade = () => useContext(TradeContext);
+export const useContextTrade = () => useContext(TradeContext) as ITradeContext;

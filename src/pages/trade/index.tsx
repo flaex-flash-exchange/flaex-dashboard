@@ -26,49 +26,6 @@ const Index: NextPage = () => {
       return tokenPair[tradeContext?.coupleTradeCoins?.origin || ""];
     }
   }, [tradeContext]);
-
-  const orderQuery = `
-    query MyQuery {
-      orders(first: 10, where: {trader: "${address}", baseToken_in: ["${token0.address}","${token1.address}"], quoteToken_in: ["${token0.address}","${token1.address}"]}) {
-        marginLevel
-        quoteToken
-        quoteTokenAmount
-        trader
-        baseTokenAmount
-        baseToken
-        baseMarginTokenAmount
-        id
-      }
-    }
-  `;
-
-
-  const fetchLongShortData =  useCallback(async ()=>{
-    const client = new ApolloClient({
-      uri: API,
-      cache: new InMemoryCache(),
-    });
-    
-    client
-      .query({
-        query: gql(orderQuery),
-      })
-      .then((data:any) => {
-        data.data.map(d=>{
-          return FormatedUserData(
-            
-          )
-        })
-        // setData(data);
-      })
-      .catch((err) => {
-        console.log('Error fetching data: ', err);
-      });
-  },[]);
-
-  useEffect(()=>{
-    fetchLongShortData();
-  },[fetchLongShortData]);
   
   return (
     <>

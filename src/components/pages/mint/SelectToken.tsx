@@ -1,7 +1,7 @@
 import AntSelect from "components/common/AntCommon/AntSelect";
 import React from "react";
 
-const SelectToken = () => {
+const SelectToken = (onSelectToken) => {
   return (
     <div>
       <AntSelect
@@ -15,6 +15,7 @@ const SelectToken = () => {
             value: "dai",
           },
         ]}
+        _onhandleselection={onSelectToken}
       />
     </div>
   );

@@ -30,17 +30,18 @@ const Index: NextPage = () => {
 
   const theme = {
     accent: "#BD905A",
-    primary: "#FFF",
-    secondary: "#666",
+    primary: "#fff",
+    secondary: "#fff",
     interactive: "#BD905A",
     container: "transparent",
-    module: "#E7E7E7",
-    outline: "#343D3A",
-    dialog: "#FFF",
-    fontFamily: "Verdana",
+    module: "#2B3A55",
+    outline: "#BD905A",
+    dialog: "#1e283b",
+    fontFamily: "Source Serif Pro",
     borderRadius: 0.8,
     opacity: 0,
   };
+
   return (
     <div className="center-all">
       {isMouted && (

@@ -3,10 +3,8 @@ import type { NextPage } from "next";
 
 const Index: NextPage = () => {
   return (
-    <div>
-      <div className="flex justify-center">
-        <MainMint />
-      </div>
+    <div className="flex justify-center">
+      <MainMint />
     </div>
   );
 };

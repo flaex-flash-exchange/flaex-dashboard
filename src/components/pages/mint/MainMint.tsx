@@ -6,8 +6,10 @@ import { testERC20 } from "contracts";
 import { constants } from "ethers";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaCog } from "react-icons/fa";
+import { amountToHex } from "util/commons";
 import { tokenPair } from "util/constants";
 import {
+  useAccount,
   useContractWrite,
   usePrepareContractWrite,
   useWaitForTransaction,
@@ -15,63 +17,86 @@ import {
 import SelectToken from "./SelectToken";
 
 const MainMint = () => {
+  const { address, isConnected } = useAccount();
   const [amount, setAmount] = useState();
   const [isMouted, setIsMouted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isApprovedMintToken, setIsApprovedMintToken] = useState(false);
 
-  const [tokenSelected, setTokenSelected] = useState();
+  const [btnConnected, setbtnConnected] = useState(false);
+
+  const [tokenSelected, setTokenSelected] = useState<number>(0);
 
   const { token0, token1, fee } = tokenPair["wETH/DAI"];
+  const [contentButton, setContentButton] = useState<string>();
 
-  const onSelectCouple = (value) => {
-    console.log("Token Value", value);
+  const onSelectToken = (value) => {
+    setTokenSelected(value);
   };
 
-  const { config: configApprovalMintToken } = usePrepareContractWrite({
-    address: token1.address,
+  const { config: configLong } = usePrepareContractWrite({
+    address:
+      tokenSelected === 0
+        ? (token0.address as `0x${string}`)
+        : (token1.address as `0x${string}`),
     abi: testERC20.abi,
-    functionName: "approve",
-    args: [contractAddress.FlaexMain, constants.MaxUint256],
+    functionName: "mint(uint256)",
+    args: [amountToHex(amount ? amount : 0, token0.decimals)],
   });
 
   const {
-    data: approvalMintTokenData,
-    isLoading: isApprovalMintLoading,
-    isSuccess: isApprovalMintSuccess,
-    write: approvalMintTokenFunc,
-  } = useContractWrite(configApprovalMintToken);
+    data: mintData,
+    isLoading: isMintLoading,
+    isSuccess: isMintSuccess,
+    write: mintFunc,
+  } = useContractWrite(configLong);
 
-  useWaitForTransaction({
-    hash: approvalMintTokenData?.hash,
+  const { isSuccess: isMintConfirmed } = useWaitForTransaction({
+    hash: mintData?.hash,
     confirmations: 1,
     onSuccess() {
-      setIsApprovedMintToken(true);
+      console.log("Mint success");
+      // getData();
     },
   });
 
-  useEffect(() => {
-    setIsLoading(true);
-  }, []);
+  console.log("isMintLoading", isMintLoading);
+  console.log("isMintSuccess", isMintSuccess);
+  console.log("isMintConfirmed", isMintConfirmed);
 
-  // useEffect(() => {
-  //   if (isMouted) {
-  //     setbtnConnected(isConnected);
-  //     fetchAllowance();
-  //   } else {
-  //     setIsMouted(true);
-  //   }
-  // }, [isConnected, fetchAllowance, isMouted]);
+  useEffect(() => {
+    if (isMouted) {
+      setbtnConnected(isConnected);
+    } else {
+      setIsMouted(true);
+    }
+  }, [isConnected, isMouted]);
+
+  const handleStatus = () => {
+    console.log(
+      "(!isLoading && !isMintSuccess)",
+      !isMintLoading && !isMintSuccess,
+    );
+    if (isMintConfirmed || (!isMintLoading && !isMintSuccess)) {
+      return `Mint ${tokenSelected === 0 ? "WETH" : "DAI"}`;
+    }
+    if (isMintLoading) {
+      return `Waiting for signing`;
+    }
+    if (isMintSuccess) {
+      return `Waiting for network`;
+    }
+  };
+  useEffect(() => {
+    setContentButton(handleStatus());
+  }, [isMintLoading, isMintSuccess, isMintConfirmed]);
 
   return (
-    <div className="w-2/5 bg-border-flaex p-6">
+    <div className="md:w-2/5 bg-border-flaex p-6">
       <div className="flex items-center w-full">
         <span className="font-semibold text-[20px]">Mint</span>
         {/* <button>
           <FaCog size={20} />
         </button> */}
       </div>
-
       <div className="bg-border-flaex p-6 mt-6 flex items-center justify-between">
         <input
           className="flex-1 w-full bg-transparent outline-none text-[20px] font-semibold"
@@ -80,42 +105,21 @@ const MainMint = () => {
           value={amount}
           onChange={(e: any) => setAmount(e.target.value)}
         />
-        <div className="text-flaex-heading w-[100px]">
-          <SelectToken onSelectToken={onSelectCouple} />
+        <div className="text-flaex-heading w-[120px] flex justify-end">
+          <SelectToken onSelectToken={onSelectToken} />
         </div>
       </div>
-
-      {/* {isMouted && !isLong && !isApprovedMintToken ? (
-        <button
-          className="button-primary mt-10 text-[20px] py-4"
-          disabled={
-            !approvalMintTokenFunc ||
-            isApprovalMintLoading ||
-            isApprovalMintSuccess
-          }
-          onClick={() => approvalMintTokenFunc?.()}
-        >
-          {!isApprovalMintLoading &&
-            !isApprovalMintSuccess &&
-            `Approval ${token1.name}`}
-          {isApprovalMintLoading && `Waiting for signing`}
-          {isApprovalMintSuccess && `Waiting for network`}
-        </button>
-      ) : (
+      {btnConnected ? (
         <BaseButton
-          disabled={!shortFunc || isShortLoading || isShortSuccess}
-          onButtonClick={() => shortFunc?.()}
+          disabled={!mintFunc || isMintLoading || isMintSuccess}
+          onButtonClick={() => mintFunc?.()}
           moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
         >
-          {!isShortLoading &&
-            !isShortSuccess &&
-            `${btnLabel} ${coupleTradeCoins?.origin}`}
-          {isShortLoading && `Waiting for signing`}
-          {isShortSuccess && `Waiting for network`}
+          {contentButton}
         </BaseButton>
-      )} */}
-
-      <LiteWagmiBtnConnect />
+      ) : (
+        <LiteWagmiBtnConnect />
+      )}
     </div>
   );
 };

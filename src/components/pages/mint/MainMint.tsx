@@ -26,7 +26,6 @@ const MainMint = () => {
   const [tokenSelected, setTokenSelected] = useState<number>(0);
 
   const { token0, token1, fee } = tokenPair["wETH/DAI"];
-  const [contentButton, setContentButton] = useState<string>();
 
   const onSelectToken = (value) => {
     setTokenSelected(value);
@@ -39,7 +38,12 @@ const MainMint = () => {
         : (token1.address as `0x${string}`),
     abi: testERC20.abi,
     functionName: "mint(uint256)",
-    args: [amountToHex(amount ? amount : 0, token0.decimals)],
+    args: [
+      amountToHex(
+        amount ? amount : 0,
+        tokenSelected === 0 ? token0.decimals : token1.decimals,
+      ),
+    ],
   });
 
   const {
@@ -70,7 +74,7 @@ const MainMint = () => {
     }
   }, [isConnected, isMouted]);
 
-  const handleStatus = () => {
+  const contentStatus = useMemo(() => {
     console.log(
       "(!isLoading && !isMintSuccess)",
       !isMintLoading && !isMintSuccess,
@@ -84,10 +88,14 @@ const MainMint = () => {
     if (isMintSuccess) {
       return `Waiting for network`;
     }
-  };
-  useEffect(() => {
-    setContentButton(handleStatus());
-  }, [isMintLoading, isMintSuccess, isMintConfirmed]);
+  }, [isMintConfirmed, isMintLoading, isMintSuccess, tokenSelected]);
+
+  const handleDisableButton = useMemo(() => {
+    if (isMintLoading || (!isMintConfirmed && isMintSuccess)) {
+      return true;
+    }
+    return false;
+  }, [isMintConfirmed, isMintLoading, isMintSuccess]);
 
   return (
     <div className="md:w-2/5 bg-border-flaex p-6">
@@ -111,11 +119,11 @@ const MainMint = () => {
       </div>
       {btnConnected ? (
         <BaseButton
-          disabled={!mintFunc || isMintLoading || isMintSuccess}
+          disabled={handleDisableButton}
           onButtonClick={() => mintFunc?.()}
           moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
         >
-          {contentButton}
+          {contentStatus}
         </BaseButton>
       ) : (
         <LiteWagmiBtnConnect />

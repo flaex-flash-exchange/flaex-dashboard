@@ -3,6 +3,7 @@ import {
   SupportedLocale,
   SUPPORTED_LOCALES,
   SwapWidget,
+  Theme,
 } from "@uniswap/widgets";
 
 // ↓↓↓ Don't forget to import the widgets' fonts! ↓↓↓
@@ -28,10 +29,10 @@ const Index: NextPage = () => {
 
   const { data: signer } = useSigner();
 
-  const theme = {
+  const theme: Theme = {
     accent: "#BD905A",
     primary: "#fff",
-    secondary: "#fff",
+    secondary: "gray",
     interactive: "#BD905A",
     container: "transparent",
     module: "#2B3A55",
@@ -39,7 +40,6 @@ const Index: NextPage = () => {
     dialog: "#1e283b",
     fontFamily: "Source Serif Pro",
     borderRadius: 0.8,
-    opacity: 0,
   };
 
   return (

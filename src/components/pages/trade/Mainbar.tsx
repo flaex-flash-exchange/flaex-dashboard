@@ -6,7 +6,7 @@ import { tokenPair } from "util/constants";
 import CloseRepay from "./CloseRepay";
 import LongShort from "./LongShort";
 
-const Mainbar = (getData:any) => {
+const Mainbar = (getData: any) => {
   const { isShowLong } = useContextTrade();
 
   const { coupleTradeCoins } = useContextTrade();
@@ -19,9 +19,9 @@ const Mainbar = (getData:any) => {
 
   return (
     <>
-    <div className="rounded-[10px] border-[0.2px] h-full px-4 py-3">
-      {isShowLong ? <LongShort price={quotedAmountOut} getData={getData} /> : <CloseRepay />}
-    </div>
+      <div className="rounded-[10px] border-[0.2px] h-full px-4 py-3">
+        {isShowLong ? <LongShort price={quotedAmountOut} /> : <CloseRepay />}
+      </div>
     </>
   );
 };

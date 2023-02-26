@@ -4,8 +4,9 @@ import { contractAddress } from "constants/contractAddress";
 import { useContextTrade } from "context/TradeContext";
 import { testERC20 } from "contracts";
 import { constants } from "ethers";
-import React, { useEffect, useMemo, useState } from "react";
-import { FaCog } from "react-icons/fa";
+import React, { ReactNode, useEffect, useMemo, useState } from "react";
+import { FaCog, FaExternalLinkAlt, FaRegCheckCircle } from "react-icons/fa";
+import { toast, ToastContent } from "react-toastify";
 import { amountToHex } from "util/commons";
 import { tokenPair } from "util/constants";
 import {
@@ -57,14 +58,44 @@ const MainMint = () => {
     hash: mintData?.hash,
     confirmations: 1,
     onSuccess() {
-      console.log("Mint success");
-      // getData();
+      const toastContent: any = () => {
+        return (
+          <div className="p-4 bg-flaex-bg-primary bg-border-flaex">
+            <div className="flex text-[16px] font-medium items-center gap-2 text-flaex-green">
+              Mint Confirmed
+              <span className="text-[20px]">
+                <FaRegCheckCircle />
+              </span>
+            </div>
+            <a
+              href={`https://goerli.etherscan.io/tx/${mintData?.hash}`}
+              className="cursor-pointer mt-1 flex items-center gap-2 text-[14px] hover:underline hover:decoration-solid duration-200"
+              target="blank"
+            >
+              View on etherscan
+              <span>
+                <FaExternalLinkAlt />
+              </span>
+            </a>
+          </div>
+        );
+      };
+
+      console.log(`https://goerli.etherscan.io/hash/${mintData?.hash}`);
+
+      toast.success(toastContent(), {
+        position: toast.POSITION.BOTTOM_CENTER,
+        autoClose: false,
+        icon: false,
+        closeOnClick: false,
+        style: {
+          background: "transparent",
+          color: "white",
+          textAlign: "center",
+        },
+      });
     },
   });
-
-  console.log("isMintLoading", isMintLoading);
-  console.log("isMintSuccess", isMintSuccess);
-  console.log("isMintConfirmed", isMintConfirmed);
 
   useEffect(() => {
     if (isMouted) {
@@ -75,10 +106,6 @@ const MainMint = () => {
   }, [isConnected, isMouted]);
 
   const contentStatus = useMemo(() => {
-    console.log(
-      "(!isLoading && !isMintSuccess)",
-      !isMintLoading && !isMintSuccess,
-    );
     if (isMintConfirmed || (!isMintLoading && !isMintSuccess)) {
       return `Mint ${tokenSelected === 0 ? "WETH" : "DAI"}`;
     }
@@ -101,9 +128,6 @@ const MainMint = () => {
     <div className="md:w-2/5 bg-border-flaex p-6">
       <div className="flex items-center w-full">
         <span className="font-semibold text-[20px]">Mint</span>
-        {/* <button>
-          <FaCog size={20} />
-        </button> */}
       </div>
       <div className="bg-border-flaex p-6 mt-6 flex items-center justify-between">
         <input

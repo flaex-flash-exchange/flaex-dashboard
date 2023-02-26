@@ -17,12 +17,12 @@ export interface IBottomProps {
   onLongShortData?: (data: any) => void;
 }
 export interface ILongShortData {
-  baseMarginTokenAmount: string;
+  baseMarginTokenAmount: string | number;
   baseToken: string;
-  baseTokenAmount: string;
+  baseTokenAmount: string | number;
   id: string;
-  marginLevel: string;
+  marginLevel: string | number;
   quoteToken: string;
-  quoteTokenAmount: string;
+  quoteTokenAmount: string | number;
   trader: string;
 }

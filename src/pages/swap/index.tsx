@@ -14,7 +14,7 @@ import type { Web3Provider } from "@ethersproject/providers";
 
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { contractAddress } from "constants/contractAddress";
-import tokenList from "./tokenList";
+import tokenList from "../../util/tokenList";
 const TOKEN_LIST = "https://gateway.ipfs.io/ipns/tokens.uniswap.org";
 const UNI = "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984";
 const JSON_RPC_URL = "https://cloudflare-eth.com";

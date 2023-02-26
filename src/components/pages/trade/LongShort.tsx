@@ -6,11 +6,16 @@ import { contractAddress } from "constants/contractAddress";
 import { useContextTrade } from "context/TradeContext";
 import Decimal from "decimal.js";
 import { BigNumber, constants, Contract } from "ethers";
+import { useLongShortData } from "hooks/useLongShortData";
 import { QuoterReturn } from "hooks/useQuote";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { amountToHex, BigNumberToReadableAmount, _onLongCalculator, _onShortCalculator } from "util/commons";
+import {
+  amountToHex,
+  BigNumberToReadableAmount,
+  _onLongCalculator,
+  _onShortCalculator,
+} from "util/commons";
 import { LSBtn, tokenPair } from "util/constants";
-import type { FormatedUserData, UserData } from "../../../util/types";
 import {
   useAccount,
   useContractRead,
@@ -23,7 +28,8 @@ import { flaexMain, testERC20 } from "../../../contracts";
 
 const LongShort = ({ price }: { price: QuoterReturn }) => {
   const { address, isConnected } = useAccount();
-  const { coupleTradeCoins } = useContextTrade();
+  const { pairCrypto } = useContextTrade();
+  const { fetchLongShortData } = useLongShortData();
   const [isMouted, setIsMouted] = useState(false);
   const provider = useProvider();
   const [isLong, setIsLong] = useState<boolean>(true);
@@ -31,13 +37,12 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
   const [isApprovedShortToken, setIsApprovedShortToken] =
     useState<boolean>(true);
   const [amountValue, setAmount] = useState<number>(0);
-  const [balanceValue, setBalanceValue] = useState<number>(4.2);
+  const [balanceValue, setBalanceValue] = useState<number>(0);
   const [percentage, setPercentage] = useState<number>(0);
   const [btnConnected, setbtnConnected] = useState(false);
-  const [userData, setUserData] = useState<Array<FormatedUserData>>([]);
   const { token0, token1, fee } = useMemo(() => {
-    return tokenPair[coupleTradeCoins.origin || ""];
-  }, [coupleTradeCoins]);
+    return tokenPair[pairCrypto.origin || ""];
+  }, [pairCrypto]);
 
   const btnLabel = useMemo(() => (isLong ? LSBtn.LONG : LSBtn.SHORT), [isLong]);
 
@@ -80,22 +85,19 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
     }
   }, [address, provider, token0.address, token1.address]);
 
-
-  const { data : baseBalance } = useContractRead({
-    abi:testERC20.abi,
-    address:token0.address,
-    functionName:"balanceOf",
-    args:[address?address:ADDRESS_ZERO]
+  const { data: baseBalance } = useContractRead({
+    abi: testERC20.abi,
+    address: token0.address,
+    functionName: "balanceOf",
+    args: [address ? address : ADDRESS_ZERO],
   });
 
-
-  const { data : quoteBalance } = useContractRead({
-    abi:testERC20.abi,
-    address:token1.address,
-    functionName:"balanceOf",
-    args:[address?address:ADDRESS_ZERO]
+  const { data: quoteBalance } = useContractRead({
+    abi: testERC20.abi,
+    address: token1.address,
+    functionName: "balanceOf",
+    args: [address ? address : ADDRESS_ZERO],
   });
-
 
   const { config: configApprovalShortToken } = usePrepareContractWrite({
     address: token1.address,
@@ -147,7 +149,7 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
     args: [
       token0.address,
       token1.address,
-      amountToHex(longShortChanging.paying,token0.decimals),
+      amountToHex(longShortChanging.paying, token0.decimals),
       constants.MaxUint256,
       fee,
       new Decimal(percentage).mul(100).toHex(),
@@ -167,6 +169,8 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
     onSuccess() {
       console.log("Long success");
       // getData();
+      //update bottom table
+      fetchLongShortData();
     },
   });
 
@@ -177,7 +181,7 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
     args: [
       token1.address,
       token0.address,
-      amountToHex(longShortChanging.paying,token1.decimals),
+      amountToHex(longShortChanging.paying, token1.decimals),
       constants.MaxUint256,
       fee,
       new Decimal(percentage).mul(100).toHex(),
@@ -214,13 +218,10 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
   const handleChangeSlider = (value: number) => {
     setPercentage(value);
   };
-  const handleChangeAmount = useCallback(
-    (e: any) => {
-      const eAmount = e.target.value;
-      setAmount(eAmount);
-    },
-    [percentage],
-  );
+  const handleChangeAmount = useCallback((e: any) => {
+    const eAmount = e.target.value;
+    setAmount(eAmount);
+  }, []);
 
   const handleChangePaying = useCallback(
     (e: any) => {
@@ -302,24 +303,24 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
 
             <div className="flex justify-between mt-2.5 font-normal text-sm">
               <input
-                className="bg-transparent outline-none"
+                className="bg-transparent outline-none w-full"
                 onChange={handleChangeAmount}
                 value={amountValue}
               />
-              <span>{coupleTradeCoins?.base}</span>
+              <span>{pairCrypto?.base}</span>
             </div>
           </div>
 
           <div className="rounded-[10px] bg-flaex-border bg-opacity-5 py-2.5 px-4 mt-1">
             <div className="flex justify-between text-[12px] font-light">
               <span>Paying</span>
-              <span>{coupleTradeCoins?.base}</span>
+              <span>{pairCrypto?.base}</span>
             </div>
 
             <div className="flex justify-between mt-2.5 font-normal text-sm">
               {/* <span>{longShortChanging.paying}</span> */}
               <input
-                className="bg-transparent outline-none"
+                className="bg-transparent outline-none w-full"
                 onChange={handleChangePaying}
                 value={longShortChanging.paying}
                 max={1000}
@@ -329,7 +330,20 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
                 className="cursor-pointer whitespace-nowrap"
                 onClick={() => _onSetBalance(balanceValue)}
               >
-                Balance: {isLong?BigNumberToReadableAmount(baseBalance?baseBalance as BigNumber:BigNumber.from(0),token0.decimals):BigNumberToReadableAmount(quoteBalance?quoteBalance as BigNumber:BigNumber.from(0),token1.decimals)}
+                Balance:{" "}
+                {isLong
+                  ? BigNumberToReadableAmount(
+                      baseBalance
+                        ? (baseBalance as BigNumber)
+                        : BigNumber.from(0),
+                      token0.decimals,
+                    )
+                  : BigNumberToReadableAmount(
+                      quoteBalance
+                        ? (quoteBalance as BigNumber)
+                        : BigNumber.from(0),
+                      token1.decimals,
+                    )}
               </span>
             </div>
           </div>
@@ -338,9 +352,7 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
               <p className="text-xs font-light italic">Flash Swap:</p>
               <p className="text-sm font-semibold whitespace-nowrap ">{`${
                 longShortChanging?.flashSwap
-              } ${
-                isLong ? coupleTradeCoins?.base : coupleTradeCoins?.quote
-              }`}</p>
+              } ${isLong ? pairCrypto?.base : pairCrypto?.quote}`}</p>
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">
@@ -348,9 +360,7 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
               </p>
               <p className="text-sm font-semibold whitespace-nowrap">{`${
                 longShortChanging?.borrowingToRepayFlash
-              } ${
-                isLong ? coupleTradeCoins?.quote : coupleTradeCoins.base
-              }`}</p>
+              } ${isLong ? pairCrypto?.quote : pairCrypto.base}`}</p>
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Entry Price:</p>
@@ -368,9 +378,7 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
               <p className="text-xs font-light italic">Commission Fee:</p>
               <p className="text-sm font-semibold whitespace-nowrap">{`${
                 longShortChanging?.commissionFee
-              } ${
-                isLong ? coupleTradeCoins?.quote : coupleTradeCoins?.base
-              }`}</p>
+              } ${isLong ? pairCrypto?.quote : pairCrypto?.base}`}</p>
             </div>
           </div>
           <div className="flex-1 flex flex-col justify-end">
@@ -424,7 +432,7 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
                           >
                             {!isLongLoading &&
                               !isLongSuccess &&
-                              `${btnLabel} ${coupleTradeCoins?.origin}`}
+                              `${btnLabel} ${pairCrypto?.origin}`}
                             {isLongLoading && `Waiting for signing`}
                             {isLongSuccess && `Waiting for network`}
                           </BaseButton>
@@ -438,7 +446,7 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
                           >
                             {!isShortLoading &&
                               !isShortSuccess &&
-                              `${btnLabel} ${coupleTradeCoins?.origin}`}
+                              `${btnLabel} ${pairCrypto?.origin}`}
                             {isShortLoading && `Waiting for signing`}
                             {isShortSuccess && `Waiting for network`}
                           </BaseButton>

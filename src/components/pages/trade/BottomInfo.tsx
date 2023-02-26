@@ -1,11 +1,42 @@
-import React from "react";
-import type { FormatedUserData } from "util/types";
+import { ApolloClient, gql, InMemoryCache } from "@apollo/client";
+import { IBottomProps, ILongShortData } from "constants/interface";
+import { useContextTrade } from "context/TradeContext";
+import Decimal from "decimal.js";
+import { BigNumber } from "ethers";
+import { useLongShortData } from "hooks/useLongShortData";
+// import { useLongShortData } from "hooks/useLongShortData";
+import useQuoter from "hooks/useQuote";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { tokenPair } from "util/constants";
+import { parseAmount } from "util/convertValue";
 import HistoryTable from "./HistoryTable";
 
-const BottomInfo =({ data}: { data:Array<FormatedUserData> }) => {
+const API = "https://api.thegraph.com/subgraphs/name/dungcui/flaex";
+
+const orderQueryFunc = (token0Address: string, token1Address: string) => `
+query MyQuery {
+  orders(first: 10, where: {trader: "0xcf9f977eBa70E819EAf6eD5eE8E2EF6860c0D646", baseToken_in: ["${token0Address}","${token1Address}"], quoteToken_in: ["${token0Address}","${token1Address}"]}) {
+    marginLevel
+    quoteToken
+    quoteTokenAmount
+    trader
+    baseTokenAmount
+    baseToken
+    baseMarginTokenAmount
+    id
+  }
+}
+`;
+
+const BottomInfo = () => {
+  // const tradeContext = useContextTrade();
+  // const [tableData, setTableData] = useState<Array<ILongShortData>>([]);
+
+  const { longShortData: tableData } = useLongShortData();
+
   return (
     <div className="mt-[20px] overflow-auto	">
-      <HistoryTable titleRow={titleHistoryRow} data={mockData} />
+      <HistoryTable titleRow={titleHistoryRow} data={tableData} />
     </div>
   );
 };
@@ -20,8 +51,8 @@ const titleHistoryRow = [
         <div
           className={`${
             data.direction.toLowerCase() === "long"
-              ? "text-flaex-green"
-              : "text-flaex-red"
+              ? "text-flaex-green capitalize"
+              : "text-flaex-red  capitalize"
           }`}
         >
           {data.direction}
@@ -30,9 +61,19 @@ const titleHistoryRow = [
     },
     classNameCustom: "text-left",
   },
-  { title: "Leverage", field: "leverage" },
-  { title: "Collateral", field: "collateral" },
-  { title: "Debt", field: "debt" },
+  { title: "Leverage", field: "marginLevel" },
+  {
+    title: "Collateral",
+    field: (data: any) => {
+      return (
+        <div className="whitespace-nowrap">{`${data.baseTokenAmount} ${
+          data.direction.toLowerCase() === "long" ? "ETH" : "DAI"
+        }`}</div>
+      );
+    },
+  },
+  // { title: "Collateral", field: "baseTokenAmount" },
+  { title: "Debt", field: "quoteTokenAmount" },
   { title: "Entry Price", field: "entryPrice" },
   { title: "Mark Price", field: "markPrice" },
   { title: "Liquidation Price", field: "liquidPrice" },
@@ -46,7 +87,7 @@ const titleHistoryRow = [
             data.pnlPercent > 0 ? "text-flaex-green" : "text-flaex-red"
           }`}
         >
-          {data.pnlPercent}%
+          {`${data.pnlPercent} %`}
         </div>
       );
     },
@@ -59,65 +100,3 @@ const titleHistoryRow = [
   //   },
   // },
 ];
-
-const mockData = [
-  {
-    direction: "Long",
-    leverage: "500%",
-    collateral: "12 ETH",
-    debt: "8000 USDC",
-    entryPrice: 1100,
-    markPrice: 1227.1,
-    liquidPrice: 990.7,
-    marginRatio: 1.6,
-    pnlPercent: 150,
-  },
-  {
-    direction: "Short",
-    leverage: "400%",
-    collateral: "12000 USDC",
-    debt: "4 ETH",
-    entryPrice: 1321.6,
-    markPrice: 1227.1,
-    liquidPrice: 1406.8,
-    marginRatio: 1.23,
-    pnlPercent: -67,
-  },
-];
-
-// const mockData = [
-//   {
-//     direction: "Long",
-//     leverage: 500,
-//     collateral: {
-//       value: 12,
-//       unit: "ETH",
-//     },
-//     debt: {
-//       value: 8000,
-//       unit: "USDC",
-//     },
-//     entryPrice: 1100,
-//     markPrice: 1227.1,
-//     liquidPrice: 990.7,
-//     marginRatio: 1.6,
-//     pnlPercent: 150,
-//   },
-//   {
-//     direction: "Short",
-//     leverage: 400,
-//     collateral: {
-//       value: 12000,
-//       unit: "USDC",
-//     },
-//     debt: {
-//       value: 4,
-//       unit: "ETH",
-//     },
-//     entryPrice: 1321.6,
-//     markPrice: 1227.1,
-//     liquidPrice: 1406.8,
-//     marginRatio: 1.23,
-//     pnlPercent: -67,
-//   },
-// ];

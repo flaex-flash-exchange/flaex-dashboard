@@ -1,7 +1,7 @@
 import { Token } from "@uniswap/sdk-core";
-import { CoupleCoin } from "constants/typeData";
+import { PairCrypto } from "constants/typeData";
 
-export const mockData: CoupleCoin[] = [
+export const mockData: PairCrypto[] = [
   { firstCoin: "ETH", secondCoin: "USDC" },
   { firstCoin: "BTC", secondCoin: "USDC" },
   { firstCoin: "BTC", secondCoin: "ETH" },

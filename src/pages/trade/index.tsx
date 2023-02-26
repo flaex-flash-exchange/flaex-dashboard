@@ -2,74 +2,12 @@ import BottomInfo from "components/pages/trade/BottomInfo";
 import Mainbar from "components/pages/trade/Mainbar";
 import Topbar from "components/pages/trade/Topbar";
 import TradingViewWidget from "components/pages/trade/TradingViewWidget";
-import { contractAddress } from "constants/contractAddress";
-import { TradeContextProvider, useContextTrade } from "context/TradeContext";
-import { flaexMain } from "contracts";
-import { Contract } from "ethers";
+import { TradeContextProvider } from "context/TradeContext";
 import type { NextPage } from "next";
-import { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
-import { BigNumberToReadableAmount } from "util/commons";
-import { tokenPair } from "util/constants";
-import { UserData, FormatedUserData } from "util/types";
-import { useAccount, useBlockNumber, useProvider } from "wagmi";
-import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
-const API = "https://api.thegraph.com/subgraphs/name/dungcui/flaex";
+import { useBlockNumber } from "wagmi";
+
 const Index: NextPage = () => {
-  const {address} = useAccount();
-  const tradeContext = useContextTrade();
-  const [ data, setData ] = useState<Array<any>>();
-  const { token0, token1, fee } = useMemo(() => {
-    if(!tradeContext){
-      return tokenPair["wETH/DAI"];
-    } else {
-      return tokenPair[tradeContext?.coupleTradeCoins?.origin || ""];
-    }
-  }, [tradeContext]);
-
-  const orderQuery = `
-    query MyQuery {
-      orders(first: 10, where: {trader: "${address}", baseToken_in: ["${token0.address}","${token1.address}"], quoteToken_in: ["${token0.address}","${token1.address}"]}) {
-        marginLevel
-        quoteToken
-        quoteTokenAmount
-        trader
-        baseTokenAmount
-        baseToken
-        baseMarginTokenAmount
-        id
-      }
-    }
-  `;
-
-
-  const fetchLongShortData =  useCallback(async ()=>{
-    const client = new ApolloClient({
-      uri: API,
-      cache: new InMemoryCache(),
-    });
-    
-    client
-      .query({
-        query: gql(orderQuery),
-      })
-      .then((data:any) => {
-        data.data.map(d=>{
-          return FormatedUserData(
-            
-          )
-        })
-        // setData(data);
-      })
-      .catch((err) => {
-        console.log('Error fetching data: ', err);
-      });
-  },[]);
-
-  useEffect(()=>{
-    fetchLongShortData();
-  },[fetchLongShortData]);
-  
   return (
     <>
       <TradeContextProvider>
@@ -87,10 +25,10 @@ const Index: NextPage = () => {
             </div>
           </div>
           <div className="col-span-5 lg:col-span-2 xl:col-span-2 2xl:col-span-2 h-full">
-            <Mainbar  />
+            <Mainbar />
           </div>
         </div>
-        <BottomInfo data={data} />
+        <BottomInfo />
         <BlockNumberView />
       </TradeContextProvider>
     </>

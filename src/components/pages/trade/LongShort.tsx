@@ -142,7 +142,7 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
     },
   });
 
-  const { config: configLong } = usePrepareContractWrite({
+  const { config: configLong, error } = usePrepareContractWrite({
     address: contractAddress.FlaexMain as `0x${string}`,
     abi: flaexMain.abi,
     functionName: "openExactOutput",
@@ -156,6 +156,8 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
     ],
     enabled: Boolean(new Decimal(longShortChanging.paying).greaterThan(0)),
   });
+
+  console.log("error",error);
   const {
     data: longData,
     isLoading: isLongLoading,

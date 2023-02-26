@@ -1,33 +1,33 @@
-import { TCoupleCoin } from "constants/interface";
+import { TPairCrypto } from "constants/interface";
 import React, { createContext, useContext, useState } from "react";
 
 interface ITradeContext {
-  coupleTradeCoins: TCoupleCoin;
+  pairCrypto: TPairCrypto;
   isShowLong: boolean | undefined;
-  repayClodeData: any | undefined;
+  repayCloseData: any | undefined;
   setIsShowLong: (item: any) => void;
-  setRepayClodeData: (item: any) => void;
-  setCoupleTradeCoins: (item: any) => void;
+  setRepayCloseData: (item: any) => void;
+  setPairCrypto: (item: any) => void;
 }
 export const TradeContext = createContext<ITradeContext | null>(null);
 export const TradeContextProvider = ({ children }: any) => {
   const [isShowLong, setIsShowLong] = useState<boolean>(true);
-  const [coupleTradeCoins, setCoupleTradeCoins] = useState<TCoupleCoin>({
+  const [pairCrypto, setPairCrypto] = useState<TPairCrypto>({
     base: "wETH",
     quote: "DAI",
     origin: "wETH/DAI",
   });
-  const [repayClodeData, setRepayClodeData] = useState<any>(null);
+  const [repayCloseData, setRepayCloseData] = useState<any>();
 
   return (
     <TradeContext.Provider
       value={{
         isShowLong,
         setIsShowLong,
-        repayClodeData,
-        coupleTradeCoins,
-        setCoupleTradeCoins,
-        setRepayClodeData,
+        repayCloseData,
+        pairCrypto,
+        setPairCrypto,
+        setRepayCloseData,
       }}
     >
       {children}

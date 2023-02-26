@@ -1,4 +1,4 @@
-import { CoupleCoin } from "constants/typeData";
+import { PairCrypto } from "constants/typeData";
 import { useOutSideClick } from "hooks/useOutSideClick";
 import React, { useRef, useState } from "react";
 import { FaAngleDown, FaSearch } from "react-icons/fa";
@@ -8,9 +8,9 @@ const DropdownCoin = ({
   data,
 }: {
   isSearch?: boolean;
-  data: CoupleCoin[];
+  data: PairCrypto[];
 }) => {
-  const [selected, setSelected] = useState<CoupleCoin>({
+  const [selected, setSelected] = useState<PairCrypto>({
     firstCoin: "ETH",
     secondCoin: "USDC",
   });

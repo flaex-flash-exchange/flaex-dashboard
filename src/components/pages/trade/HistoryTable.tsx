@@ -1,8 +1,9 @@
+import { ILongShortData } from "constants/interface";
 import { useContextTrade } from "context/TradeContext";
 import { useCallback, useState } from "react";
 import { twMerge } from "tailwind-merge";
 type TableCustom = {
-  data: any;
+  data: Array<ILongShortData>;
   titleRow: any;
 };
 const styleTitleColDefault =
@@ -13,7 +14,7 @@ const HistoryTable = ({ data, titleRow }: TableCustom): JSX.Element => {
   const {
     setIsShowLong,
     isShowLong = false,
-    setRepayClodeData,
+    setRepayCloseData,
   } = useContextTrade();
   const [isActiveRow, setIsActiveRow] = useState(2);
 
@@ -21,9 +22,9 @@ const HistoryTable = ({ data, titleRow }: TableCustom): JSX.Element => {
     (index: number, data: any) => {
       setIsActiveRow(index);
       setIsShowLong(false);
-      setRepayClodeData(data);
+      setRepayCloseData(data);
     },
-    [setIsShowLong, setRepayClodeData],
+    [setIsShowLong, setRepayCloseData],
   );
 
   const _onActiveRow = (
@@ -57,8 +58,6 @@ const HistoryTable = ({ data, titleRow }: TableCustom): JSX.Element => {
 
       <tbody className="">
         {data.map((row: any, idx: number) => {
-          // console.log({ row });
-
           return (
             <tr
               key={idx}
@@ -74,8 +73,6 @@ const HistoryTable = ({ data, titleRow }: TableCustom): JSX.Element => {
                   styleColDefault,
                   col.classNameCustom || "",
                 );
-                // console.log("{ col }", typeof col.field);
-
                 return (
                   <td className={styleCol} key={idx}>
                     {typeof col.field === "string" ? (

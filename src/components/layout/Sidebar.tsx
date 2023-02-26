@@ -5,7 +5,9 @@ import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import {
   FaAngleDoubleRight,
+  FaChartBar,
   FaChartPie,
+  FaCoins,
   FaDonate,
   FaExchangeAlt,
   FaHandHoldingUsd,
@@ -140,7 +142,7 @@ export default Sidebar;
 
 const menuItems = [
   { id: 1, label: "Dashboard", icon: <FaChartPie />, link: "/" },
-  { id: 2, label: "Trade", icon: <FaExchangeAlt />, link: "/trade" },
+  { id: 2, label: "Trade", icon: <FaChartBar />, link: "/trade" },
   {
     id: 3,
     label: "My positions",
@@ -158,5 +160,17 @@ const menuItems = [
     label: "Staking",
     icon: <FaDonate />,
     link: "/staking",
+  },
+  {
+    id: 6,
+    label: "Swap",
+    icon: <FaExchangeAlt />,
+    link: "/swap",
+  },
+  {
+    id: 7,
+    label: "Mint",
+    icon: <FaCoins />,
+    link: "/mint",
   },
 ];

@@ -11,7 +11,6 @@ import { tokenPair } from "util/constants";
 import { parseAmount } from "util/convertValue";
 import HistoryTable from "./HistoryTable";
 
-
 const BottomInfo = () => {
   // const tradeContext = useContextTrade();
   // const [tableData, setTableData] = useState<Array<ILongShortData>>([]);
@@ -90,12 +89,8 @@ const BottomInfo = () => {
         baseMarginTokenAmount: parseAmount(
           BigNumber.from(item?.baseMarginTokenAmount),
         ),
-        baseTokenAmount: parseAmount(
-          BigNumber.from(item?.baseTokenAmount),
-        ),
-        quoteTokenAmount: parseAmount(
-          BigNumber.from(item?.quoteTokenAmount),
-        ),
+        baseTokenAmount: parseAmount(BigNumber.from(item?.baseTokenAmount)),
+        quoteTokenAmount: parseAmount(BigNumber.from(item?.quoteTokenAmount)),
         direction: isLong ? "long" : "short",
         marginLevel: new Decimal(item?.marginLevel).div(100).toNumber(),
         entryPrice: entryPriceParser,

@@ -2,18 +2,15 @@ import BottomInfo from "components/pages/trade/BottomInfo";
 import Mainbar from "components/pages/trade/Mainbar";
 import Topbar from "components/pages/trade/Topbar";
 import TradingViewWidget from "components/pages/trade/TradingViewWidget";
-import { contractAddress } from "constants/contractAddress";
 import { TradeContextProvider, useContextTrade } from "context/TradeContext";
-import { flaexMain } from "contracts";
-import { Contract } from "ethers";
+
 import type { NextPage } from "next";
-import { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
-import { BigNumberToReadableAmount } from "util/commons";
-import { tokenPair } from "util/constants";
-import { UserData, FormatedUserData } from "util/types";
+
 import { useAccount, useBlockNumber, useProvider } from "wagmi";
 import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
+import { useMemo, useState } from "react";
+import { tokenPair } from "util/constants";
 const API = "https://api.thegraph.com/subgraphs/name/dungcui/flaex";
 const Index: NextPage = () => {
   const {address} = useAccount();
@@ -47,7 +44,7 @@ const Index: NextPage = () => {
             <Mainbar  />
           </div>
         </div>
-        <BottomInfo data={data} />
+        <BottomInfo />
         <BlockNumberView />
       </TradeContextProvider>
     </>

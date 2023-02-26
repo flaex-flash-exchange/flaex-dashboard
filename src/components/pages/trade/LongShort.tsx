@@ -10,7 +10,7 @@ import { QuoterReturn } from "hooks/useQuote";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { amountToHex, BigNumberToReadableAmount, _onLongCalculator, _onShortCalculator } from "util/commons";
 import { LSBtn, tokenPair } from "util/constants";
-import type { FormatedUserData, UserData } from "../../../util/types";
+import type { FormatedUserData, UserData } from "util/type";
 import {
   useAccount,
   useContractRead,
@@ -19,7 +19,7 @@ import {
   useProvider,
   useWaitForTransaction,
 } from "wagmi";
-import { flaexMain, testERC20 } from "../../../contracts";
+import { FlaexMain, TestERC20 } from "../../../contracts";
 
 const LongShort = ({ price }: { price: QuoterReturn }) => {
   const { address, isConnected } = useAccount();
@@ -58,8 +58,8 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
   );
 
   const fetchAllowance = useCallback(async () => {
-    const longToken = new Contract(token0.address, testERC20.abi, provider);
-    const shortToken = new Contract(token1.address, testERC20.abi, provider);
+    const longToken = new Contract(token0.address, TestERC20.abi, provider);
+    const shortToken = new Contract(token1.address, TestERC20.abi, provider);
     if (!longToken || !address || !shortToken) {
       return;
     } else {
@@ -82,7 +82,7 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
 
 
   const { data : baseBalance } = useContractRead({
-    abi:testERC20.abi,
+    abi:TestERC20.abi,
     address:token0.address,
     functionName:"balanceOf",
     args:[address?address:ADDRESS_ZERO]
@@ -90,7 +90,7 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
 
 
   const { data : quoteBalance } = useContractRead({
-    abi:testERC20.abi,
+    abi:TestERC20.abi,
     address:token1.address,
     functionName:"balanceOf",
     args:[address?address:ADDRESS_ZERO]
@@ -99,7 +99,7 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
 
   const { config: configApprovalShortToken } = usePrepareContractWrite({
     address: token1.address,
-    abi: testERC20.abi,
+    abi: TestERC20.abi,
     functionName: "approve",
     args: [contractAddress.FlaexMain, constants.MaxUint256],
   });
@@ -121,7 +121,7 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
 
   const { config: configApprovalLongToken } = usePrepareContractWrite({
     address: token0.address,
-    abi: testERC20.abi,
+    abi: TestERC20.abi,
     functionName: "approve",
     args: [contractAddress.FlaexMain, constants.MaxUint256],
   });
@@ -142,7 +142,7 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
 
   const { config: configLong } = usePrepareContractWrite({
     address: contractAddress.FlaexMain as `0x${string}`,
-    abi: flaexMain.abi,
+    abi: FlaexMain.abi,
     functionName: "openExactOutput",
     args: [
       token0.address,
@@ -172,7 +172,7 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
 
   const { config: configShort } = usePrepareContractWrite({
     address: contractAddress.FlaexMain as `0x${string}`,
-    abi: flaexMain.abi,
+    abi: FlaexMain.abi,
     functionName: "openExactOutput",
     args: [
       token1.address,

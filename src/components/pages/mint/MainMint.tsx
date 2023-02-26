@@ -2,7 +2,7 @@ import BaseButton from "components/common/BaseButton";
 import { LiteWagmiBtnConnect } from "components/layout/ConnectButton";
 import { contractAddress } from "constants/contractAddress";
 import { useContextTrade } from "context/TradeContext";
-import { testERC20 } from "contracts";
+import { TestERC20 } from "contracts";
 import { constants } from "ethers";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaCog } from "react-icons/fa";
@@ -37,7 +37,7 @@ const MainMint = () => {
       tokenSelected === 0
         ? (token0.address as `0x${string}`)
         : (token1.address as `0x${string}`),
-    abi: testERC20.abi,
+    abi: TestERC20.abi,
     functionName: "mint(uint256)",
     args: [amountToHex(amount ? amount : 0, token0.decimals)],
   });

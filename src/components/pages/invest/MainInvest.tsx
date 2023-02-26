@@ -1,8 +1,21 @@
+import { contractAddress } from "constants/contractAddress";
+import { FlaexInvest, FlaexVault } from "contracts";
 import React from "react";
+import { useContractRead } from "wagmi";
 import LeftContent from "./LeftContent";
 import RightContent from "./RightContent";
 
 const MainInvest = () => {
+
+  const {data: investorYield} = useContractRead({
+    abi: FlaexVault.abi,
+    address: contractAddress.FlaexVault as `0x${string}`,
+    functionName:"getActiveAssets",
+    args:[]
+  });
+  
+
+
   return (
     <div className="md:flex gap-8 mt-3.5 mb-6">
       <div className="flex-1">

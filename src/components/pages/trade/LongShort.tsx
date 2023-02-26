@@ -199,8 +199,9 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
     hash: dataShort?.hash,
     confirmations: 1,
     onSuccess() {
-      console.log("Long success");
+      console.log("Short success");
       // getData();
+      fetchLongShortData();
     },
   });
 

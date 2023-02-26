@@ -52,23 +52,41 @@ const CloseRepay = () => {
 
   const marginRatioAfter = useMemo(() => {
     if (!amountValue) return 0;
-    return repayCloseData?.isLong
-      ? new Decimal(repayCloseData?.baseTokenAmount)
-          .minus(amountValue)
-          .mul(new Decimal(repayCloseData?.markPrice))
-          .div(new Decimal(repayCloseData?.quoteTokenAmount))
-          .toNumber()
-      : new Decimal(repayCloseData?.baseTokenAmount)
-          .minus(amountValue)
-          .div(
-            new Decimal(
+    if (!isRepay) {
+      return repayCloseData?.isLong
+        ? new Decimal(repayCloseData?.baseTokenAmount)
+            .minus(amountValue)
+            .mul(new Decimal(repayCloseData?.markPrice))
+            .div(new Decimal(repayCloseData?.quoteTokenAmount))
+            .toFixed(4)
+        : new Decimal(repayCloseData?.baseTokenAmount)
+            .minus(amountValue)
+            .div(
               new Decimal(repayCloseData?.quoteTokenAmount).mul(
-                new Decimal(repayCloseData?.markPrice),
+                repayCloseData?.markPrice,
               ),
-            ),
-          )
-          .toNumber();
-  }, [amountValue, repayCloseData]);
+            )
+            .toFixed(4);
+    } else {
+      return repayCloseData?.isLong
+        ? new Decimal(repayCloseData?.quoteTokenAmount)
+            .minus(amountValue)
+            .div(
+              new Decimal(repayCloseData?.baseTokenAmount).mul(
+                repayCloseData?.markPrice,
+              ),
+            )
+            .toFixed(4)
+        : new Decimal(repayCloseData?.quoteTokenAmount)
+            .minus(amountValue)
+            .div(
+              new Decimal(repayCloseData.baseTokenAmount).div(
+                repayCloseData?.markPrice,
+              ),
+            )
+            .toFixed(4);
+    }
+  }, [amountValue, repayCloseData, isRepay]);
 
   const receive = useMemo(() => {
     return new Decimal(repayCloseData?.quoteTokenAmount)

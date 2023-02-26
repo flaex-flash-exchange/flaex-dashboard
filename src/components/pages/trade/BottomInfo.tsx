@@ -15,9 +15,6 @@ import HistoryTable from "./HistoryTable";
 const BottomInfo = () => {
   // const tradeContext = useContextTrade();
   // const [tableData, setTableData] = useState<Array<ILongShortData>>([]);
-
-  console.log("aaaaaa");
-
   const { fetchLongShortData, longShortData: tableData } = useLongShortData();
   const { pairCrypto } = useContextTrade();
 

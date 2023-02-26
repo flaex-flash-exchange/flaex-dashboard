@@ -60,7 +60,7 @@ export function CustomedRainbowConnect() {
               }
 
               return (
-                <div className="flex items-center px-2 font-semibold duration-200 rounded-xl py-1 text-[18px] lg:px-6 lg:py-2 border ease-in cursor-pointer border-text-flaex-border ">
+                <div className="flex items-center px-2 font-semibold duration-200 rounded-xl py-1 text-[14px] md:text-[18px] lg:px-6 lg:py-2 border ease-in cursor-pointer border-text-flaex-border ">
                   <div className="overflow-hidden truncate w-42">
                     <AntDropDown
                       className="test-motmi"
@@ -73,7 +73,9 @@ export function CustomedRainbowConnect() {
                               onClick={() => onCopyAddress(`${address}`)}
                             >
                               <AntImage src="/images/header/copy.svg" />
-                              <span>Copy Address</span>
+                              <span className="text-[12px] md:text-[14px]">
+                                Copy Address
+                              </span>
                             </DropboxItem>
                           ),
                         },
@@ -88,7 +90,9 @@ export function CustomedRainbowConnect() {
                               <a target="_blank">
                                 <DropboxItem>
                                   <AntImage src="/images/header/explorer.svg" />
-                                  <span>View on Explorer</span>
+                                  <span className="text-[12px] md:text-[14px]">
+                                    View on Explorer
+                                  </span>
                                 </DropboxItem>
                               </a>
                             </Link>
@@ -99,7 +103,9 @@ export function CustomedRainbowConnect() {
                           label: (
                             <DropboxItem onClick={() => disconnect()}>
                               <AntImage src="/images/header/disconnect.svg" />
-                              <span>Disconnect</span>
+                              <span className="text-[12px] md:text-[14px]">
+                                Disconnect
+                              </span>
                             </DropboxItem>
                           ),
                         },

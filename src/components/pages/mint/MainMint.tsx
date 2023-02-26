@@ -1,12 +1,9 @@
 import BaseButton from "components/common/BaseButton";
 import { LiteWagmiBtnConnect } from "components/layout/ConnectButton";
-import { contractAddress } from "constants/contractAddress";
-import { useContextTrade } from "context/TradeContext";
+import ModalCallback from "components/modal/ModalCallback";
+import { useModalContext } from "context/ModalContext";
 import { testERC20 } from "contracts";
-import { constants } from "ethers";
-import React, { ReactNode, useEffect, useMemo, useState } from "react";
-import { FaCog, FaExternalLinkAlt, FaRegCheckCircle } from "react-icons/fa";
-import { toast, ToastContent } from "react-toastify";
+import React, { useEffect, useMemo, useState } from "react";
 import { amountToHex } from "util/commons";
 import { tokenPair } from "util/constants";
 import {
@@ -16,15 +13,17 @@ import {
   useWaitForTransaction,
 } from "wagmi";
 import SelectToken from "./SelectToken";
+import { BounceLoader } from "react-spinners";
 
 const MainMint = () => {
   const { address, isConnected } = useAccount();
-  const [amount, setAmount] = useState();
+  const [amount, setAmount] = useState("");
   const [isMouted, setIsMouted] = useState(false);
 
   const [btnConnected, setbtnConnected] = useState(false);
 
   const [tokenSelected, setTokenSelected] = useState<number>(0);
+  const { pushModal } = useModalContext();
 
   const { token0, token1, fee } = tokenPair["wETH/DAI"];
 
@@ -41,7 +40,7 @@ const MainMint = () => {
     functionName: "mint(uint256)",
     args: [
       amountToHex(
-        amount ? amount : 0,
+        amount ? Number(amount) : 0,
         tokenSelected === 0 ? token0.decimals : token1.decimals,
       ),
     ],
@@ -58,42 +57,15 @@ const MainMint = () => {
     hash: mintData?.hash,
     confirmations: 1,
     onSuccess() {
-      const toastContent: any = () => {
-        return (
-          <div className="p-4 bg-flaex-bg-primary bg-border-flaex">
-            <div className="flex text-[16px] font-medium items-center gap-2 text-flaex-green">
-              Mint Confirmed
-              <span className="text-[20px]">
-                <FaRegCheckCircle />
-              </span>
-            </div>
-            <a
-              href={`https://goerli.etherscan.io/tx/${mintData?.hash}`}
-              className="cursor-pointer mt-1 flex items-center gap-2 text-[14px] hover:underline hover:decoration-solid duration-200"
-              target="blank"
-            >
-              View on etherscan
-              <span>
-                <FaExternalLinkAlt />
-              </span>
-            </a>
-          </div>
-        );
-      };
+      pushModal(
+        <ModalCallback
+          hash={mintData?.hash}
+          content={`Succesfully Mint
+      ${amount} ${tokenSelected === 0 ? "WETH" : "DAI"} `}
+        />,
+      );
 
-      console.log(`https://goerli.etherscan.io/hash/${mintData?.hash}`);
-
-      toast.success(toastContent(), {
-        position: toast.POSITION.BOTTOM_CENTER,
-        autoClose: false,
-        icon: false,
-        closeOnClick: false,
-        style: {
-          background: "transparent",
-          color: "white",
-          textAlign: "center",
-        },
-      });
+      setAmount("");
     },
   });
 
@@ -107,13 +79,16 @@ const MainMint = () => {
 
   const contentStatus = useMemo(() => {
     if (isMintConfirmed || (!isMintLoading && !isMintSuccess)) {
-      return `Mint ${tokenSelected === 0 ? "WETH" : "DAI"}`;
+      return {
+        content: `Mint ${tokenSelected === 0 ? "WETH" : "DAI"}`,
+        loading: false,
+      };
     }
     if (isMintLoading) {
-      return `Waiting for signing`;
+      return { content: `Waiting for signing`, loading: true };
     }
     if (isMintSuccess) {
-      return `Waiting for network`;
+      return { content: `Waiting for network`, loading: true };
     }
   }, [isMintConfirmed, isMintLoading, isMintSuccess, tokenSelected]);
 
@@ -129,7 +104,7 @@ const MainMint = () => {
       <div className="flex items-center w-full">
         <span className="font-semibold text-[20px]">Mint</span>
       </div>
-      <div className="bg-border-flaex p-6 mt-6 flex items-center justify-between">
+      <div className="focus:border-flaex-text bg-border-flaex p-6 mt-6 flex items-center justify-between">
         <input
           className="flex-1 w-full bg-transparent outline-none text-[20px] font-semibold"
           placeholder="0"
@@ -143,11 +118,18 @@ const MainMint = () => {
       </div>
       {btnConnected ? (
         <BaseButton
-          disabled={handleDisableButton}
+          disabled={!amount || handleDisableButton}
           onButtonClick={() => mintFunc?.()}
-          moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
+          moreClass="mt-3.5 py-2.5 text-base flex items-center justify-center gap-2 font-semibold rounded-[10px] bg-flaex-button w-full border-none"
         >
-          {contentStatus}
+          {contentStatus.loading ? (
+            <>
+              {contentStatus.content}{" "}
+              <BounceLoader size={24} color={"#fafafa"} />
+            </>
+          ) : (
+            contentStatus.content
+          )}
         </BaseButton>
       ) : (
         <LiteWagmiBtnConnect />

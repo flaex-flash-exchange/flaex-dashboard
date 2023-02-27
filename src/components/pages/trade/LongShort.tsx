@@ -448,8 +448,8 @@ const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLo
                             onButtonClick={() => longFunc?.()}
                             moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
                           >
-                            {(!isLongLoading &&
-                               !isLongSuccess ) || isLongConfirmed &&
+                            {((!isLongLoading &&
+                               !isLongSuccess ) || isLongConfirmed) &&
                               `${btnLabel} ${pairCrypto?.origin}`}
                             {isLongLoading && `Waiting for signing`}
                             {(isLongSuccess && !isLongConfirmed ) && `Waiting for network`}

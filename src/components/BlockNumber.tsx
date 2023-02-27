@@ -25,6 +25,7 @@ const WrappBlockNumber = styled.div`
   font-size: 14px;
   background-color: #151924;
   border-radius: 5px;
+  position: relative;
   &::after {
     content: "";
     width: 7px;

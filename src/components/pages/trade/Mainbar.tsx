@@ -1,3 +1,4 @@
+import { ILongShortData } from "constants/interface";
 import { useContextTrade } from "context/TradeContext";
 import useQuoter from "hooks/useQuote";
 import "rc-slider/assets/index.css";
@@ -6,22 +7,35 @@ import { tokenPair } from "util/constants";
 import CloseRepay from "./CloseRepay";
 import LongShort from "./LongShort";
 
-const Mainbar = (getData:any) => {
+const Mainbar = ({
+  fetchLongShortData,
+}: {
+  fetchLongShortData: () => void;
+}) => {
   const { isShowLong } = useContextTrade();
-
-  const { coupleTradeCoins } = useContextTrade();
+  const { pairCrypto } = useContextTrade();
 
   const { token0, token1, fee } = useMemo(() => {
-    return tokenPair[coupleTradeCoins.origin || ""];
-  }, [coupleTradeCoins]);
+    return tokenPair[pairCrypto.origin || ""];
+  }, [pairCrypto]);
 
   const quotedAmountOut = useQuoter(token1, token0, 1, 18, 18, fee);
 
   return (
     <>
-    <div className="rounded-[10px] border-[0.2px] h-full px-4 py-3">
-      {isShowLong ? <LongShort price={quotedAmountOut} /> : <CloseRepay />}
-    </div>
+      <div className="rounded-[10px] border-[0.2px] h-full px-4 py-3">
+        {isShowLong ? (
+          <LongShort
+            price={quotedAmountOut}
+            fetchLongShortData={fetchLongShortData}
+          />
+        ) : (
+          <CloseRepay             
+          price={quotedAmountOut}
+          fetchLongShortData={fetchLongShortData}
+          />
+        )}
+      </div>
     </>
   );
 };

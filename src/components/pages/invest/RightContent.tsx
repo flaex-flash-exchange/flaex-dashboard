@@ -35,7 +35,7 @@ const RightContent = () => {
     console.log("index",index);
     return {
       title:rewardTokens.get(address)?.symbol,
-      value:`${BigNumberToReadableAmount(userInvestYield[1][index],rewardTokens?.get(address)?.decimals)} (${BigNumberToNumberAmount(userInvestYield[1][index],rewardTokens?.get(address)?.decimals)*rewardTokens?.get(address)?.price} $)` ,
+      value:`${BigNumberToReadableAmount(userInvestYield[1][index],rewardTokens?.get(address)?.decimals)} (${BigNumberToNumberAmount(userInvestYield[1][index],rewardTokens?.get(address)?.decimals)} $)` ,
     };
 
   }):[];

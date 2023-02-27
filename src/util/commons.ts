@@ -28,14 +28,13 @@ export function formatNumber(num: number, decimalLength: number = 4) {
   return num.toFixed(decimalLength);
 }
 
-export function amountToHex(num: number | string, decimals: number) : string{
+export function amountToHex(num: number | string, decimals: number) {
   return new Decimal(num).mul(new Decimal(10).pow(decimals)).toHex();
 }
 
-export function amountToBigNumer(num: number | string, decimals: number) : BigNumber{
+export function amountToBigNumer(num: number | string, decimals: number) :BigNumber {
   return BigNumber.from(new Decimal(num).mul(new Decimal(10).pow(decimals)).toHex());
 }
-
 
 export function BigNumberToReadableAmount(num: BigNumber, decimals: number | undefined): string{
   return new Decimal(num?._hex || 0).div(new Decimal(10).pow(decimals || 0)).toFixed(4);
@@ -58,7 +57,7 @@ export function _onLongCalculator(
 ) {
   const onParseLeverage = leverage / 100;
   if (onParseLeverage >= 1) {
-    const onParseEntryPrice = Number(entryPrice) || 0;
+    const onParseEntryPrice = new Decimal(entryPrice).toNumber() || 0;
     const onPaying = amount / (1 + onParseLeverage) || 0;
     const flashSwap = onPaying * onParseLeverage || 0;
     const borrowingToRepayFlash = flashSwap * onParseEntryPrice * 1.0005 || 0;
@@ -93,7 +92,7 @@ export function _onShortCalculator(
 ) {
   const onParseLeverage = leverage / 100 || 0;
   if (onParseLeverage >= 1) {
-    const onParseEntryPrice = Number(entryPrice) || 0;
+    const onParseEntryPrice = new Decimal(entryPrice).toNumber() || 0;
     const paying = (amount * onParseEntryPrice) / (1 + onParseLeverage) || 0;
     const flashSwap = paying * onParseLeverage || 0;
     const borrowingToRepayFlash = (flashSwap / onParseEntryPrice) * 1.0005 || 0;

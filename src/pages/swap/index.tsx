@@ -3,6 +3,7 @@ import {
   SupportedLocale,
   SUPPORTED_LOCALES,
   SwapWidget,
+  Theme,
 } from "@uniswap/widgets";
 
 // ↓↓↓ Don't forget to import the widgets' fonts! ↓↓↓
@@ -13,10 +14,7 @@ import type { Web3Provider } from "@ethersproject/providers";
 
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { contractAddress } from "constants/contractAddress";
-import tokenList from "./tokenList";
-const TOKEN_LIST = "https://gateway.ipfs.io/ipns/tokens.uniswap.org";
-const UNI = "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984";
-const JSON_RPC_URL = "https://cloudflare-eth.com";
+import tokenList from "../../util/tokenList";
 
 const Index: NextPage = () => {
   const { openConnectModal } = useConnectModal();
@@ -28,10 +26,10 @@ const Index: NextPage = () => {
 
   const { data: signer } = useSigner();
 
-  const theme = {
+  const theme: Theme = {
     accent: "#BD905A",
     primary: "#fff",
-    secondary: "#fff",
+    secondary: "gray",
     interactive: "#BD905A",
     container: "transparent",
     module: "#2B3A55",
@@ -39,7 +37,6 @@ const Index: NextPage = () => {
     dialog: "#1e283b",
     fontFamily: "Source Serif Pro",
     borderRadius: 0.8,
-    opacity: 0,
   };
 
   return (

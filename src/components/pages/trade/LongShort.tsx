@@ -6,11 +6,16 @@ import { contractAddress } from "constants/contractAddress";
 import { useContextTrade } from "context/TradeContext";
 import Decimal from "decimal.js";
 import { BigNumber, constants, Contract } from "ethers";
+import { useLongShortData } from "hooks/useLongShortData";
 import { QuoterReturn } from "hooks/useQuote";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { amountToHex, BigNumberToReadableAmount, _onLongCalculator, _onShortCalculator } from "util/commons";
+import {
+  amountToHex,
+  BigNumberToReadableAmount,
+  _onLongCalculator,
+  _onShortCalculator,
+} from "util/commons";
 import { LSBtn, tokenPair } from "util/constants";
-import type { FormatedUserData, UserData } from "util/type";
 import {
   useAccount,
   useContractRead,
@@ -21,9 +26,9 @@ import {
 } from "wagmi";
 import { FlaexMain, TestERC20 } from "../../../contracts";
 
-const LongShort = ({ price }: { price: QuoterReturn }) => {
+const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLongShortData :()=>void}) => {
   const { address, isConnected } = useAccount();
-  const { coupleTradeCoins } = useContextTrade();
+  const { pairCrypto } = useContextTrade();
   const [isMouted, setIsMouted] = useState(false);
   const provider = useProvider();
   const [isLong, setIsLong] = useState<boolean>(true);
@@ -31,13 +36,13 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
   const [isApprovedShortToken, setIsApprovedShortToken] =
     useState<boolean>(true);
   const [amountValue, setAmount] = useState<number>(0);
-  const [balanceValue, setBalanceValue] = useState<number>(4.2);
+  const [balanceValue, setBalanceValue] = useState<number>(0);
   const [percentage, setPercentage] = useState<number>(0);
   const [btnConnected, setbtnConnected] = useState(false);
-  const [userData, setUserData] = useState<Array<FormatedUserData>>([]);
+  const [payingValue, setpayingValue] = useState(0);
   const { token0, token1, fee } = useMemo(() => {
-    return tokenPair[coupleTradeCoins.origin || ""];
-  }, [coupleTradeCoins]);
+    return tokenPair[pairCrypto.origin || ""];
+  }, [pairCrypto]);
 
   const btnLabel = useMemo(() => (isLong ? LSBtn.LONG : LSBtn.SHORT), [isLong]);
 
@@ -56,6 +61,9 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
           ),
     [percentage, amountValue, price, isLong],
   );
+  const payingUpdate = useMemo(() => {
+    return payingValue ? payingValue : longShortChanging.paying;
+  }, [longShortChanging, payingValue]);
 
   const fetchAllowance = useCallback(async () => {
     const longToken = new Contract(token0.address, TestERC20.abi, provider);
@@ -80,22 +88,19 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
     }
   }, [address, provider, token0.address, token1.address]);
 
-
-  const { data : baseBalance } = useContractRead({
-    abi:TestERC20.abi,
-    address:token0.address,
-    functionName:"balanceOf",
-    args:[address?address:ADDRESS_ZERO]
+  const { data: baseBalance } = useContractRead({
+    abi: TestERC20.abi,
+    address: token0.address,
+    functionName: "balanceOf",
+    args: [address ? address : ADDRESS_ZERO],
   });
 
-
-  const { data : quoteBalance } = useContractRead({
-    abi:TestERC20.abi,
-    address:token1.address,
-    functionName:"balanceOf",
-    args:[address?address:ADDRESS_ZERO]
+  const { data: quoteBalance } = useContractRead({
+    abi: TestERC20.abi,
+    address: token1.address,
+    functionName: "balanceOf",
+    args: [address ? address : ADDRESS_ZERO],
   });
-
 
   const { config: configApprovalShortToken } = usePrepareContractWrite({
     address: token1.address,
@@ -147,13 +152,14 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
     args: [
       token0.address,
       token1.address,
-      amountToHex(longShortChanging.paying,token0.decimals),
+      amountToHex(longShortChanging.paying, token0.decimals),
       constants.MaxUint256,
       fee,
       new Decimal(percentage).mul(100).toHex(),
     ],
     enabled: Boolean(new Decimal(longShortChanging.paying).greaterThan(0)),
   });
+
   const {
     data: longData,
     isLoading: isLongLoading,
@@ -167,6 +173,8 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
     onSuccess() {
       console.log("Long success");
       // getData();
+      //update bottom table
+      fetchLongShortData();
     },
   });
 
@@ -177,7 +185,7 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
     args: [
       token1.address,
       token0.address,
-      amountToHex(longShortChanging.paying,token1.decimals),
+      amountToHex(longShortChanging.paying, token1.decimals),
       constants.MaxUint256,
       fee,
       new Decimal(percentage).mul(100).toHex(),
@@ -195,8 +203,9 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
     hash: dataShort?.hash,
     confirmations: 1,
     onSuccess() {
-      console.log("Long success");
+      console.log("Short success");
       // getData();
+      fetchLongShortData();
     },
   });
 
@@ -212,25 +221,34 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
   };
 
   const handleChangeSlider = (value: number) => {
-    setPercentage(value);
+    if (!Number(value)) {
+      setPercentage(0);
+      return;
+    }
+    setPercentage(Number(value));
+    // setAmount(value * (1 + percentage / 100));
   };
-  const handleChangeAmount = useCallback(
-    (e: any) => {
-      const eAmount = e.target.value;
-      setAmount(eAmount);
-    },
-    [percentage],
-  );
+
+  const handleChangeAmount = useCallback((e: any) => {
+    const eAmount = e.target.value;
+    setAmount(eAmount);
+  }, []);
 
   const handleChangePaying = useCallback(
     (e: any) => {
       const ePaying = e.target.value;
+
+      setpayingValue(ePaying);
+      if (percentage === 0 || !percentage) {
+        setAmount(0);
+        return;
+      }
       setAmount(ePaying * (1 + percentage / 100));
     },
     [percentage],
   );
 
-  const _onSetBalance = useCallback((_balance: number) => {
+  const _onSetBalance = useCallback((_balance: any) => {
     setAmount(_balance);
   }, []);
 
@@ -242,6 +260,16 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
       setIsMouted(true);
     }
   }, [isConnected, fetchAllowance, isMouted]);
+
+  const _onBalance = isLong
+    ? BigNumberToReadableAmount(
+        baseBalance ? (baseBalance as BigNumber) : BigNumber.from(0),
+        token0.decimals,
+      )
+    : BigNumberToReadableAmount(
+        quoteBalance ? (quoteBalance as BigNumber) : BigNumber.from(0),
+        token1.decimals,
+      );
 
   return (
     <>
@@ -302,54 +330,54 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
 
             <div className="flex justify-between mt-2.5 font-normal text-sm">
               <input
-                className="bg-transparent outline-none"
+                className="bg-transparent outline-none w-full"
                 onChange={handleChangeAmount}
                 value={amountValue}
               />
-              <span>{coupleTradeCoins?.base}</span>
+              <span>{pairCrypto?.base}</span>
             </div>
           </div>
 
           <div className="rounded-[10px] bg-flaex-border bg-opacity-5 py-2.5 px-4 mt-1">
             <div className="flex justify-between text-[12px] font-light">
               <span>Paying</span>
-              <span>{coupleTradeCoins?.base}</span>
+              <span>{isLong ? pairCrypto?.base : pairCrypto?.quote}</span>
             </div>
 
             <div className="flex justify-between mt-2.5 font-normal text-sm">
               {/* <span>{longShortChanging.paying}</span> */}
               <input
-                className="bg-transparent outline-none"
+                className="bg-transparent outline-none w-full"
                 onChange={handleChangePaying}
-                value={longShortChanging.paying}
+                value={payingUpdate}
                 max={1000}
                 type="number"
               />
               <span
                 className="cursor-pointer whitespace-nowrap"
-                onClick={() => _onSetBalance(balanceValue)}
+                onClick={() => _onSetBalance(_onBalance)}
               >
-                Balance: {isLong?BigNumberToReadableAmount(baseBalance?baseBalance as BigNumber:BigNumber.from(0),token0.decimals):BigNumberToReadableAmount(quoteBalance?quoteBalance as BigNumber:BigNumber.from(0),token1.decimals)}
+                Balance: {_onBalance}
               </span>
             </div>
           </div>
           <div className="mt-5">
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Flash Swap:</p>
-              <p className="text-sm font-semibold whitespace-nowrap ">{`${
-                longShortChanging?.flashSwap
-              } ${
-                isLong ? coupleTradeCoins?.base : coupleTradeCoins?.quote
+              <p className="text-sm font-semibold whitespace-nowrap ">{`${Number(
+                longShortChanging?.flashSwap,
+              ).toFixed(4)} ${
+                isLong ? pairCrypto?.base : pairCrypto?.quote
               }`}</p>
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">
                 Borrowing to Repay Flash:
               </p>
-              <p className="text-sm font-semibold whitespace-nowrap">{`${
-                longShortChanging?.borrowingToRepayFlash
-              } ${
-                isLong ? coupleTradeCoins?.quote : coupleTradeCoins.base
+              <p className="text-sm font-semibold whitespace-nowrap">{`${Number(
+                longShortChanging?.borrowingToRepayFlash,
+              ).toFixed(4)} ${
+                isLong ? pairCrypto?.quote : pairCrypto.base
               }`}</p>
             </div>
             <div className="flex justify-between">
@@ -368,9 +396,7 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
               <p className="text-xs font-light italic">Commission Fee:</p>
               <p className="text-sm font-semibold whitespace-nowrap">{`${
                 longShortChanging?.commissionFee
-              } ${
-                isLong ? coupleTradeCoins?.quote : coupleTradeCoins?.base
-              }`}</p>
+              } ${isLong ? pairCrypto?.quote : pairCrypto?.base}`}</p>
             </div>
           </div>
           <div className="flex-1 flex flex-col justify-end">
@@ -417,30 +443,30 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
                         {isMouted && isLong && isApprovedShortToken ? (
                           <BaseButton
                             disabled={
-                              !longFunc || isLongLoading || isLongSuccess
+                              !longFunc || isLongLoading || (isLongSuccess && !isLongConfirmed)
                             }
                             onButtonClick={() => longFunc?.()}
                             moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
                           >
-                            {!isLongLoading &&
-                              !isLongSuccess &&
-                              `${btnLabel} ${coupleTradeCoins?.origin}`}
+                            {((!isLongLoading &&
+                               !isLongSuccess ) || isLongConfirmed) &&
+                              `${btnLabel} ${pairCrypto?.origin}`}
                             {isLongLoading && `Waiting for signing`}
-                            {isLongSuccess && `Waiting for network`}
+                            {(isLongSuccess && !isLongConfirmed ) && `Waiting for network`}
                           </BaseButton>
                         ) : (
                           <BaseButton
                             disabled={
-                              !shortFunc || isShortLoading || isShortSuccess
+                              !shortFunc || isShortLoading || (isShortSuccess && !isShortConfirmed)
                             }
                             onButtonClick={() => shortFunc?.()}
                             moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
                           >
-                            {!isShortLoading &&
-                              !isShortSuccess &&
-                              `${btnLabel} ${coupleTradeCoins?.origin}`}
+                            {((!isShortLoading &&
+                              !isShortSuccess) || isShortConfirmed ) &&
+                              `${btnLabel} ${pairCrypto?.origin}`}
                             {isShortLoading && `Waiting for signing`}
-                            {isShortSuccess && `Waiting for network`}
+                            {(isShortSuccess && !isShortConfirmed) && `Waiting for network`}
                           </BaseButton>
                         )}
                       </>

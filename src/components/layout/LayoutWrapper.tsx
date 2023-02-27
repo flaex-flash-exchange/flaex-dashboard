@@ -12,7 +12,7 @@ const LayoutWrapper = ({ children }: { children: any }): JSX.Element => {
   };
 
   return (
-    <div className="min-h-[900px] flex flex-col justify-between">
+    <div className="min-h-[900px] flex flex-col justify-between h-screen">
       <div className="flex flex-col flex-1 px-3 pt-5 md:px-4 md:py-8 lg:px-12 xl:px-12 2xl:px-24 h-full">
         <Header
           toggleCollapse={toggleCollapse}

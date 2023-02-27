@@ -4,8 +4,9 @@ import { contractAddress } from "constants/contractAddress";
 import { useContextTrade } from "context/TradeContext";
 import { TestERC20 } from "contracts";
 import { constants } from "ethers";
-import React, { useEffect, useMemo, useState } from "react";
-import { FaCog } from "react-icons/fa";
+import React, { ReactNode, useEffect, useMemo, useState } from "react";
+import { FaCog, FaExternalLinkAlt, FaRegCheckCircle } from "react-icons/fa";
+import { toast, ToastContent } from "react-toastify";
 import { amountToHex } from "util/commons";
 import { tokenPair } from "util/constants";
 import {
@@ -26,9 +27,8 @@ const MainMint = () => {
   const [tokenSelected, setTokenSelected] = useState<number>(0);
 
   const { token0, token1, fee } = tokenPair["wETH/DAI"];
-  const [contentButton, setContentButton] = useState<string>();
 
-  const onSelectToken = (value) => {
+  const onSelectToken = (value: any) => {
     setTokenSelected(value);
   };
 
@@ -39,7 +39,12 @@ const MainMint = () => {
         : (token1.address as `0x${string}`),
     abi: TestERC20.abi,
     functionName: "mint(uint256)",
-    args: [amountToHex(amount ? amount : 0, token0.decimals)],
+    args: [
+      amountToHex(
+        amount ? amount : 0,
+        tokenSelected === 0 ? token0.decimals : token1.decimals,
+      ),
+    ],
   });
 
   const {
@@ -53,14 +58,44 @@ const MainMint = () => {
     hash: mintData?.hash,
     confirmations: 1,
     onSuccess() {
-      console.log("Mint success");
-      // getData();
+      const toastContent: any = () => {
+        return (
+          <div className="p-4 bg-flaex-bg-primary bg-border-flaex">
+            <div className="flex text-[16px] font-medium items-center gap-2 text-flaex-green">
+              Mint Confirmed
+              <span className="text-[20px]">
+                <FaRegCheckCircle />
+              </span>
+            </div>
+            <a
+              href={`https://goerli.etherscan.io/tx/${mintData?.hash}`}
+              className="cursor-pointer mt-1 flex items-center gap-2 text-[14px] hover:underline hover:decoration-solid duration-200"
+              target="blank"
+            >
+              View on etherscan
+              <span>
+                <FaExternalLinkAlt />
+              </span>
+            </a>
+          </div>
+        );
+      };
+
+      console.log(`https://goerli.etherscan.io/hash/${mintData?.hash}`);
+
+      toast.success(toastContent(), {
+        position: toast.POSITION.BOTTOM_CENTER,
+        autoClose: false,
+        icon: false,
+        closeOnClick: false,
+        style: {
+          background: "transparent",
+          color: "white",
+          textAlign: "center",
+        },
+      });
     },
   });
-
-  console.log("isMintLoading", isMintLoading);
-  console.log("isMintSuccess", isMintSuccess);
-  console.log("isMintConfirmed", isMintConfirmed);
 
   useEffect(() => {
     if (isMouted) {
@@ -70,11 +105,7 @@ const MainMint = () => {
     }
   }, [isConnected, isMouted]);
 
-  const handleStatus = () => {
-    console.log(
-      "(!isLoading && !isMintSuccess)",
-      !isMintLoading && !isMintSuccess,
-    );
+  const contentStatus = useMemo(() => {
     if (isMintConfirmed || (!isMintLoading && !isMintSuccess)) {
       return `Mint ${tokenSelected === 0 ? "WETH" : "DAI"}`;
     }
@@ -84,18 +115,19 @@ const MainMint = () => {
     if (isMintSuccess) {
       return `Waiting for network`;
     }
-  };
-  useEffect(() => {
-    setContentButton(handleStatus());
-  }, [isMintLoading, isMintSuccess, isMintConfirmed]);
+  }, [isMintConfirmed, isMintLoading, isMintSuccess, tokenSelected]);
+
+  const handleDisableButton = useMemo(() => {
+    if (isMintLoading || (!isMintConfirmed && isMintSuccess)) {
+      return true;
+    }
+    return false;
+  }, [isMintConfirmed, isMintLoading, isMintSuccess]);
 
   return (
     <div className="md:w-2/5 bg-border-flaex p-6">
       <div className="flex items-center w-full">
         <span className="font-semibold text-[20px]">Mint</span>
-        {/* <button>
-          <FaCog size={20} />
-        </button> */}
       </div>
       <div className="bg-border-flaex p-6 mt-6 flex items-center justify-between">
         <input
@@ -111,11 +143,11 @@ const MainMint = () => {
       </div>
       {btnConnected ? (
         <BaseButton
-          disabled={!mintFunc || isMintLoading || isMintSuccess}
+          disabled={handleDisableButton}
           onButtonClick={() => mintFunc?.()}
           moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
         >
-          {contentButton}
+          {contentStatus}
         </BaseButton>
       ) : (
         <LiteWagmiBtnConnect />

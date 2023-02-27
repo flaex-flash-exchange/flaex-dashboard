@@ -1,5 +1,5 @@
 import AntSelect from "components/common/AntCommon/AntSelect";
-import { TCoupleCoin } from "constants/interface";
+import { TPairCrypto } from "constants/interface";
 import { useContextTrade } from "context/TradeContext";
 // import DropdownCoin from "components/common/DropdownCoin";
 import React from "react";
@@ -15,11 +15,11 @@ type ITopBar = {
 };
 
 const Topbar = ({ amount, currency, change, high, low }: ITopBar) => {
-  const { setCoupleTradeCoins } = useContextTrade();
+  const { setPairCrypto } = useContextTrade();
 
-  const onSelectCouple = (item: string) => {
+  const onSelectPairCrypto = (item: string) => {
     const [before, after] = splitStringOnSlash(item);
-    setCoupleTradeCoins((prev: TCoupleCoin) => ({
+    setPairCrypto((prev: TPairCrypto) => ({
       ...prev,
       base: before,
       quote: after,
@@ -36,7 +36,7 @@ const Topbar = ({ amount, currency, change, high, low }: ITopBar) => {
             fontWeight: 600,
           }}
           width={220}
-          _onhandleselection={onSelectCouple}
+          _onhandleselection={onSelectPairCrypto}
         />
       </div>
 

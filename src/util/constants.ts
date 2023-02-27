@@ -1,7 +1,7 @@
 import { Token } from "@uniswap/sdk-core";
-import { CoupleCoin } from "constants/typeData";
+import { PairCrypto } from "constants/typeData";
 
-export const mockData: CoupleCoin[] = [
+export const mockData: PairCrypto[] = [
   { firstCoin: "ETH", secondCoin: "USDC" },
   { firstCoin: "BTC", secondCoin: "USDC" },
   { firstCoin: "BTC", secondCoin: "ETH" },
@@ -12,6 +12,13 @@ export enum FeeAmount {
   MEDIUM = 3000,
   HIGH = 10000,
 }
+
+export enum Shippaple {
+  LOW = 0.005,
+  MEDIUM = 0.01,
+  HIGH = 0.1,
+}
+
 export enum S_LONG_SHORT_TYPE {
   LONG = "LONG",
   SHORT = "SHORT",

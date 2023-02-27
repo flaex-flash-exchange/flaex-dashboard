@@ -1,29 +1,25 @@
+import { BlockNumberView } from "components/BlockNumber";
 import BottomInfo from "components/pages/trade/BottomInfo";
 import Mainbar from "components/pages/trade/Mainbar";
 import Topbar from "components/pages/trade/Topbar";
 import TradingViewWidget from "components/pages/trade/TradingViewWidget";
-import { TradeContextProvider, useContextTrade } from "context/TradeContext";
-
+import { TradeContextProvider } from "context/TradeContext";
+import { useLongShortData } from "hooks/useLongShortData";
 import type { NextPage } from "next";
-import styled from "styled-components";
 
-import { useAccount, useBlockNumber, useProvider } from "wagmi";
-import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
-import { useMemo, useState } from "react";
-import { tokenPair } from "util/constants";
-const API = "https://api.thegraph.com/subgraphs/name/dungcui/flaex";
+import { useEffect } from "react";
+import styled from "styled-components";
+import { useBlockNumber } from "wagmi";
+
 const Index: NextPage = () => {
-  const {address} = useAccount();
-  const tradeContext = useContextTrade();
-  const [ data, setData ] = useState<Array<any>>();
-  const { token0, token1, fee } = useMemo(() => {
-    if(!tradeContext){
-      return tokenPair["wETH/DAI"];
-    } else {
-      return tokenPair[tradeContext?.coupleTradeCoins?.origin || ""];
-    }
-  }, [tradeContext]);
-  
+
+
+  const { fetchLongShortData , longShortData: tableData} = useLongShortData();
+  useEffect(() => {
+    fetchLongShortData();
+  }, [fetchLongShortData]);
+
+
   return (
     <>
       <TradeContextProvider>
@@ -41,10 +37,10 @@ const Index: NextPage = () => {
             </div>
           </div>
           <div className="col-span-5 lg:col-span-2 xl:col-span-2 2xl:col-span-2 h-full">
-            <Mainbar  />
+            <Mainbar fetchLongShortData = {fetchLongShortData}/>
           </div>
         </div>
-        <BottomInfo />
+        <BottomInfo tableData ={tableData}/>
         <BlockNumberView />
       </TradeContextProvider>
     </>
@@ -52,41 +48,3 @@ const Index: NextPage = () => {
 };
 
 export default Index;
-
-const BlockNumberView = () => {
-  const { data: blockNumber } = useBlockNumber({
-    watch: true,
-  });
-  return blockNumber ? (
-    <div style={{ position: "fixed", bottom: 20, right: 30 }}>
-      <WrappBlockNumber>
-        <span
-          style={{
-            padding: "8px 8px 8px 15px",
-          }}
-        >
-          {blockNumber}
-        </span>
-      </WrappBlockNumber>
-    </div>
-  ) : null;
-};
-
-const WrappBlockNumber = styled.div`
-  color: whitesmoke;
-  font-size: 14px;
-  background-color: #151924;
-  border-radius: 5px;
-  &::after {
-    content: "";
-    width: 7px;
-    height: 7px;
-    position: absolute;
-    top: 0;
-    left: 3px;
-    bottom: 0;
-    background-color: green;
-    border-radius: 100%;
-    margin: auto 0;
-  }
-`;

@@ -63,6 +63,7 @@ const MainMint = () => {
           content={`Succesfully Mint
       ${amount} ${tokenSelected === 0 ? "WETH" : "DAI"} `}
         />,
+        true,
       );
 
       setAmount("");

@@ -40,6 +40,7 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
   const [balanceValue, setBalanceValue] = useState<number>(0);
   const [percentage, setPercentage] = useState<number>(0);
   const [btnConnected, setbtnConnected] = useState(false);
+  const [payingValue, setpayingValue] = useState(0);
   const { token0, token1, fee } = useMemo(() => {
     return tokenPair[pairCrypto.origin || ""];
   }, [pairCrypto]);
@@ -61,6 +62,9 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
           ),
     [percentage, amountValue, price, isLong],
   );
+  const payingUpdate = useMemo(() => {
+    return payingValue ? payingValue : longShortChanging.paying;
+  }, [longShortChanging, payingValue]);
 
   const fetchAllowance = useCallback(async () => {
     const longToken = new Contract(token0.address, testERC20.abi, provider);
@@ -157,7 +161,7 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
     enabled: Boolean(new Decimal(longShortChanging.paying).greaterThan(0)),
   });
 
-  console.log("error",error);
+  console.log("error", error);
   const {
     data: longData,
     isLoading: isLongLoading,
@@ -219,8 +223,14 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
   };
 
   const handleChangeSlider = (value: number) => {
-    setPercentage(value);
+    if (!Number(value)) {
+      setPercentage(0);
+      return;
+    }
+    setPercentage(Number(value));
+    // setAmount(value * (1 + percentage / 100));
   };
+
   const handleChangeAmount = useCallback((e: any) => {
     const eAmount = e.target.value;
     setAmount(eAmount);
@@ -229,12 +239,18 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
   const handleChangePaying = useCallback(
     (e: any) => {
       const ePaying = e.target.value;
+
+      setpayingValue(ePaying);
+      if (percentage === 0 || !percentage) {
+        setAmount(0);
+        return;
+      }
       setAmount(ePaying * (1 + percentage / 100));
     },
     [percentage],
   );
 
-  const _onSetBalance = useCallback((_balance: number) => {
+  const _onSetBalance = useCallback((_balance: any) => {
     setAmount(_balance);
   }, []);
 
@@ -246,6 +262,16 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
       setIsMouted(true);
     }
   }, [isConnected, fetchAllowance, isMouted]);
+
+  const _onBalance = isLong
+    ? BigNumberToReadableAmount(
+        baseBalance ? (baseBalance as BigNumber) : BigNumber.from(0),
+        token0.decimals,
+      )
+    : BigNumberToReadableAmount(
+        quoteBalance ? (quoteBalance as BigNumber) : BigNumber.from(0),
+        token1.decimals,
+      );
 
   return (
     <>
@@ -317,7 +343,7 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
           <div className="rounded-[10px] bg-flaex-border bg-opacity-5 py-2.5 px-4 mt-1">
             <div className="flex justify-between text-[12px] font-light">
               <span>Paying</span>
-              <span>{pairCrypto?.base}</span>
+              <span>{isLong ? pairCrypto?.base : pairCrypto?.quote}</span>
             </div>
 
             <div className="flex justify-between mt-2.5 font-normal text-sm">
@@ -325,45 +351,36 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
               <input
                 className="bg-transparent outline-none w-full"
                 onChange={handleChangePaying}
-                value={longShortChanging.paying}
+                value={payingUpdate}
                 max={1000}
                 type="number"
               />
               <span
                 className="cursor-pointer whitespace-nowrap"
-                onClick={() => _onSetBalance(balanceValue)}
+                onClick={() => _onSetBalance(_onBalance)}
               >
-                Balance:{" "}
-                {isLong
-                  ? BigNumberToReadableAmount(
-                      baseBalance
-                        ? (baseBalance as BigNumber)
-                        : BigNumber.from(0),
-                      token0.decimals,
-                    )
-                  : BigNumberToReadableAmount(
-                      quoteBalance
-                        ? (quoteBalance as BigNumber)
-                        : BigNumber.from(0),
-                      token1.decimals,
-                    )}
+                Balance: {_onBalance}
               </span>
             </div>
           </div>
           <div className="mt-5">
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Flash Swap:</p>
-              <p className="text-sm font-semibold whitespace-nowrap ">{`${
-                longShortChanging?.flashSwap
-              } ${isLong ? pairCrypto?.base : pairCrypto?.quote}`}</p>
+              <p className="text-sm font-semibold whitespace-nowrap ">{`${Number(
+                longShortChanging?.flashSwap,
+              ).toFixed(4)} ${
+                isLong ? pairCrypto?.base : pairCrypto?.quote
+              }`}</p>
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">
                 Borrowing to Repay Flash:
               </p>
-              <p className="text-sm font-semibold whitespace-nowrap">{`${
-                longShortChanging?.borrowingToRepayFlash
-              } ${isLong ? pairCrypto?.quote : pairCrypto.base}`}</p>
+              <p className="text-sm font-semibold whitespace-nowrap">{`${Number(
+                longShortChanging?.borrowingToRepayFlash,
+              ).toFixed(4)} ${
+                isLong ? pairCrypto?.quote : pairCrypto.base
+              }`}</p>
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Entry Price:</p>

@@ -31,6 +31,11 @@ const CloseRepay = () => {
   };
 
   const handleChangeSlider = (value: number) => {
+    if (!value) {
+      setAmount(0);
+      setPercentage(0);
+      return;
+    }
     const amount = (Number(available) * value) / 100;
     setAmount(amount);
     setPercentage(value);
@@ -52,15 +57,27 @@ const CloseRepay = () => {
 
   const marginRatioAfter = useMemo(() => {
     if (!amountValue) return 0;
+    const amountValueParser = new Decimal(amountValue);
+    const debtMinusAmount = new Decimal(repayCloseData?.quoteTokenAmount).minus(
+      amountValueParser,
+    );
+
+    console.log(
+      { repayCloseData },
+      { amountValueParser },
+      { baseTokenAmount: repayCloseData?.baseTokenAmount },
+      { quoteTokenAmount: repayCloseData?.quoteTokenAmount },
+      { markPrice: repayCloseData?.markPrice },
+      { debtMinusAmount: debtMinusAmount.toNumber() },
+    );
     if (!isRepay) {
       return repayCloseData?.isLong
         ? new Decimal(repayCloseData?.baseTokenAmount)
-            .minus(amountValue)
             .mul(new Decimal(repayCloseData?.markPrice))
-            .div(new Decimal(repayCloseData?.quoteTokenAmount))
+            .div(debtMinusAmount)
             .toFixed(4)
         : new Decimal(repayCloseData?.baseTokenAmount)
-            .minus(amountValue)
+            .minus(amountValueParser)
             .div(
               new Decimal(repayCloseData?.quoteTokenAmount).mul(
                 repayCloseData?.markPrice,
@@ -69,19 +86,19 @@ const CloseRepay = () => {
             .toFixed(4);
     } else {
       return repayCloseData?.isLong
-        ? new Decimal(repayCloseData?.quoteTokenAmount)
-            .minus(amountValue)
+        ? new Decimal(repayCloseData?.baseTokenAmount)
+            .mul(repayCloseData?.markPrice)
             .div(
-              new Decimal(repayCloseData?.baseTokenAmount).mul(
-                repayCloseData?.markPrice,
+              new Decimal(repayCloseData?.quoteTokenAmount).minus(
+                amountValueParser,
               ),
             )
             .toFixed(4)
-        : new Decimal(repayCloseData?.quoteTokenAmount)
-            .minus(amountValue)
+        : new Decimal(repayCloseData?.baseTokenAmount)
+            .div(repayCloseData?.markPrice)
             .div(
-              new Decimal(repayCloseData.baseTokenAmount).div(
-                repayCloseData?.markPrice,
+              new Decimal(repayCloseData.quoteTokenAmount).minus(
+                amountValueParser,
               ),
             )
             .toFixed(4);
@@ -257,10 +274,13 @@ const CloseRepay = () => {
                 {repayCloseData?.marginRatio}
               </p>
             </div>
-            <div className="flex justify-between">
-              <p className="text-xs font-light italic">Margin Ratio After:</p>
-              <p className="text-sm font-semibold">{marginRatioAfter}</p>
-            </div>
+            {isRepay ? (
+              <div className="flex justify-between">
+                <p className="text-xs font-light italic">Margin Ratio After:</p>
+                <p className="text-sm font-semibold">{marginRatioAfter}</p>
+              </div>
+            ) : null}
+
             <div className="flex justify-between">
               <p className="text-xs font-light italic">PnL:</p>
               <p className="text-sm font-semibold">
@@ -334,7 +354,7 @@ const marks_100 = {
 
 // PNL = markPrice/entryPrice * leverage
 // marginRatio = colateral/debt (same unit)
-// marginRatioAfter = colateral/( - amount) (same unit)
+// marginRatioAfter = colateral/(debt - amount) (same unit)
 // wallet 6xx...4xx
 // block number at  bottom
 // debt;

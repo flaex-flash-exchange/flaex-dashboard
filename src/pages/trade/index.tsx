@@ -1,3 +1,4 @@
+import { BlockNumberView } from "components/BlockNumber";
 import BottomInfo from "components/pages/trade/BottomInfo";
 import Mainbar from "components/pages/trade/Mainbar";
 import Topbar from "components/pages/trade/Topbar";
@@ -5,12 +6,10 @@ import TradingViewWidget from "components/pages/trade/TradingViewWidget";
 import { TradeContextProvider } from "context/TradeContext";
 import { useLongShortData } from "hooks/useLongShortData";
 import type { NextPage } from "next";
-<<<<<<< HEAD
-=======
+
 import { useEffect } from "react";
 import styled from "styled-components";
 import { useBlockNumber } from "wagmi";
->>>>>>> eea698a ( add close, repay function)
 
 const Index: NextPage = () => {
 
@@ -41,12 +40,8 @@ const Index: NextPage = () => {
             <Mainbar fetchLongShortData = {fetchLongShortData}/>
           </div>
         </div>
-<<<<<<< HEAD
-        <BottomInfo />
-=======
         <BottomInfo tableData ={tableData}/>
         <BlockNumberView />
->>>>>>> eea698a ( add close, repay function)
       </TradeContextProvider>
     </>
   );

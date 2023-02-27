@@ -1,3 +1,4 @@
+import { BlockNumberView } from "components/BlockNumber";
 import AntImage from "components/common/AntCommon/AntImages";
 import Link from "next/link";
 
@@ -5,7 +6,7 @@ const Footer = (): JSX.Element => {
   return (
     <div className="bg-[#010C1A] py-5">
       <div className="container mx-auto">
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-4 gap-6 lg:gap-2 px-4 md:px-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-4 gap-6 lg:gap-2 px-4 md:px-2 relative">
           <div className="md:ml-0 lg:ml-16">
             <div className="flex items-center gap-1">
               <AntImage src="/images/logo.svg" width={45} height={45} />
@@ -37,6 +38,15 @@ const Footer = (): JSX.Element => {
               </div>
             );
           })}
+          <div
+            style={{
+              position: "absolute",
+              right: 25,
+              top: 30,
+            }}
+          >
+            <BlockNumberView />
+          </div>
         </div>
       </div>
     </div>

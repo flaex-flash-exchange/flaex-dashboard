@@ -1,4 +1,4 @@
-export type CoupleCoin = {
+export type PairCrypto = {
   firstCoin: string;
   secondCoin: string;
 };

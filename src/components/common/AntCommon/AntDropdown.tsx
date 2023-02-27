@@ -2,6 +2,7 @@ import type { MenuProps } from "antd";
 import { Dropdown } from "antd";
 import { FaAngleDown } from "react-icons/fa";
 import { DropdownProps } from "antd";
+import { splitString } from "util/commons";
 
 interface IDropDownProps extends DropdownProps {
   options: Array<any>;
@@ -22,7 +23,8 @@ const AntDropDown = (props: IDropDownProps) => {
       {...props}
     >
       <div style={{ display: "flex", alignItems: "center" }}>
-        <div className="overflow-hidden truncate w-32"> {title}</div>
+        <div> {splitString(title)}</div>
+        {/* <div className="overflow-hidden truncate w-32"> {title}</div> */}
         <FaAngleDown />
       </div>
     </Dropdown>

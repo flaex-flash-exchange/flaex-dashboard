@@ -2,25 +2,12 @@ import Dropdown from "components/common/Dropdown";
 import { useModalContext } from "context/ModalContext";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import {
-  FaAlignRight,
-  FaAngleDoubleRight,
-  FaTimes,
-  FaWallet,
-} from "react-icons/fa";
-import { useAccount } from "wagmi";
-import { Connectbutton } from "./ConnectButton";
+import { useState } from "react";
+import { FaAlignRight, FaAngleDoubleRight, FaTimes } from "react-icons/fa";
 import { CustomedRainbowConnect } from "./CustomedRainbowConnect";
 
 const Header = ({ toggleCollapse, onChangeToggle }: any): JSX.Element => {
-  const [isSetting, setIsSetting] = useState<boolean>(false);
-  const [mouted , setMouted] = useState(false);
-  const { isConnected } = useAccount();
-
-  useEffect(()=>{
-    setMouted(true);
-  },[]);
+  const [isSetting] = useState<boolean>(false);
 
   return (
     <div className="flex justify-between items-center">
@@ -53,37 +40,7 @@ const Header = ({ toggleCollapse, onChangeToggle }: any): JSX.Element => {
       </Link>
 
       <div className="flex gap-2 md:gap-6 items-center ">
-        {/* <Link href="/">
-          <button className="px-2 font-semibold duration-200 rounded-xl py-1 text-[16px] lg:px-5 lg:py-2 border mr-2 md:mr-5 ease-in cursor-pointer border-text-flaex-border">
-            Connect Wallet
-          </button>
-        </Link> */}
-
-        {/* <Dropdown
-          title="Connect Wallet"
-          data={mockDataWallet}
-          sizeIcon={22}
-          classItem="p-2 cursor-pointer hover:text-flaex-primary duration-200 text-sm font-semibold"
-          classTitle="px-2 font-semibold duration-200 rounded-xl py-1 text-[18px] lg:px-6 lg:py-2 border ease-in cursor-pointer border-text-flaex-border"
-        /> */}
-
-        {/* <button
-          className="px-2 font-semibold duration-200 rounded-xl py-1 text-[18px] lg:px-6 lg:py-2 border ease-in cursor-pointer border-text-flaex-border"
-        <button
-          className="px-2 hidden md:block font-semibold duration-200 rounded-lg md:rounded-xl py-1 text-[16px] md:text-[18px] lg:px-6 lg:py-2 border ease-in cursor-pointer border-text-flaex-border"
-          onClick={() => pushModal(<ModalConnectWallet />)}
-        >
-          Connect Wallet
-        </button> */}
-       <CustomedRainbowConnect/> 
-
-        {/* <button
-          className="md:hidden"
-          onClick={() => pushModal(<ModalConnectWallet />)}
-        >
-          <FaWallet />
-        </button> */}
-
+        <CustomedRainbowConnect />
         <Dropdown
           title={isSetting ? <FaTimes size={20} /> : <FaAlignRight size={20} />}
           data={mockDataSetting}
@@ -92,12 +49,7 @@ const Header = ({ toggleCollapse, onChangeToggle }: any): JSX.Element => {
           sizeIcon={18}
           bottomLength="-bottom-5"
         />
-        {/* <div className="block cursor-pointer z-10">
-          {isSetting ? <FaTimes size={20} /> : <FaAlignRight size={20} />}
-        </div> */}
       </div>
-
-      {/* Mobile Menu */}
     </div>
   );
 };

@@ -1,24 +1,58 @@
-import { TCoupleCoin } from "constants/interface";
+import { TPairCrypto } from "constants/interface";
 import React, { createContext, useContext, useState } from "react";
 
-export const TradeContext = createContext<any>({});
+interface ITradeContext {
+  pairCrypto: TPairCrypto;
+  isShowLong: boolean | undefined;
+  repayCloseData: any | undefined;
+  setIsShowLong: (item: any) => void;
+  setRepayCloseData: (item: any) => void;
+  setPairCrypto: (item: any) => void;
+}
+const initContext = {
+  pairCrypto:{
+    base: "wETH",
+    quote: "DAI",
+    origin: "wETH/DAI",
+  },
+  isShowLong: true,
+  repayCloseData: ()=>{
+    return;
+  },
+  setIsShowLong:()=>{
+    return;
+  },
+  setPairCrypto:()=>{
+    return;
+  },
+  setRepayCloseData:()=>{
+    return;
+  }
+};
+export const TradeContext = createContext<ITradeContext | null>(initContext);
 export const TradeContextProvider = ({ children }: any) => {
-  const [isShowLong, setIsShowLong] = useState<boolean | undefined>(undefined);
-  const [coupleTradeCoins, setCoupleTradeCoins] = useState<TCoupleCoin>({
-    base: "BTC",
-    quote: "USDC",
-    origin: "BTC/USDC",
+  const [isShowLong, setIsShowLong] = useState<boolean>(true);
+  const [pairCrypto, setPairCrypto] = useState<TPairCrypto>({
+    base: "wETH",
+    quote: "DAI",
+    origin: "wETH/DAI",
   });
-  const value = {
-    isShowLong,
-    setIsShowLong,
-    coupleTradeCoins,
-    setCoupleTradeCoins,
-  };
+  const [repayCloseData, setRepayCloseData] = useState<any>();
 
   return (
-    <TradeContext.Provider value={value}>{children}</TradeContext.Provider>
+    <TradeContext.Provider
+      value={{
+        isShowLong,
+        setIsShowLong,
+        repayCloseData,
+        pairCrypto,
+        setPairCrypto,
+        setRepayCloseData,
+      }}
+    >
+      {children}
+    </TradeContext.Provider>
   );
 };
 
-export const useContextTrade = () => useContext(TradeContext);
+export const useContextTrade = () => useContext(TradeContext) as ITradeContext;

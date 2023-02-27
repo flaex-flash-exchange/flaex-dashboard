@@ -1,13 +1,125 @@
-import React from "react";
+import { ApolloClient, gql, InMemoryCache } from "@apollo/client";
+import { validateAndParseAddress } from "@uniswap/sdk-core";
+import { IBottomProps, ILongShortData } from "constants/interface";
+import { useContextTrade } from "context/TradeContext";
+import Decimal from "decimal.js";
+import { BigNumber } from "ethers";
+import { useLongShortData } from "hooks/useLongShortData";
+// import { useLongShortData } from "hooks/useLongShortData";
+import useQuoter from "hooks/useQuote";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { tokenPair } from "util/constants";
+import { parseAmount } from "util/convertValue";
+import { Address } from "wagmi";
 import HistoryTable from "./HistoryTable";
 
-const BottomInfo = () => {
+const BottomInfo = ({tableData}:{tableData:Array<ILongShortData>}) => {
+  const { pairCrypto } = useContextTrade();
+
+  const { token0, token1, fee } = useMemo(() => {
+    return tokenPair[pairCrypto.origin || ""];
+  }, [pairCrypto]);
+
+  const quotedAmountOut = useQuoter(
+    token1,
+    token0,
+    1,
+    token0.decimals,
+    token1.decimals,
+    fee,
+  );
+
+
+
+  const longShortHistory = useMemo(() => {
+    return tableData?.map((item: ILongShortData, idx: number) => {
+      const isLong = validateAndParseAddress(item.baseToken) == validateAndParseAddress(token0.address);
+      const entryPriceParser = isLong
+        ? new Decimal(item?.quoteTokenAmount)
+            .div(
+              new Decimal(item?.baseMarginTokenAmount).mul(
+                new Decimal(item?.marginLevel).div(10000),
+              ),
+            )
+            .toNumber()
+        : new Decimal(item?.baseMarginTokenAmount)
+            .mul(new Decimal(item?.marginLevel).div(10000))
+            .div(new Decimal(item?.quoteTokenAmount))
+            .toNumber();
+
+      const markPriceParser = isLong
+        ? quotedAmountOut.priceExactInputToken0
+        : quotedAmountOut.priceExactOutputToken1;
+
+      const pnlPercent = isLong
+        ? new Decimal(markPriceParser)
+            .div(new Decimal(entryPriceParser))
+            .minus(1)
+            .mul(new Decimal(new Decimal(item?.marginLevel).div(100)))
+            .toFixed(2)
+        : new Decimal(entryPriceParser)
+            .div(new Decimal(markPriceParser))
+            .minus(1)
+            .mul(new Decimal(new Decimal(item?.marginLevel).div(100)))
+            .toFixed(2);
+
+      const liquidatePrice = isLong
+        ? new Decimal(1.1)
+            .mul(
+              new Decimal(item?.quoteTokenAmount).div(
+                new Decimal(item?.baseTokenAmount),
+              ),
+            )
+            .toFixed(4)
+        : new Decimal(1)
+            .div(
+              new Decimal(1.1).mul(
+                new Decimal(item?.quoteTokenAmount).div(
+                  new Decimal(item?.baseTokenAmount),
+                ),
+              ),
+            )
+            .toFixed(4);
+
+      return {
+        ...item,
+        baseMarginTokenAmount: parseAmount(
+          BigNumber.from(item?.baseMarginTokenAmount),
+        ),
+        baseTokenAmount: parseAmount(BigNumber.from(item?.baseTokenAmount)),
+        quoteTokenAmount: parseAmount(BigNumber.from(item?.quoteTokenAmount)),
+        direction: isLong ? "long" : "short",
+        marginLevel: new Decimal(item?.marginLevel).div(100).toNumber(),
+        entryPrice: entryPriceParser,
+        markPrice: markPriceParser,
+        liquidPrice: liquidatePrice,
+        marginRatio: isLong
+          ? new Decimal(item.baseTokenAmount)
+              .mul(new Decimal(markPriceParser))
+              .div(new Decimal(item?.quoteTokenAmount))
+              .toNumber()
+          : new Decimal(item.baseTokenAmount)
+              .div(
+                new Decimal(item?.quoteTokenAmount).mul(
+                  new Decimal(markPriceParser),
+                ),
+              )
+              .toNumber(),
+        pnlPercent,
+        isLong,
+      };
+    });
+  }, [quotedAmountOut.priceExactInputToken0, quotedAmountOut.priceExactOutputToken1, tableData, token0.address]);
+
+
   return (
     <div className="mt-[20px] overflow-auto	">
-      <HistoryTable titleRow={titleHistoryRow} data={mockData} />
+      <HistoryTable titleRow={titleHistoryRow} data={longShortHistory} />
     </div>
   );
 };
+
+
 
 export default BottomInfo;
 
@@ -19,8 +131,8 @@ const titleHistoryRow = [
         <div
           className={`${
             data.direction.toLowerCase() === "long"
-              ? "text-flaex-green"
-              : "text-flaex-red"
+              ? "text-flaex-green capitalize"
+              : "text-flaex-red  capitalize"
           }`}
         >
           {data.direction}
@@ -29,9 +141,19 @@ const titleHistoryRow = [
     },
     classNameCustom: "text-left",
   },
-  { title: "Leverage", field: "leverage" },
-  { title: "Collateral", field: "collateral" },
-  { title: "Debt", field: "debt" },
+  { title: "Leverage", field: "marginLevel" },
+  {
+    title: "Collateral",
+    field: (data: any) => {
+      return (
+        <div className="whitespace-nowrap">{`${data.baseTokenAmount} ${
+          data.direction.toLowerCase() === "long" ? "ETH" : "DAI"
+        }`}</div>
+      );
+    },
+  },
+  // { title: "Collateral", field: "baseTokenAmount" },
+  { title: "Debt", field: "quoteTokenAmount" },
   { title: "Entry Price", field: "entryPrice" },
   { title: "Mark Price", field: "markPrice" },
   { title: "Liquidation Price", field: "liquidPrice" },
@@ -45,7 +167,7 @@ const titleHistoryRow = [
             data.pnlPercent > 0 ? "text-flaex-green" : "text-flaex-red"
           }`}
         >
-          {data.pnlPercent}%
+          {`${data.pnlPercent} %`}
         </div>
       );
     },
@@ -57,29 +179,4 @@ const titleHistoryRow = [
   //     return <div className="flex justify-around gap-4"></div>;
   //   },
   // },
-];
-
-const mockData = [
-  {
-    direction: "Long",
-    leverage: "500%",
-    collateral: "12 ETH",
-    debt: "8000 USDC",
-    entryPrice: 1100,
-    markPrice: 1227.1,
-    liquidPrice: 990.7,
-    marginRatio: 1.6,
-    pnlPercent: 150,
-  },
-  {
-    direction: "Short",
-    leverage: "400%",
-    collateral: "12000 USDC",
-    debt: "4 ETH",
-    entryPrice: 1321.6,
-    markPrice: 1227.1,
-    liquidPrice: 1406.8,
-    marginRatio: 1.23,
-    pnlPercent: -67,
-  },
 ];

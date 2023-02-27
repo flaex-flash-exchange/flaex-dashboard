@@ -1,29 +1,213 @@
-import { useAccount } from "wagmi";
-import React, { useEffect, useMemo, useState } from "react";
+import { ADDRESS_ZERO } from "@uniswap/v3-sdk";
 import BaseButton from "components/common/BaseButton";
 import SliderCustom from "components/common/SliderCustom";
-import { ConnectWalletBtn } from "components/layout/ConnectButton";
+import { LiteWagmiBtnConnect } from "components/layout/ConnectButton";
+import { contractAddress } from "constants/contractAddress";
 import { useContextTrade } from "context/TradeContext";
+import Decimal from "decimal.js";
+import { BigNumber, constants, Contract } from "ethers";
+import { useLongShortData } from "hooks/useLongShortData";
+import { QuoterReturn } from "hooks/useQuote";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  amountToHex,
+  BigNumberToReadableAmount,
+  _onLongCalculator,
+  _onShortCalculator,
+} from "util/commons";
+import { LSBtn, tokenPair } from "util/constants";
+import {
+  useAccount,
+  useContractRead,
+  useContractWrite,
+  usePrepareContractWrite,
+  useProvider,
+  useWaitForTransaction,
+} from "wagmi";
+import { flaexMain, testERC20 } from "../../../contracts";
 
-type ILongShort = { data?: any };
-
-const LSBtn = {
-  LONG: "Long",
-  SHORT: "Short",
-};
-
-const LongShort = ({ data = mockData }: ILongShort) => {
-  const { isConnected } = useAccount();
-  const { coupleTradeCoins } = useContextTrade();
-
+const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLongShortData :()=>void}) => {
+  const { address, isConnected } = useAccount();
+  const { pairCrypto } = useContextTrade();
+  const [isMouted, setIsMouted] = useState(false);
+  const provider = useProvider();
   const [isLong, setIsLong] = useState<boolean>(true);
-  const [amountValue, setAmount] = useState<number>(10);
-  const [payingValue, setPayingValue] = useState<number>(2.941);
-  const [balanceValue, setBalanceValue] = useState<number>(4.2);
+  const [isApprovedLongToken, setIsApprovedLongToken] = useState<boolean>(true);
+  const [isApprovedShortToken, setIsApprovedShortToken] =
+    useState<boolean>(true);
+  const [amountValue, setAmount] = useState<number>(0);
+  const [balanceValue, setBalanceValue] = useState<number>(0);
   const [percentage, setPercentage] = useState<number>(0);
   const [btnConnected, setbtnConnected] = useState(false);
+  const [payingValue, setpayingValue] = useState(0);
+  const { token0, token1, fee } = useMemo(() => {
+    return tokenPair[pairCrypto.origin || ""];
+  }, [pairCrypto]);
 
   const btnLabel = useMemo(() => (isLong ? LSBtn.LONG : LSBtn.SHORT), [isLong]);
+
+  const longShortChanging = useMemo(
+    () =>
+      isLong
+        ? _onLongCalculator(
+            percentage,
+            amountValue,
+            price.priceExactOutputToken1,
+          )
+        : _onShortCalculator(
+            percentage,
+            amountValue,
+            price.priceExactInputToken0,
+          ),
+    [percentage, amountValue, price, isLong],
+  );
+  const payingUpdate = useMemo(() => {
+    return payingValue ? payingValue : longShortChanging.paying;
+  }, [longShortChanging, payingValue]);
+
+  const fetchAllowance = useCallback(async () => {
+    const longToken = new Contract(token0.address, testERC20.abi, provider);
+    const shortToken = new Contract(token1.address, testERC20.abi, provider);
+    if (!longToken || !address || !shortToken) {
+      return;
+    } else {
+      const allowanceLongToken = await longToken.allowance(
+        address,
+        contractAddress.FlaexMain,
+      );
+      const allowanceShortToken = await shortToken.allowance(
+        address,
+        contractAddress.FlaexMain,
+      );
+      if (new Decimal(allowanceLongToken._hex || 0).equals(0)) {
+        setIsApprovedLongToken(false);
+      }
+      if (new Decimal(allowanceShortToken._hex || 0).equals(0)) {
+        setIsApprovedShortToken(false);
+      }
+    }
+  }, [address, provider, token0.address, token1.address]);
+
+  const { data: baseBalance } = useContractRead({
+    abi: testERC20.abi,
+    address: token0.address,
+    functionName: "balanceOf",
+    args: [address ? address : ADDRESS_ZERO],
+  });
+
+  const { data: quoteBalance } = useContractRead({
+    abi: testERC20.abi,
+    address: token1.address,
+    functionName: "balanceOf",
+    args: [address ? address : ADDRESS_ZERO],
+  });
+
+  const { config: configApprovalShortToken } = usePrepareContractWrite({
+    address: token1.address,
+    abi: testERC20.abi,
+    functionName: "approve",
+    args: [contractAddress.FlaexMain, constants.MaxUint256],
+  });
+
+  const {
+    data: approvalShortTokenData,
+    isLoading: isApprovalShortLoading,
+    isSuccess: isApprovalShortSuccess,
+    write: approvalShortTokenFunc,
+  } = useContractWrite(configApprovalShortToken);
+
+  useWaitForTransaction({
+    hash: approvalShortTokenData?.hash,
+    confirmations: 1,
+    onSuccess() {
+      setIsApprovedShortToken(true);
+    },
+  });
+
+  const { config: configApprovalLongToken } = usePrepareContractWrite({
+    address: token0.address,
+    abi: testERC20.abi,
+    functionName: "approve",
+    args: [contractAddress.FlaexMain, constants.MaxUint256],
+  });
+  const {
+    data: approvalLongTokenData,
+    isLoading: isApprovalLongLoading,
+    isSuccess: isApprovalLongSuccess,
+    write: approvalLongTokenFunc,
+  } = useContractWrite(configApprovalLongToken);
+
+  useWaitForTransaction({
+    hash: approvalLongTokenData?.hash,
+    confirmations: 1,
+    onSuccess() {
+      setIsApprovedLongToken(true);
+    },
+  });
+
+  const { config: configLong } = usePrepareContractWrite({
+    address: contractAddress.FlaexMain as `0x${string}`,
+    abi: flaexMain.abi,
+    functionName: "openExactOutput",
+    args: [
+      token0.address,
+      token1.address,
+      amountToHex(longShortChanging.paying, token0.decimals),
+      constants.MaxUint256,
+      fee,
+      new Decimal(percentage).mul(100).toHex(),
+    ],
+    enabled: Boolean(new Decimal(longShortChanging.paying).greaterThan(0)),
+  });
+
+  const {
+    data: longData,
+    isLoading: isLongLoading,
+    isSuccess: isLongSuccess,
+    write: longFunc,
+  } = useContractWrite(configLong);
+
+  const { isSuccess: isLongConfirmed } = useWaitForTransaction({
+    hash: longData?.hash,
+    confirmations: 1,
+    onSuccess() {
+      console.log("Long success");
+      // getData();
+      //update bottom table
+      fetchLongShortData();
+    },
+  });
+
+  const { config: configShort } = usePrepareContractWrite({
+    address: contractAddress.FlaexMain as `0x${string}`,
+    abi: flaexMain.abi,
+    functionName: "openExactOutput",
+    args: [
+      token1.address,
+      token0.address,
+      amountToHex(longShortChanging.paying, token1.decimals),
+      constants.MaxUint256,
+      fee,
+      new Decimal(percentage).mul(100).toHex(),
+    ],
+    enabled: Boolean(new Decimal(longShortChanging.paying).greaterThan(0)),
+  });
+  const {
+    data: dataShort,
+    isLoading: isShortLoading,
+    isSuccess: isShortSuccess,
+    write: shortFunc,
+  } = useContractWrite(configShort);
+
+  const { isSuccess: isShortConfirmed } = useWaitForTransaction({
+    hash: dataShort?.hash,
+    confirmations: 1,
+    onSuccess() {
+      console.log("Short success");
+      // getData();
+      fetchLongShortData();
+    },
+  });
 
   const handleChangeLongShort = (clickedLong: boolean) => {
     if (clickedLong) {
@@ -32,147 +216,275 @@ const LongShort = ({ data = mockData }: ILongShort) => {
       setIsLong(false);
     }
     setAmount(0);
-    setPayingValue(0);
     setBalanceValue(0);
     setPercentage(0);
   };
 
   const handleChangeSlider = (value: number) => {
-    setPercentage(value);
+    if (!Number(value)) {
+      setPercentage(0);
+      return;
+    }
+    setPercentage(Number(value));
+    // setAmount(value * (1 + percentage / 100));
   };
 
-  const handleLongShort = (type: string) => {
-    switch (type) {
-      case LSBtn.LONG:
-        console.log("click", type);
-        break;
-      case LSBtn.SHORT:
-        console.log("click", type);
-        break;
-      default:
-        break;
-    }
-  };
+  const handleChangeAmount = useCallback((e: any) => {
+    const eAmount = e.target.value;
+    setAmount(eAmount);
+  }, []);
+
+  const handleChangePaying = useCallback(
+    (e: any) => {
+      const ePaying = e.target.value;
+
+      setpayingValue(ePaying);
+      if (percentage === 0 || !percentage) {
+        setAmount(0);
+        return;
+      }
+      setAmount(ePaying * (1 + percentage / 100));
+    },
+    [percentage],
+  );
+
+  const _onSetBalance = useCallback((_balance: any) => {
+    setAmount(_balance);
+  }, []);
 
   useEffect(() => {
-    setbtnConnected(isConnected);
-  }, [isConnected]);
+    if (isMouted) {
+      setbtnConnected(isConnected);
+      fetchAllowance();
+    } else {
+      setIsMouted(true);
+    }
+  }, [isConnected, fetchAllowance, isMouted]);
+
+  const _onBalance = isLong
+    ? BigNumberToReadableAmount(
+        baseBalance ? (baseBalance as BigNumber) : BigNumber.from(0),
+        token0.decimals,
+      )
+    : BigNumberToReadableAmount(
+        quoteBalance ? (quoteBalance as BigNumber) : BigNumber.from(0),
+        token1.decimals,
+      );
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex text-base font-semibold bg-flaex-border bg-opacity-5 rounded-[10px]">
-        <button
-          onClick={() => {
-            handleChangeLongShort(true);
-          }}
-          className={`flex-1 ${
-            isLong ? "bg-flaex-button" : ""
-          } text-base py-2.5 rounded-[10px]`}
-        >
-          {LSBtn.LONG}
-        </button>
+    <>
+      {isMouted && (
+        <div className="flex h-full flex-col">
+          <div className="flex text-base font-semibold bg-flaex-border bg-opacity-5 rounded-[10px]">
+            <button
+              onClick={() => {
+                handleChangeLongShort(true);
+              }}
+              className={`flex-1 ${
+                isLong ? "bg-flaex-button" : ""
+              } text-base py-2.5 rounded-[10px]`}
+            >
+              {LSBtn.LONG}
+            </button>
 
-        <button
-          onClick={() => {
-            handleChangeLongShort(false);
-          }}
-          className={`flex-1 ${
-            !isLong ? "bg-flaex-button" : ""
-          } text-base py-2.5 rounded-[10px]`}
-        >
-          {LSBtn.SHORT}
-        </button>
-      </div>
-
-      <div className="mt-[22px]">
-        <div className="text-sm font-semibold">Leverage</div>
-        <div className="flex justify-between rounded-[10px] bg-flaex-border bg-opacity-5 py-1 px-2 mt-2">
-          <input
-            className="bg-transparent outline-none"
-            onChange={(e: any) => handleChangeSlider(e.target.value)}
-            value={percentage}
-            max={1000}
-            type="number"
-          />
-          <div className="mr-2">%</div>
-        </div>
-
-        <div className="mt-8">
-          <SliderCustom
-            value={percentage}
-            onChangeValue={handleChangeSlider}
-            marks={marks}
-            max={1000}
-          />
-        </div>
-      </div>
-
-      <div className="rounded-[10px] bg-flaex-border bg-opacity-5 py-2.5 px-4 mt-12">
-        <div className="flex justify-between text-[12px] font-light">
-          <span>Amount</span>
-          <span>Collateral In</span>
-        </div>
-
-        <div className="flex justify-between mt-2.5 font-normal text-sm">
-          <input
-            className="bg-transparent outline-none"
-            onChange={(e: any) => setAmount(e.target.value)}
-            value={amountValue}
-          />
-          <span>{data.tokenName}</span>
-        </div>
-      </div>
-
-      <div className="rounded-[10px] bg-flaex-border bg-opacity-5 py-2.5 px-4 mt-1">
-        <div className="flex justify-between text-[12px] font-light">
-          <span>Paying</span>
-          <span>{data.tokenName}</span>
-        </div>
-
-        <div className="flex justify-between mt-2.5 font-normal text-sm">
-          <span>{payingValue}</span>
-          <span>Balance: {balanceValue}</span>
-        </div>
-      </div>
-      <div className="mt-5">
-        {data.descInfo.map((item: any, idx: any) => (
-          <div key={idx} className="flex justify-between">
-            <p className="text-xs font-light italic">{item.title}</p>
-            <p className="text-sm font-semibold">{item.value}</p>
+            <button
+              onClick={() => {
+                handleChangeLongShort(false);
+              }}
+              className={`flex-1 ${
+                !isLong ? "bg-flaex-button" : ""
+              } text-base py-2.5 rounded-[10px]`}
+            >
+              {LSBtn.SHORT}
+            </button>
           </div>
-        ))}
-      </div>
 
-      <div className="flex-1 flex flex-col justify-end">
-        {btnConnected ? (
-          <BaseButton
-            onButtonClick={() => handleLongShort(btnLabel)}
-            moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
-          >{`${btnLabel} ${coupleTradeCoins?.origin}`}</BaseButton>
-        ) : (
-          <ConnectWalletBtn extendClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none" />
-        )}
-      </div>
-    </div>
+          <div className="mt-[22px]">
+            <div className="text-sm font-semibold">Leverage</div>
+            <div className="flex justify-between rounded-[10px] bg-flaex-border bg-opacity-5 py-1 px-2 mt-2">
+              <input
+                className="bg-transparent outline-none"
+                onChange={(e: any) => handleChangeSlider(e.target.value)}
+                value={percentage}
+                max={1000}
+                type="number"
+              />
+              <div className="mr-2">%</div>
+            </div>
+
+            <div className="mt-8">
+              <SliderCustom
+                value={percentage}
+                onChangeValue={handleChangeSlider}
+                marks={marks}
+                max={1000}
+              />
+            </div>
+          </div>
+
+          <div className="rounded-[10px] bg-flaex-border bg-opacity-5 py-2.5 px-4 mt-12">
+            <div className="flex justify-between text-[12px] font-light">
+              <span>Amount</span>
+              <span>Collateral In</span>
+            </div>
+
+            <div className="flex justify-between mt-2.5 font-normal text-sm">
+              <input
+                className="bg-transparent outline-none w-full"
+                onChange={handleChangeAmount}
+                value={amountValue}
+              />
+              <span>{pairCrypto?.base}</span>
+            </div>
+          </div>
+
+          <div className="rounded-[10px] bg-flaex-border bg-opacity-5 py-2.5 px-4 mt-1">
+            <div className="flex justify-between text-[12px] font-light">
+              <span>Paying</span>
+              <span>{isLong ? pairCrypto?.base : pairCrypto?.quote}</span>
+            </div>
+
+            <div className="flex justify-between mt-2.5 font-normal text-sm">
+              {/* <span>{longShortChanging.paying}</span> */}
+              <input
+                className="bg-transparent outline-none w-full"
+                onChange={handleChangePaying}
+                value={payingUpdate}
+                max={1000}
+                type="number"
+              />
+              <span
+                className="cursor-pointer whitespace-nowrap"
+                onClick={() => _onSetBalance(_onBalance)}
+              >
+                Balance: {_onBalance}
+              </span>
+            </div>
+          </div>
+          <div className="mt-5">
+            <div className="flex justify-between">
+              <p className="text-xs font-light italic">Flash Swap:</p>
+              <p className="text-sm font-semibold whitespace-nowrap ">{`${Number(
+                longShortChanging?.flashSwap,
+              ).toFixed(4)} ${
+                isLong ? pairCrypto?.base : pairCrypto?.quote
+              }`}</p>
+            </div>
+            <div className="flex justify-between">
+              <p className="text-xs font-light italic">
+                Borrowing to Repay Flash:
+              </p>
+              <p className="text-sm font-semibold whitespace-nowrap">{`${Number(
+                longShortChanging?.borrowingToRepayFlash,
+              ).toFixed(4)} ${
+                isLong ? pairCrypto?.quote : pairCrypto.base
+              }`}</p>
+            </div>
+            <div className="flex justify-between">
+              <p className="text-xs font-light italic">Entry Price:</p>
+              <p className="text-sm font-semibold whitespace-nowrap">{`${longShortChanging?.entryPrice}`}</p>
+            </div>
+            <div className="flex justify-between">
+              <p className="text-xs font-light italic">Liquidation Price:</p>
+              <p className="text-sm font-semibold whitespace-nowrap">{`${longShortChanging?.liquidationPrice}`}</p>
+            </div>
+            <div className="flex justify-between">
+              <p className="text-xs font-light italic">Margin Ratio:</p>
+              <p className="text-sm font-semibold whitespace-nowrap">{`${longShortChanging?.marginRatio}`}</p>
+            </div>
+            <div className="flex justify-between">
+              <p className="text-xs font-light italic">Commission Fee:</p>
+              <p className="text-sm font-semibold whitespace-nowrap">{`${
+                longShortChanging?.commissionFee
+              } ${isLong ? pairCrypto?.quote : pairCrypto?.base}`}</p>
+            </div>
+          </div>
+          <div className="flex-1 flex flex-col justify-end">
+            {btnConnected ? (
+              <>
+                {isMouted && isLong && !isApprovedLongToken ? (
+                  <>
+                    <BaseButton
+                      disabled={
+                        !approvalLongTokenFunc ||
+                        isApprovalLongLoading ||
+                        isApprovalLongSuccess
+                      }
+                      onButtonClick={() => approvalLongTokenFunc?.()}
+                      moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
+                    >
+                      {!isApprovalLongLoading &&
+                        !isApprovalLongSuccess &&
+                        `Approval ${token0.name}`}
+                      {isApprovalLongLoading && `Waiting for signing`}
+                      {isApprovalLongSuccess && `Waiting for network`}
+                    </BaseButton>
+                  </>
+                ) : (
+                  <>
+                    {isMouted && !isLong && !isApprovedShortToken ? (
+                      <BaseButton
+                        disabled={
+                          !approvalShortTokenFunc ||
+                          isApprovalShortLoading ||
+                          isApprovalShortSuccess
+                        }
+                        onButtonClick={() => approvalShortTokenFunc?.()}
+                        moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
+                      >
+                        {!isApprovalShortLoading &&
+                          !isApprovalShortSuccess &&
+                          `Approval ${token1.name}`}
+                        {isApprovalShortLoading && `Waiting for signing`}
+                        {isApprovalShortSuccess && `Waiting for network`}
+                      </BaseButton>
+                    ) : (
+                      <>
+                        {isMouted && isLong && isApprovedShortToken ? (
+                          <BaseButton
+                            disabled={
+                              !longFunc || isLongLoading || (isLongSuccess && !isLongConfirmed)
+                            }
+                            onButtonClick={() => longFunc?.()}
+                            moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
+                          >
+                            {(!isLongLoading &&
+                               !isLongSuccess ) || isLongConfirmed &&
+                              `${btnLabel} ${pairCrypto?.origin}`}
+                            {isLongLoading && `Waiting for signing`}
+                            {(isLongSuccess && !isLongConfirmed ) && `Waiting for network`}
+                          </BaseButton>
+                        ) : (
+                          <BaseButton
+                            disabled={
+                              !shortFunc || isShortLoading || (isShortSuccess && !isShortConfirmed)
+                            }
+                            onButtonClick={() => shortFunc?.()}
+                            moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
+                          >
+                            {((!isShortLoading &&
+                              !isShortSuccess) || isShortConfirmed ) &&
+                              `${btnLabel} ${pairCrypto?.origin}`}
+                            {isShortLoading && `Waiting for signing`}
+                            {(isShortSuccess && !isShortConfirmed) && `Waiting for network`}
+                          </BaseButton>
+                        )}
+                      </>
+                    )}
+                  </>
+                )}
+              </>
+            ) : (
+              <LiteWagmiBtnConnect />
+            )}
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
 export default LongShort;
-
-const mockData = {
-  amount: 10,
-  tokenName: "ETH",
-  payingValue: 2.941,
-  balanceValue: 4.2,
-  descInfo: [
-    { title: "Flash Swap:", value: "7.059 ETH" },
-    { title: "Borrowing to Repay Flash:", value: "8665.98 USDC" },
-    { title: "Entry Price:", value: "1227.65" },
-    { title: "Liquidation Price:", value: "960.84" },
-    { title: "Margin Ratio:", value: "1.41" },
-    { title: "Commission Fee:", value: "8.66 USDC" },
-  ],
-};
 
 const marks = {
   0: <strong>0%</strong>,

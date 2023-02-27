@@ -7,7 +7,11 @@ import { tokenPair } from "util/constants";
 import CloseRepay from "./CloseRepay";
 import LongShort from "./LongShort";
 
-const Mainbar = () => {
+const Mainbar = ({
+  fetchLongShortData,
+}: {
+  fetchLongShortData: () => void;
+}) => {
   const { isShowLong } = useContextTrade();
   const { pairCrypto } = useContextTrade();
 
@@ -20,7 +24,17 @@ const Mainbar = () => {
   return (
     <>
       <div className="rounded-[10px] border-[0.2px] h-full px-4 py-3">
-        {isShowLong ? <LongShort price={quotedAmountOut} /> : <CloseRepay />}
+        {isShowLong ? (
+          <LongShort
+            price={quotedAmountOut}
+            fetchLongShortData={fetchLongShortData}
+          />
+        ) : (
+          <CloseRepay             
+          price={quotedAmountOut}
+          fetchLongShortData={fetchLongShortData}
+          />
+        )}
       </div>
     </>
   );

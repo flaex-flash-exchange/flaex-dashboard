@@ -12,6 +12,13 @@ export enum FeeAmount {
   MEDIUM = 3000,
   HIGH = 10000,
 }
+
+export enum Shippaple {
+  LOW = 0.005,
+  MEDIUM = 0.01,
+  HIGH = 0.1,
+}
+
 export enum S_LONG_SHORT_TYPE {
   LONG = "LONG",
   SHORT = "SHORT",

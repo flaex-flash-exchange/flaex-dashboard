@@ -3,9 +3,24 @@ import Mainbar from "components/pages/trade/Mainbar";
 import Topbar from "components/pages/trade/Topbar";
 import TradingViewWidget from "components/pages/trade/TradingViewWidget";
 import { TradeContextProvider } from "context/TradeContext";
+import { useLongShortData } from "hooks/useLongShortData";
 import type { NextPage } from "next";
+<<<<<<< HEAD
+=======
+import { useEffect } from "react";
+import styled from "styled-components";
+import { useBlockNumber } from "wagmi";
+>>>>>>> eea698a ( add close, repay function)
 
 const Index: NextPage = () => {
+
+
+  const { fetchLongShortData , longShortData: tableData} = useLongShortData();
+  useEffect(() => {
+    fetchLongShortData();
+  }, [fetchLongShortData]);
+
+
   return (
     <>
       <TradeContextProvider>
@@ -23,10 +38,15 @@ const Index: NextPage = () => {
             </div>
           </div>
           <div className="col-span-5 lg:col-span-2 xl:col-span-2 2xl:col-span-2 h-full">
-            <Mainbar />
+            <Mainbar fetchLongShortData = {fetchLongShortData}/>
           </div>
         </div>
+<<<<<<< HEAD
         <BottomInfo />
+=======
+        <BottomInfo tableData ={tableData}/>
+        <BlockNumberView />
+>>>>>>> eea698a ( add close, repay function)
       </TradeContextProvider>
     </>
   );

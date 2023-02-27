@@ -26,10 +26,9 @@ import {
 } from "wagmi";
 import { flaexMain, testERC20 } from "../../../contracts";
 
-const LongShort = ({ price }: { price: QuoterReturn }) => {
+const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLongShortData :()=>void}) => {
   const { address, isConnected } = useAccount();
   const { pairCrypto } = useContextTrade();
-  const { fetchLongShortData } = useLongShortData();
   const [isMouted, setIsMouted] = useState(false);
   const provider = useProvider();
   const [isLong, setIsLong] = useState<boolean>(true);
@@ -146,7 +145,7 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
     },
   });
 
-  const { config: configLong, error } = usePrepareContractWrite({
+  const { config: configLong } = usePrepareContractWrite({
     address: contractAddress.FlaexMain as `0x${string}`,
     abi: flaexMain.abi,
     functionName: "openExactOutput",
@@ -161,7 +160,6 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
     enabled: Boolean(new Decimal(longShortChanging.paying).greaterThan(0)),
   });
 
-  console.log("error", error);
   const {
     data: longData,
     isLoading: isLongLoading,
@@ -445,30 +443,30 @@ const LongShort = ({ price }: { price: QuoterReturn }) => {
                         {isMouted && isLong && isApprovedShortToken ? (
                           <BaseButton
                             disabled={
-                              !longFunc || isLongLoading || isLongSuccess
+                              !longFunc || isLongLoading || (isLongSuccess && !isLongConfirmed)
                             }
                             onButtonClick={() => longFunc?.()}
                             moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
                           >
-                            {!isLongLoading &&
-                              !isLongSuccess &&
+                            {(!isLongLoading &&
+                               !isLongSuccess ) || isLongConfirmed &&
                               `${btnLabel} ${pairCrypto?.origin}`}
                             {isLongLoading && `Waiting for signing`}
-                            {isLongSuccess && `Waiting for network`}
+                            {(isLongSuccess && !isLongConfirmed ) && `Waiting for network`}
                           </BaseButton>
                         ) : (
                           <BaseButton
                             disabled={
-                              !shortFunc || isShortLoading || isShortSuccess
+                              !shortFunc || isShortLoading || (isShortSuccess && !isShortConfirmed)
                             }
                             onButtonClick={() => shortFunc?.()}
                             moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
                           >
-                            {!isShortLoading &&
-                              !isShortSuccess &&
+                            {((!isShortLoading &&
+                              !isShortSuccess) || isShortConfirmed ) &&
                               `${btnLabel} ${pairCrypto?.origin}`}
                             {isShortLoading && `Waiting for signing`}
-                            {isShortSuccess && `Waiting for network`}
+                            {(isShortSuccess && !isShortConfirmed) && `Waiting for network`}
                           </BaseButton>
                         )}
                       </>

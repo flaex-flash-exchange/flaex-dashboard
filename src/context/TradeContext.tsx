@@ -9,7 +9,27 @@ interface ITradeContext {
   setRepayCloseData: (item: any) => void;
   setPairCrypto: (item: any) => void;
 }
-export const TradeContext = createContext<ITradeContext | null>(null);
+const initContext = {
+  pairCrypto:{
+    base: "wETH",
+    quote: "DAI",
+    origin: "wETH/DAI",
+  },
+  isShowLong: true,
+  repayCloseData: ()=>{
+    return;
+  },
+  setIsShowLong:()=>{
+    return;
+  },
+  setPairCrypto:()=>{
+    return;
+  },
+  setRepayCloseData:()=>{
+    return;
+  }
+};
+export const TradeContext = createContext<ITradeContext | null>(initContext);
 export const TradeContextProvider = ({ children }: any) => {
   const [isShowLong, setIsShowLong] = useState<boolean>(true);
   const [pairCrypto, setPairCrypto] = useState<TPairCrypto>({

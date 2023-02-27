@@ -29,10 +29,11 @@ query MyQuery {
 
 export const useLongShortData = () => {
   const [longShortData, setLongShortData] = useState<Array<ILongShortData>>([]);
+
   const { pairCrypto } = useContextTrade();
   const { address } = useAccount();
   const { token0, token1, fee } = useMemo(() => {
-    return tokenPair[pairCrypto.origin || ""];
+    return tokenPair[pairCrypto.origin || "wETH/DAI"];
   }, [pairCrypto]);
 
   const orderQuery = orderQueryFunc(address as string, token0.address, token1.address);
@@ -46,7 +47,7 @@ export const useLongShortData = () => {
 
         const client = new ApolloClient({
           uri: API,
-          cache: new InMemoryCache(),
+          cache: new InMemoryCache({resultCaching:false}),
         });
 
         const { data } = await client.query({
@@ -54,7 +55,8 @@ export const useLongShortData = () => {
         });
 
         if (data && data?.orders) {
-          setLongShortData(data?.orders);
+          console.log({data});
+          setLongShortData(data?.orders?.flat());
         }
       }
     } catch (error) {
@@ -62,9 +64,10 @@ export const useLongShortData = () => {
     }
   }, [address, orderQuery, token0, token1]);
 
-  // useEffect(() => {
-  //   fetchLongShortData();
-  // }, [fetchLongShortData]);
+  useEffect(() => {
+    console.log("longShortData updated:", longShortData);
+  }, [longShortData]);
+
 
   return {
     fetchLongShortData,

@@ -172,7 +172,7 @@ export function _onShortCalculator(
     } else if(new Decimal(amount).equals(0) && new Decimal(payingValue).greaterThan(0)) {
       const leverage = new Decimal(percentage);
       const payingAmount = new Decimal(payingValue);
-      const marginAmount = leverage.div(100).add(1).mul(payingAmount);
+      const marginAmount = leverage.div(100).add(1).mul(payingAmount).div(entryPrice);
       const flashSwap = payingAmount.mul(leverage.div(100));
       const borrowingToRepayFlash = flashSwap.div(entryPrice).mul(1.0005);
       const liquidationPrice = new Decimal(1).div(borrowingToRepayFlash.div(marginAmount).mul(1.1));

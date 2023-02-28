@@ -15,6 +15,7 @@ import HistoryTable from "./HistoryTable";
 
 const BottomInfo = ({tableData}:{tableData:Array<ILongShortData>}) => {
   const { pairCrypto } = useContextTrade();
+  const { setRepayCloseData, repayCloseData } = useContextTrade();
 
   const { token0, token1, fee } = useMemo(() => {
     return tokenPair[pairCrypto.origin || ""];
@@ -110,6 +111,15 @@ const BottomInfo = ({tableData}:{tableData:Array<ILongShortData>}) => {
       };
     });
   }, [quotedAmountOut.priceExactInputToken0, quotedAmountOut.priceExactOutputToken1, tableData, token0.address]);
+
+  useEffect(()=>{
+    if(repayCloseData?.isLong){
+      setRepayCloseData(longShortHistory.find(data => data.isLong));
+    } else {
+      setRepayCloseData(longShortHistory.find(data => !data.isLong));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[tableData]);
 
 
   return (

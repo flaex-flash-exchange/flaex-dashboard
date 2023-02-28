@@ -43,8 +43,6 @@ export const useLongShortData = () => {
       if (!token0 ||  !token1 || !address) {
         return ;
       } else {
-        console.log("fetchLongShortData");
-
         const client = new ApolloClient({
           uri: API,
           cache: new InMemoryCache({resultCaching:false}),

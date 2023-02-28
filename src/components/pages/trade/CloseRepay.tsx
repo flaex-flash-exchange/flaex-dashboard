@@ -21,12 +21,13 @@ import {
   useProvider,
   useWaitForTransaction,
 } from "wagmi";
+import { ILongShortData } from "constants/interface";
 
 const CloseRepay = ({
   price,
   fetchLongShortData,
 }: {
-  price:QuoterReturn,
+  price:QuoterReturn;
   fetchLongShortData: () => void;
 }) => {
   const { address, isConnected } = useAccount();

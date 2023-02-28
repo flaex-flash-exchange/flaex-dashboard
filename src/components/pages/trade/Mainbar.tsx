@@ -30,7 +30,7 @@ const Mainbar = ({
             fetchLongShortData={fetchLongShortData}
           />
         ) : (
-          <CloseRepay             
+          <CloseRepay   
           price={quotedAmountOut}
           fetchLongShortData={fetchLongShortData}
           />

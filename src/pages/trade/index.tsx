@@ -41,7 +41,6 @@ const Index: NextPage = () => {
           </div>
         </div>
         <BottomInfo tableData ={tableData}/>
-        <BlockNumberView />
       </TradeContextProvider>
     </>
   );

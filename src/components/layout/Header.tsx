@@ -24,13 +24,9 @@ const Header = ({ toggleCollapse, onChangeToggle }: any): JSX.Element => {
 
       <Link href={"/"}>
         <a className="flex items-center">
-          <Image
-            src="/images/logo.svg"
-            alt="logo"
-            width={60}
-            height={60}
-            className="w-12 h-12 md:w-[60px] md:h-[60px] mr-2"
-          />
+          <div className="relative w-14 h-14 md:w-[60px] md:h-[60px] mr-2">
+            <Image src="/images/logo.svg" alt="logo" layout="fill" />
+          </div>
           <span
             className={`text-[28px] md:text-[30px] leading-[50px] tracking-[3px]`}
           >

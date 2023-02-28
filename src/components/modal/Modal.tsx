@@ -5,10 +5,12 @@ const Modal = ({
   content,
   isVisible,
   onClose,
+  hiddenClose = false,
 }: {
   content: JSX.Element;
   onClose: () => void;
   isVisible: boolean;
+  hiddenClose?: boolean;
 }) => {
   const handleClose = (e: any) => {
     if (e.target.id === "wrapper") onClose();
@@ -23,12 +25,14 @@ const Modal = ({
       id="wrapper"
     >
       <div className="relative">
-        <div
-          onClick={() => onClose()}
-          className="absolute top-[10px] right-[10px] cursor-pointer hover:scale-105 duration-300"
-        >
-          <FaTimes size={20} />
-        </div>
+        {!hiddenClose && (
+          <div
+            onClick={() => onClose()}
+            className="absolute top-[10px] right-[10px] cursor-pointer hover:scale-105 duration-300"
+          >
+            <FaTimes size={20} />
+          </div>
+        )}
         <div className="bg-flaex-bg-primary py-3.5 px-3 rounded-[10px]">
           {content}
         </div>

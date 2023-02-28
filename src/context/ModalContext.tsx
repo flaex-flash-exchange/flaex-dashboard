@@ -36,7 +36,7 @@ export const ModalContextProvider = ({ children }: any) => {
     }, 300);
   };
 
-  const pushModal = (content: JSX.Element) => {
+  const pushModal = (content: JSX.Element, hiddenClose: boolean) => {
     const key = uid();
 
     const modal = (
@@ -45,6 +45,7 @@ export const ModalContextProvider = ({ children }: any) => {
         isVisible={true}
         content={content}
         onClose={() => close(key, content)}
+        hiddenClose={hiddenClose}
       />
     );
 

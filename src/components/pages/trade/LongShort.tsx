@@ -231,14 +231,27 @@ const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLo
     setpayingValue(0);
   };
 
+  const _onBalance = isLong
+  ? BigNumberToReadableAmount(
+      baseBalance ? (baseBalance as BigNumber) : BigNumber.from(0),
+      token0.decimals,
+    )
+  : BigNumberToReadableAmount(
+      quoteBalance ? (quoteBalance as BigNumber) : BigNumber.from(0),
+      token1.decimals,
+    );
+
 
   const handleChangeAmount = useCallback((e: any) => {
-    const eAmount = e.floatValue;
+    let eAmount = e.floatValue;
     // -> keep amount and percen , calculate paying value
     if(isNaN(eAmount)){
       setAmount(0);
       setpayingValue(0);
     } else if (/^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$/.test(eAmount)) {
+       if(new Decimal(eAmount).greaterThan(_onBalance)){
+        eAmount= new Decimal(_onBalance).mul(percentage).div(100).toNumber();
+       }
       // -> keep paying and percen , calculate amount value
         setAmount(eAmount);
         setpayingValue(0);
@@ -247,11 +260,14 @@ const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLo
 
   const handleChangePaying = (
     (e: any) => {
-      const ePaying = e.floatValue;
+      let ePaying = e.floatValue;
       if(isNaN(ePaying)){
         setpayingValue(0);
         setAmount(0);
       } else if (/^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$/.test(ePaying)) {
+        if(new Decimal(ePaying).greaterThan(_onBalance)){
+          ePaying= new Decimal(_onBalance).toNumber();
+         }
         // -> keep paying and percen , calculate amount value
         setpayingValue(ePaying);
         setAmount(0);
@@ -273,15 +289,7 @@ const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLo
     }
   }, [isConnected, fetchAllowance, isMouted]);
 
-  const _onBalance = isLong
-    ? BigNumberToReadableAmount(
-        baseBalance ? (baseBalance as BigNumber) : BigNumber.from(0),
-        token0.decimals,
-      )
-    : BigNumberToReadableAmount(
-        quoteBalance ? (quoteBalance as BigNumber) : BigNumber.from(0),
-        token1.decimals,
-      );
+
 
   return (
     <>

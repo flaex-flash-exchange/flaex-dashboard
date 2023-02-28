@@ -12,6 +12,8 @@ import { FaArrowLeft } from "react-icons/fa";
 import { amountToHex } from "util/commons";
 import { Shippaple, tokenPair } from "util/constants";
 import { toBigNumber } from "util/convertValue";
+import { NumericFormat } from 'react-number-format';
+
 import {
   useAccount,
   useContractWrite,
@@ -97,10 +99,25 @@ const CloseRepay = ({
     setPercentage(value);
   };
 
-  const handleChangeAmount = (value: number) => {
-    const percen = new Decimal(value).div(repayCloseData?.quoteTokenAmount).mul(100).toFixed(4);
-    setAmount(value);
-    setPercentage(percen);
+  const handleChangeAmount = (e: any) => {
+    let value = e.floatValue;
+    if(isNaN(value)){
+      setAmount(0);
+      setPercentage(0);
+    } else if (/^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$/.test(value)) {
+      if(new Decimal(value).greaterThan(available)){
+        value = new Decimal(available).toNumber();
+      }
+      // -> keep paying and percen , calculate amount value
+      if(isRepay){
+        const percen = new Decimal(value).div(repayCloseData?.quoteTokenAmount).mul(100).toFixed(4);
+        setPercentage(percen);
+      } else {
+        const percen = new Decimal(value).div(repayCloseData?.baseTokenAmount).mul(100).toFixed(4);
+        setPercentage(percen);
+      }
+      setAmount(value);
+    }
   };
 
   const handleBackToTrade = () => {
@@ -382,11 +399,13 @@ const CloseRepay = ({
           </span>
         </div>
         <div className="flex justify-between mt-2.5 font-normal text-sm">
-          <input
+          <NumericFormat
             className="bg-transparent outline-none w-full"
-            onChange={(e: any) => handleChangeAmount(e.target.value)}
+            onValueChange={handleChangeAmount}
             value={amountValue}
-            // readOnly={!isRepay}
+            max={available}
+            allowNegative={false}
+            decimalScale={4}
           />
           <span className="cursor-pointer" onClick={() => onSetMax()}>
             {available}

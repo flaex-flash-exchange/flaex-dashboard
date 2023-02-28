@@ -48,7 +48,7 @@ const Index: NextPage = () => {
             onConnectWalletClick={openConnectModal}
             provider={signer?.provider as Web3Provider}
             defaultOutputTokenAddress={contractAddress.WETH}
-            defaultInputTokenAddress={contractAddress.USDT}
+            defaultInputTokenAddress={contractAddress.DAI}
             theme={theme}
           />
         </div>

@@ -224,11 +224,12 @@ const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLo
     if (!Number(value)) {
       setPercentage(0);
       return;
+    } else {
+      // -> keep amount and percen , calculate paying value
+      setPercentage(value);
+      setAmount(longShortInfo.marginAmount.toNumber());
+      setpayingValue(0);
     }
-    // -> keep amount and percen , calculate paying value
-    setPercentage(Number(value));
-    setAmount(longShortInfo.marginAmount.toNumber());
-    setpayingValue(0);
   };
 
   const _onBalance = isLong
@@ -242,21 +243,21 @@ const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLo
     );
 
 
-  const handleChangeAmount = useCallback((e: any) => {
+  const handleChangeAmount = (e: any) => {
     let eAmount = e.floatValue;
     // -> keep amount and percen , calculate paying value
     if(isNaN(eAmount)){
       setAmount(0);
       setpayingValue(0);
     } else if (/^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$/.test(eAmount)) {
-       if(new Decimal(eAmount).greaterThan(_onBalance)){
-        eAmount= new Decimal(_onBalance).mul(percentage).div(100).toNumber();
+       if(new Decimal(eAmount).greaterThan(new Decimal(_onBalance).mul(100+percentage).div(100))){
+        eAmount= new Decimal(_onBalance).mul(100+percentage).div(100).toNumber();
        }
       // -> keep paying and percen , calculate amount value
         setAmount(eAmount);
         setpayingValue(0);
     }
-  }, []);
+  };
 
   const handleChangePaying = (
     (e: any) => {
@@ -275,10 +276,10 @@ const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLo
     }
   );
 
-  const _onSetBalance = useCallback((_balance: any) => {
+  const _onSetBalance = (_balance: any) => {
     setAmount(0);
     setpayingValue(_balance);
-  }, []);
+  };
 
   useEffect(() => {
     if (isMouted) {
@@ -345,7 +346,6 @@ const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLo
           <div className="rounded-[10px] bg-flaex-border bg-opacity-5 py-2.5 px-4 mt-12">
             <div className="flex justify-between text-[12px] font-light">
               <span>Amount</span>
-              <span>Collateral In</span>
             </div>
 
             <div className="flex justify-between mt-2.5 font-normal text-sm">
@@ -374,7 +374,6 @@ const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLo
                 allowNegative={false}
                 decimalScale={4}
                 value={payingValue?payingValue:longShortInfo.paying.toNumber()}
-                max={1000}
               />
               <span
                 className="cursor-pointer whitespace-nowrap"
@@ -385,6 +384,15 @@ const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLo
             </div>
           </div>
           <div className="mt-5">
+            <div className="flex justify-between">
+                <p className="text-xs font-light italic">Total Collateral:</p>
+                <p className="text-sm font-semibold whitespace-nowrap ">{`
+                ${isLong ? longShortInfo.marginAmount.toFixed(4) : longShortInfo.flashSwap.add(longShortInfo.paying).toFixed(4)}
+                
+                ${
+                  isLong ? pairCrypto?.base : pairCrypto?.quote
+                }`}</p>
+            </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Flash Swap:</p>
               <p className="text-sm font-semibold whitespace-nowrap ">{`${Number(

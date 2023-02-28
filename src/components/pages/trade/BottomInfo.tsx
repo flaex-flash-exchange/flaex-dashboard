@@ -8,6 +8,7 @@ import { useLongShortData } from "hooks/useLongShortData";
 // import { useLongShortData } from "hooks/useLongShortData";
 import useQuoter from "hooks/useQuote";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { BigNumberToReadableAmount } from "util/commons";
 import { tokenPair } from "util/constants";
 import { parseAmount } from "util/convertValue";
 import { Address } from "wagmi";
@@ -42,12 +43,11 @@ const BottomInfo = ({tableData}:{tableData:Array<ILongShortData>}) => {
                 new Decimal(item?.marginLevel).div(10000),
               ),
             )
-            .toNumber()
+            .toFixed(4)
         : new Decimal(item?.baseMarginTokenAmount)
             .mul(new Decimal(item?.marginLevel).div(10000))
             .div(new Decimal(item?.quoteTokenAmount))
-            .toNumber();
-
+            .toFixed(4);
       const markPriceParser = isLong
         ? quotedAmountOut.priceExactInputToken0
         : quotedAmountOut.priceExactOutputToken1;
@@ -87,8 +87,8 @@ const BottomInfo = ({tableData}:{tableData:Array<ILongShortData>}) => {
         baseMarginTokenAmount: parseAmount(
           BigNumber.from(item?.baseMarginTokenAmount),
         ),
-        baseTokenAmount: parseAmount(BigNumber.from(item?.baseTokenAmount)),
-        quoteTokenAmount: parseAmount(BigNumber.from(item?.quoteTokenAmount)),
+        baseTokenAmount: isLong? BigNumberToReadableAmount(BigNumber.from(item?.baseTokenAmount),token0.decimals):BigNumberToReadableAmount(BigNumber.from(item?.baseTokenAmount),token1.decimals),
+        quoteTokenAmount: isLong ? BigNumberToReadableAmount(BigNumber.from(item?.quoteTokenAmount),token1.decimals): BigNumberToReadableAmount(BigNumber.from(item?.quoteTokenAmount),token0.decimals),
         direction: isLong ? "long" : "short",
         marginLevel: new Decimal(item?.marginLevel).div(100).toNumber(),
         entryPrice: entryPriceParser,
@@ -98,14 +98,14 @@ const BottomInfo = ({tableData}:{tableData:Array<ILongShortData>}) => {
           ? new Decimal(item.baseTokenAmount)
               .mul(new Decimal(markPriceParser))
               .div(new Decimal(item?.quoteTokenAmount))
-              .toNumber()
+              .toFixed(4)
           : new Decimal(item.baseTokenAmount)
               .div(
                 new Decimal(item?.quoteTokenAmount).mul(
                   new Decimal(markPriceParser),
                 ),
               )
-              .toNumber(),
+              .toFixed(4),
         pnlPercent,
         isLong,
       };

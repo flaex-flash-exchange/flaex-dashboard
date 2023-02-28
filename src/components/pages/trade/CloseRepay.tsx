@@ -82,8 +82,10 @@ const CloseRepay = ({
 
   const handleChangeLongShort = (clicked: boolean) => {
     if (clicked) {
+      setAmount(0);
       setIsPay(true);
     } else {
+      setAmount(0);
       setIsPay(false);
     }
   };

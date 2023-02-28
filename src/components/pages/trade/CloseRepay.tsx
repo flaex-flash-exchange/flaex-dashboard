@@ -494,9 +494,9 @@ const CloseRepay = ({
                   onButtonClick={() => repayFunc?.()}
                   moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full"
                 >
-                  {((!isRepayLoading && !isRepaySuccess) || isRepayConfirmed) && `Repay Partition Dept`}
+                  {((!isRepayLoading && !isRepaySuccess) || isRepayConfirmed) && `Repay Partition Debt`}
                   {isRepayLoading && `Waiting for signing`}
-                  {isRepaySuccess && `Waiting for network`}
+                  {(isRepaySuccess && !isRepayConfirmed) && `Waiting for network`}
                 </BaseButton>
               </>
             )}
@@ -538,7 +538,7 @@ const CloseRepay = ({
                 >
                   {((!isCloseLoading && !isCloseSuccess) || isCloseConfirmed) && `Close Position`}
                   {isCloseLoading && `Waiting for signing`}
-                  {isCloseSuccess && `Waiting for network`}
+                  {isCloseSuccess && !isCloseConfirmed && `Waiting for network`}
                 </BaseButton>
               </>
             )}

@@ -156,7 +156,7 @@ const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLo
       new Decimal(longShortInfo.paying.toFixed(4)).mul(new Decimal(10).pow(token0.decimals)).toHex(),
       constants.MaxUint256,
       fee,
-      longShortInfo.leverage.toHex(),
+      longShortInfo.leverage.mul(100).toHex(),
     ],
     enabled: Boolean(new Decimal(longShortInfo.paying).greaterThan(0)),
   });
@@ -189,7 +189,7 @@ const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLo
       new Decimal(longShortInfo.paying.toFixed(4)).mul(new Decimal(10).pow(token1.decimals)).toHex(),
       constants.MaxUint256,
       fee,
-      longShortInfo.leverage.toHex(),
+      longShortInfo.leverage.mul(100).toHex(),
     ],
     enabled: Boolean(new Decimal(longShortInfo.paying).greaterThan(0)),
   });
@@ -260,8 +260,8 @@ const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLo
   );
 
   const _onSetBalance = useCallback((_balance: any) => {
-    setAmount(_balance);
-    setpayingValue(0);
+    setAmount(0);
+    setpayingValue(_balance);
   }, []);
 
   useEffect(() => {

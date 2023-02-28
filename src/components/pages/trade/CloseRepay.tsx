@@ -1,18 +1,76 @@
+import BaseButton from "components/common/BaseButton";
 import SliderCustom from "components/common/SliderCustom";
 import { LiteWagmiBtnConnect } from "components/layout/ConnectButton";
+import { contractAddress } from "constants/contractAddress";
 import { useContextTrade } from "context/TradeContext";
+import { flaexMain, testERC20 } from "contracts";
 import Decimal from "decimal.js";
+import { constants, Contract } from "ethers";
+import { QuoterReturn } from "hooks/useQuote";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
-import { useAccount } from "wagmi";
+import { amountToHex } from "util/commons";
+import { Shippaple, tokenPair } from "util/constants";
+import { toBigNumber } from "util/convertValue";
+import { NumericFormat } from 'react-number-format';
 
-const CloseRepay = () => {
-  const { isConnected } = useAccount();
+import {
+  useAccount,
+  useContractWrite,
+  usePrepareContractWrite,
+  useProvider,
+  useWaitForTransaction,
+} from "wagmi";
 
+const CloseRepay = ({
+  price,
+  fetchLongShortData,
+}: {
+  price:QuoterReturn,
+  fetchLongShortData: () => void;
+}) => {
+  const { address, isConnected } = useAccount();
+  const provider = useProvider();
   const [isRepay, setIsPay] = useState<boolean>(true);
-  const [percentage, setPercentage] = useState<number>(0);
+  const [percentage, setPercentage] = useState<number| string>(0);
   const [btnConnected, setbtnConnected] = useState(false);
   const { setIsShowLong, repayCloseData } = useContextTrade();
+  const { pairCrypto } = useContextTrade();
+
+  const { token0, token1, fee } = useMemo(() => {
+    return tokenPair[pairCrypto.origin || ""];
+  }, [pairCrypto]);
+
+
+  const [isApprovedRepayLongToken, setIsApprovedRepayLongToken] = useState<boolean>(true);
+  const [isApprovedRepayShortToken, setIsApprovedRepayShortToken] =
+    useState<boolean>(true);
+
+
+  const fetchAllowance = useCallback(async () => {
+    const longToken = new Contract(token1.address, testERC20.abi, provider);
+    const shortToken = new Contract(token0.address, testERC20.abi, provider);
+    if (!longToken || !address || !shortToken) {
+      return;
+    } else {
+      const allowanceLongToken = await longToken.allowance(
+        address,
+        contractAddress.FlaexMain,
+      );
+      const allowanceShortToken = await shortToken.allowance(
+        address,
+        contractAddress.FlaexMain,
+      );
+      if (new Decimal(allowanceLongToken._hex || 0).equals(0)) {
+        setIsApprovedRepayLongToken(false);
+      }
+      if (new Decimal(allowanceShortToken._hex || 0).equals(0)) {
+        setIsApprovedRepayShortToken(false);
+      }
+    }
+  }, [address, provider, token0.address, token1.address]);
+
+
 
   const available = isRepay
     ? new Decimal(repayCloseData?.quoteTokenAmount).mul(0.9999).toFixed(4)
@@ -24,43 +82,207 @@ const CloseRepay = () => {
 
   const handleChangeLongShort = (clicked: boolean) => {
     if (clicked) {
+      setAmount(0);
       setIsPay(true);
+      setPercentage(0);
     } else {
+      setAmount(0);
       setIsPay(false);
+      setPercentage(0);
     }
   };
 
   const handleChangeSlider = (value: number) => {
-    const amount = (Number(available) * value) / 100;
+    if (!value) {
+      setAmount(0);
+      setPercentage(0);
+      return;
+    }
+    const amount = new Decimal(available).mul(value).div(100).toFixed(4);
     setAmount(amount);
     setPercentage(value);
   };
 
-  const handleChangeAmount = (value: number) => {
-    const percen = (value / repayCloseData?.quoteTokenAmount) * 100;
-    setAmount(value);
-    setPercentage(percen);
+  const handleChangeAmount = (e: any) => {
+    let value = e.floatValue;
+    if(isNaN(value)){
+      setAmount(0);
+      setPercentage(0);
+    } else if (/^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$/.test(value)) {
+      if(new Decimal(value).greaterThan(available)){
+        value = new Decimal(available).toNumber();
+      }
+      // -> keep paying and percen , calculate amount value
+      if(isRepay){
+        const percen = new Decimal(value).div(repayCloseData?.quoteTokenAmount).mul(100).toFixed(4);
+        setPercentage(percen);
+      } else {
+        const percen = new Decimal(value).div(repayCloseData?.baseTokenAmount).mul(100).toFixed(4);
+        setPercentage(percen);
+      }
+      setAmount(value);
+    }
   };
 
   const handleBackToTrade = () => {
     setIsShowLong(true);
   };
 
+  const minQuoteTokenAmountLong = toBigNumber(new Decimal(price.priceExactInputToken0).mul(amountValue).mul(1+Shippaple.HIGH),token1.decimals);
+  const minQuoteTokenAmountShort  = toBigNumber(new Decimal(price.priceExactOutputToken1).mul(amountValue).mul(1+Shippaple.HIGH),token0.decimals);
+  const { config: configClose, error } = usePrepareContractWrite({
+    address: contractAddress.FlaexMain as `0x${string}`,
+    abi: flaexMain.abi,
+    functionName: "closeExactInput",
+    args: repayCloseData?.isLong
+      ? [
+          token0.address,
+          token1.address,
+          percentage == 100
+            ? constants.MaxUint256
+            : amountToHex(amountValue, token0.decimals),
+          0,
+          fee,
+        ]
+      : [
+          token1.address,
+          token0.address,
+          percentage == 100
+            ? constants.MaxUint256
+            : amountToHex(amountValue, token1.decimals),
+          0,
+          fee,
+        ],
+    enabled: amountValue > 0 && percentage > 0,
+  });
+  console.log({error});
+  const {
+    data: dataClose,
+    isLoading: isCloseLoading,
+    isSuccess: isCloseSuccess,
+    write: closeFunc,
+  } = useContractWrite(configClose);
+
+  const { isSuccess: isCloseConfirmed } = useWaitForTransaction({
+    hash: dataClose?.hash,
+    confirmations: 1,
+    onSuccess() {
+      console.log("close success");
+      // getData();
+      fetchLongShortData();
+    },
+  });
+
+
+  const { config: configRepay } = usePrepareContractWrite({
+    address: contractAddress.FlaexMain as `0x${string}`,
+    abi: flaexMain.abi,
+    functionName: "repayPartialDebt",
+    args: repayCloseData?.isLong
+      ? [
+          token0.address,
+          token1.address,
+          amountToHex(amountValue, token0.decimals),
+        ]
+      : [
+          token1.address,
+          token0.address,
+          amountToHex(amountValue, token1.decimals),
+        ],
+    enabled: amountValue > 0 && percentage > 0,
+  });
+  const {
+    data: dataRepay,
+    isLoading: isRepayLoading,
+    isSuccess: isRepaySuccess,
+    write: repayFunc,
+  } = useContractWrite(configRepay);
+
+  const { isSuccess: isRepayConfirmed } = useWaitForTransaction({
+    hash: dataRepay?.hash,
+    confirmations: 1,
+    onSuccess() {
+      console.log("Repay success");
+      // getData();
+      fetchLongShortData();
+    },
+  });
+
+  const { config: configApprovalRepayShortToken } = usePrepareContractWrite({
+    address: token1.address,
+    abi: testERC20.abi,
+    functionName: "approve",
+    args: [contractAddress.FlaexMain, constants.MaxUint256],
+  });
+
+  const {
+    data: approvalRepayShortTokenData,
+    isLoading: isApprovalRepayShortLoading,
+    isSuccess: isApprovalRepayShortSuccess,
+    write: approvalRepayShortTokenFunc,
+  } = useContractWrite(configApprovalRepayShortToken);
+
+  useWaitForTransaction({
+    hash: approvalRepayShortTokenData?.hash,
+    confirmations: 1,
+    onSuccess() {
+      setIsApprovedRepayShortToken(true);
+    },
+  });
+
+  const { config: configApprovalRepayLongToken } = usePrepareContractWrite({
+    address: token0.address,
+    abi: testERC20.abi,
+    functionName: "approve",
+    args: [contractAddress.FlaexMain, constants.MaxUint256],
+  });
+  const {
+    data: approvalRepayLongTokenData,
+    isLoading: isApprovalRepayLongLoading,
+    isSuccess: isApprovalRepayLongSuccess,
+    write: approvalRepayLongTokenFunc,
+  } = useContractWrite(configApprovalRepayLongToken);
+
+  useWaitForTransaction({
+    hash: approvalRepayLongTokenData?.hash,
+    confirmations: 1,
+    onSuccess() {
+      setIsApprovedRepayLongToken(true);
+    },
+  });
+
+
   useEffect(() => {
     setbtnConnected(isConnected);
   }, [isConnected]);
 
+  useEffect(()=>{
+    fetchAllowance();
+  },[fetchAllowance]);
+
   const marginRatioAfter = useMemo(() => {
     if (!amountValue) return 0;
+    const amountValueParser = new Decimal(amountValue);
+    const debtMinusAmount = new Decimal(repayCloseData?.quoteTokenAmount).minus(
+      amountValueParser,
+    );
+
+    console.log(
+      { repayCloseData },
+      { amountValueParser },
+      { baseTokenAmount: repayCloseData?.baseTokenAmount },
+      { quoteTokenAmount: repayCloseData?.quoteTokenAmount },
+      { markPrice: repayCloseData?.markPrice },
+      { debtMinusAmount: debtMinusAmount.toNumber() },
+    );
     if (!isRepay) {
       return repayCloseData?.isLong
         ? new Decimal(repayCloseData?.baseTokenAmount)
-            .minus(amountValue)
             .mul(new Decimal(repayCloseData?.markPrice))
-            .div(new Decimal(repayCloseData?.quoteTokenAmount))
+            .div(debtMinusAmount)
             .toFixed(4)
         : new Decimal(repayCloseData?.baseTokenAmount)
-            .minus(amountValue)
+            .minus(amountValueParser)
             .div(
               new Decimal(repayCloseData?.quoteTokenAmount).mul(
                 repayCloseData?.markPrice,
@@ -69,19 +291,19 @@ const CloseRepay = () => {
             .toFixed(4);
     } else {
       return repayCloseData?.isLong
-        ? new Decimal(repayCloseData?.quoteTokenAmount)
-            .minus(amountValue)
+        ? new Decimal(repayCloseData?.baseTokenAmount)
+            .mul(repayCloseData?.markPrice)
             .div(
-              new Decimal(repayCloseData?.baseTokenAmount).mul(
-                repayCloseData?.markPrice,
+              new Decimal(repayCloseData?.quoteTokenAmount).minus(
+                amountValueParser,
               ),
             )
             .toFixed(4)
-        : new Decimal(repayCloseData?.quoteTokenAmount)
-            .minus(amountValue)
+        : new Decimal(repayCloseData?.baseTokenAmount)
+            .div(repayCloseData?.markPrice)
             .div(
-              new Decimal(repayCloseData.baseTokenAmount).div(
-                repayCloseData?.markPrice,
+              new Decimal(repayCloseData.quoteTokenAmount).minus(
+                amountValueParser,
               ),
             )
             .toFixed(4);
@@ -181,11 +403,13 @@ const CloseRepay = () => {
           </span>
         </div>
         <div className="flex justify-between mt-2.5 font-normal text-sm">
-          <input
+          <NumericFormat
             className="bg-transparent outline-none w-full"
-            onChange={(e: any) => handleChangeAmount(e.target.value)}
+            onValueChange={handleChangeAmount}
             value={amountValue}
-            // readOnly={!isRepay}
+            max={available}
+            allowNegative={false}
+            decimalScale={4}
           />
           <span className="cursor-pointer" onClick={() => onSetMax()}>
             {available}
@@ -257,10 +481,13 @@ const CloseRepay = () => {
                 {repayCloseData?.marginRatio}
               </p>
             </div>
-            <div className="flex justify-between">
-              <p className="text-xs font-light italic">Margin Ratio After:</p>
-              <p className="text-sm font-semibold">{marginRatioAfter}</p>
-            </div>
+            {isRepay ? (
+              <div className="flex justify-between">
+                <p className="text-xs font-light italic">Margin Ratio After:</p>
+                <p className="text-sm font-semibold">{marginRatioAfter}</p>
+              </div>
+            ) : null}
+
             <div className="flex justify-between">
               <p className="text-xs font-light italic">PnL:</p>
               <p className="text-sm font-semibold">
@@ -282,9 +509,63 @@ const CloseRepay = () => {
       </div>
       <div className="flex-1 flex flex-col justify-end">
         {btnConnected ? (
-          <button className="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full">
-            {isRepay ? "Repay Partial Debt" : "Close Position"}
-          </button>
+          <>
+            {isRepay && ((repayCloseData?.isLong && isApprovedRepayLongToken ) || (!repayCloseData?.isLong && isApprovedRepayShortToken)) && (
+              <>
+                <BaseButton
+                  disabled={!repayFunc || isRepayLoading || (isRepaySuccess && !isRepayConfirmed)}
+                  onButtonClick={() => repayFunc?.()}
+                  moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full"
+                >
+                  {((!isRepayLoading && !isRepaySuccess) || isRepayConfirmed) && `Repay Partition Debt`}
+                  {isRepayLoading && `Waiting for signing`}
+                  {(isRepaySuccess && !isRepayConfirmed) && `Waiting for network`}
+                </BaseButton>
+              </>
+            )}
+
+            {isRepay && repayCloseData?.isLong && !isApprovedRepayLongToken && (
+              <>
+              <BaseButton
+                disabled={!approvalRepayLongTokenFunc || isApprovalRepayLongLoading || isApprovalRepayLongSuccess}
+                onButtonClick={() => approvalRepayLongTokenFunc?.()}
+                moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full"
+              >
+                {(!isApprovalRepayLongLoading && !isApprovalRepayLongSuccess)  && `Approval ${token1.name}`}
+                {isApprovalRepayLongLoading && `Waiting for signing`}
+                {isApprovalRepayLongSuccess && `Waiting for network`}
+              </BaseButton>
+              </>
+            )}
+
+            {isRepay && !repayCloseData?.isLong && !isApprovedRepayShortToken && (
+              <>
+              <BaseButton
+                disabled={!approvalRepayShortTokenFunc || isApprovalRepayShortLoading || isApprovalRepayShortSuccess}
+                onButtonClick={() => approvalRepayShortTokenFunc?.()}
+                moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full"
+              >
+                {(!isApprovalRepayShortLoading && !isApprovalRepayShortSuccess)  && `Approval ${token0.name}`}
+                {isApprovalRepayShortLoading && `Waiting for signing`}
+                {isApprovalRepayShortSuccess && `Waiting for network`}
+              </BaseButton>
+              </>
+            )}
+            
+            {!isRepay &&(
+              <>
+                <BaseButton
+                  disabled={!closeFunc || isCloseLoading || (isCloseSuccess && !isCloseConfirmed)}
+                  onButtonClick={() => closeFunc?.()}
+                  moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full"
+                >
+                  {((!isCloseLoading && !isCloseSuccess) || isCloseConfirmed) && `Close Position`}
+                  {isCloseLoading && `Waiting for signing`}
+                  {isCloseSuccess && !isCloseConfirmed && `Waiting for network`}
+                </BaseButton>
+              </>
+            )}
+          </>
         ) : (
           <LiteWagmiBtnConnect />
         )}
@@ -334,7 +615,7 @@ const marks_100 = {
 
 // PNL = markPrice/entryPrice * leverage
 // marginRatio = colateral/debt (same unit)
-// marginRatioAfter = colateral/( - amount) (same unit)
+// marginRatioAfter = colateral/(debt - amount) (same unit)
 // wallet 6xx...4xx
 // block number at  bottom
 // debt;

@@ -1,4 +1,5 @@
 import { ApolloClient, gql, InMemoryCache } from "@apollo/client";
+import { validateAndParseAddress } from "@uniswap/sdk-core";
 import { IBottomProps, ILongShortData } from "constants/interface";
 import { useContextTrade } from "context/TradeContext";
 import Decimal from "decimal.js";
@@ -9,12 +10,10 @@ import useQuoter from "hooks/useQuote";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { tokenPair } from "util/constants";
 import { parseAmount } from "util/convertValue";
+import { Address } from "wagmi";
 import HistoryTable from "./HistoryTable";
 
-const BottomInfo = () => {
-  // const tradeContext = useContextTrade();
-  // const [tableData, setTableData] = useState<Array<ILongShortData>>([]);
-  const { fetchLongShortData, longShortData: tableData } = useLongShortData();
+const BottomInfo = ({tableData}:{tableData:Array<ILongShortData>}) => {
   const { pairCrypto } = useContextTrade();
 
   const { token0, token1, fee } = useMemo(() => {
@@ -30,13 +29,11 @@ const BottomInfo = () => {
     fee,
   );
 
-  useEffect(() => {
-    fetchLongShortData();
-  }, [fetchLongShortData]);
 
-  const longShortHistory = tableData?.map(
-    (item: ILongShortData, idx: number) => {
-      const isLong = idx === 0;
+
+  const longShortHistory = useMemo(() => {
+    return tableData?.map((item: ILongShortData, idx: number) => {
+      const isLong = validateAndParseAddress(item.baseToken) == validateAndParseAddress(token0.address);
       const entryPriceParser = isLong
         ? new Decimal(item?.quoteTokenAmount)
             .div(
@@ -111,8 +108,9 @@ const BottomInfo = () => {
         pnlPercent,
         isLong,
       };
-    },
-  );
+    });
+  }, [quotedAmountOut.priceExactInputToken0, quotedAmountOut.priceExactOutputToken1, tableData, token0.address]);
+
 
   return (
     <div className="mt-[20px] overflow-auto	">
@@ -120,6 +118,8 @@ const BottomInfo = () => {
     </div>
   );
 };
+
+
 
 export default BottomInfo;
 

@@ -84,9 +84,11 @@ const CloseRepay = ({
     if (clicked) {
       setAmount(0);
       setIsPay(true);
+      setPercentage(0);
     } else {
       setAmount(0);
       setIsPay(false);
+      setPercentage(0);
     }
   };
 

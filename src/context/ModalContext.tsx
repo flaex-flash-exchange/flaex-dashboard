@@ -9,6 +9,12 @@ const uid = (() => {
 export const ModalContext = createContext<any>({});
 export const ModalContextProvider = ({ children }: any) => {
   const [modals, setModals] = useState<JSX.Element[]>([]);
+  const [dataModal, setDataModal] = useState();
+
+  const handleDataModal = (data: any) => {
+    setDataModal(data);
+    console.log("handle data modal");
+  };
 
   const closeModals = () => {
     setModals([]);
@@ -52,7 +58,7 @@ export const ModalContextProvider = ({ children }: any) => {
     setModals((modals) => [...modals, modal]);
   };
 
-  const value = { modals, pushModal, close, closeModals };
+  const value = { modals, pushModal, close, closeModals, handleDataModal };
 
   return (
     <ModalContext.Provider value={value}>{children}</ModalContext.Provider>

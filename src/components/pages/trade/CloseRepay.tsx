@@ -321,7 +321,7 @@ const CloseRepay = ({
   const { receiveToken0 , receiveToken1} = useMemo(() => {
     const priceFlash = repayCloseData?.isLong ? price.priceExactInputToken0: price.priceExactOutputToken1;
     const flashSwap = repayCloseData?.isLong ? new Decimal(amountValue).mul(priceFlash).mul(0.995) : new Decimal(amountValue).div(priceFlash).mul(0.995);
-    if(flashSwap.gte(repayCloseData?.quoteTokenAmount)){
+    if(flashSwap.gte(repayCloseData?.quoteTokenAmount || 0)){
       if(repayCloseData?.isLong){
         return {
           receiveToken0 :new Decimal(repayCloseData?.baseTokenAmount).sub(amountValue).toFixed(4),

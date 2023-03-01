@@ -155,7 +155,7 @@ export function _onShortCalculator(
       const payingAmount = marginAmount.mul(entryPrice).div((leverage.div(100).add(1)));
       const flashSwap = payingAmount.mul(leverage.div(100));
       const borrowingToRepayFlash = flashSwap.div(entryPrice).mul(1.0005);
-      const liquidationPrice = new Decimal(1).div(borrowingToRepayFlash.div(marginAmount).mul(1.1));
+      const liquidationPrice = new Decimal(1).div(borrowingToRepayFlash.div(marginAmount.mul(entryPrice)).mul(1.1));
       const marginRatio = marginAmount.div((borrowingToRepayFlash));
       const commissionFee = flashSwap.div(entryPrice).mul(0.0005);
       return {
@@ -175,7 +175,7 @@ export function _onShortCalculator(
       const marginAmount = leverage.div(100).add(1).mul(payingAmount).div(entryPrice);
       const flashSwap = payingAmount.mul(leverage.div(100));
       const borrowingToRepayFlash = flashSwap.div(entryPrice).mul(1.0005);
-      const liquidationPrice = new Decimal(1).div(borrowingToRepayFlash.div(marginAmount).mul(1.1));
+      const liquidationPrice = new Decimal(1).div(borrowingToRepayFlash.div(marginAmount.mul(entryPrice)).mul(1.1));
       const marginRatio = marginAmount.div((borrowingToRepayFlash));
       const commissionFee = flashSwap.div(entryPrice).mul(0.0005);
       return {

@@ -319,27 +319,35 @@ const CloseRepay = ({
   }, [amountValue, repayCloseData, isRepay]);
 
   const { receiveToken0 , receiveToken1} = useMemo(() => {
-    const priceFlash = repayCloseData?.isLong ? price.priceExactInputToken0: price.priceExactOutputToken1;
-    const flashSwap = repayCloseData?.isLong ? new Decimal(amountValue).mul(priceFlash).mul(0.995) : new Decimal(amountValue).div(priceFlash).mul(0.995);
-    if(flashSwap.gte(repayCloseData?.quoteTokenAmount || 0)){
-      if(repayCloseData?.isLong){
-        return {
-          receiveToken0 :new Decimal(repayCloseData?.baseTokenAmount).sub(amountValue).toFixed(4),
-          receiveToken1: new Decimal(flashSwap).sub(repayCloseData?.quoteTokenAmount).toFixed(4),
-        };
+    if(repayCloseData){
+      const priceFlash = repayCloseData?.isLong ? price.priceExactInputToken0: price.priceExactOutputToken1;
+      const flashSwap = repayCloseData?.isLong ? new Decimal(amountValue).mul(priceFlash).mul(0.9995) : new Decimal(amountValue).div(priceFlash).mul(0.9995);
+      if(flashSwap.gte(repayCloseData?.quoteTokenAmount || 0)){
+        if(repayCloseData?.isLong){
+          return {
+            receiveToken0 :new Decimal(repayCloseData?.baseTokenAmount).sub(amountValue).toFixed(4),
+            receiveToken1: new Decimal(flashSwap).sub(repayCloseData?.quoteTokenAmount).toFixed(4),
+          };
+        } else {
+          return {
+            receiveToken1 :new Decimal(repayCloseData?.baseTokenAmount).sub(amountValue).toFixed(4),
+            receiveToken0: new Decimal(flashSwap).sub(repayCloseData?.quoteTokenAmount).toFixed(4),
+          };
+        }
       } else {
         return {
-          receiveToken1 :new Decimal(repayCloseData?.baseTokenAmount).sub(amountValue).toFixed(4),
-          receiveToken0: new Decimal(flashSwap).sub(repayCloseData?.quoteTokenAmount).toFixed(4),
+          receiveToken0 :new Decimal(0).toFixed(4),
+          receiveToken1:new Decimal(0).toFixed(4),
         };
-      }
-    } else {
-      return {
-        receiveToken0 :new Decimal(0).toFixed(4),
-        receiveToken1:new Decimal(0).toFixed(4),
-      };
+      } 
+    }else {
+        return {
+          receiveToken0 :new Decimal(0).toFixed(4),
+          receiveToken1:new Decimal(0).toFixed(4),
+        };
     }
-  }, [amountValue, price.priceExactInputToken0, price.priceExactOutputToken1, repayCloseData?.baseTokenAmount, repayCloseData?.isLong, repayCloseData?.quoteTokenAmount]);
+  
+  }, [amountValue, price.priceExactInputToken0, price.priceExactOutputToken1, repayCloseData]);
 
  
 

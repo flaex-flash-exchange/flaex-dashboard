@@ -8,8 +8,7 @@ import { useModalContext } from "context/ModalContext";
 import { useContextTrade } from "context/TradeContext";
 import Decimal from "decimal.js";
 import { BigNumber, constants, Contract } from "ethers";
-import { QuoterReturn } from "hooks/useQuote";
-import { type } from "os";
+import useQuoter, { QuoterReturn } from "hooks/useQuote";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import {
@@ -18,6 +17,7 @@ import {
   _onShortCalculator,
 } from "util/commons";
 import { LSBtn, tokenPair } from "util/constants";
+import { parseTokenAmount } from "util/convertValue";
 import { LongShortInfo } from "util/type";
 
 import {
@@ -56,6 +56,18 @@ const LongShort = ({
   }, [pairCrypto]);
 
   const btnLabel = useMemo(() => (isLong ? LSBtn.LONG : LSBtn.SHORT), [isLong]);
+
+  const quotedAmountOut = useQuoter(
+    token1,
+    token0,
+    1,
+    token0.decimals,
+    token1.decimals,
+    fee,
+  );
+  const markPriceParser = isLong
+    ? quotedAmountOut.priceExactInputToken0
+    : quotedAmountOut.priceExactOutputToken1;
 
   const pushErrorModal = (hash: string) => {
     pushModal(
@@ -136,21 +148,21 @@ const LongShort = ({
   useWaitForTransaction({
     hash: approvalShortTokenData?.hash,
     confirmations: 1,
-    onSuccess(data) {
-      console.log("onSuccess - setIsApprovedShortToken", data);
-      pushModal(
-        <ModalCallback
-          hash={"mintData?.hash"}
-          content={`Succesfully Opened position for`}
-        />,
-        true,
-      );
-      setIsApprovedShortToken(true);
-    },
-    onError(error) {
-      pushErrorModal("hash");
-      console.log("setIsApprovedShortToken Short Error", error);
-    },
+    // onSuccess(data) {
+    //   console.log("onSuccess - setIsApprovedShortToken", data);
+    //   pushModal(
+    //     <ModalCallback
+    //       hash={"mintData?.hash"}
+    //       content={`Succesfully Opened position for`}
+    //     />,
+    //     true,
+    //   );
+    //   setIsApprovedShortToken(true);
+    // },
+    // onError(error) {
+    //   pushErrorModal("hash");
+    //   console.log("setIsApprovedShortToken Short Error", error);
+    // },
   });
 
   const { config: configApprovalLongToken } = usePrepareContractWrite({
@@ -169,21 +181,21 @@ const LongShort = ({
   useWaitForTransaction({
     hash: approvalLongTokenData?.hash,
     confirmations: 1,
-    onSuccess(data) {
-      console.log("onSuccess - setIsApprovedLongToken", data);
-      setIsApprovedLongToken(true);
-      pushModal(
-        <ModalCallback
-          hash={"mintData?.hash"}
-          content={`Succesfully Opened position for`}
-        />,
-        true,
-      );
-    },
-    onError(error) {
-      console.log("setIsApprovedLongToken Short Error", error);
-      pushErrorModal("hash");
-    },
+    // onSuccess(data) {
+    //   console.log("onSuccess - setIsApprovedLongToken", data);
+    //   setIsApprovedLongToken(true);
+    //   pushModal(
+    //     <ModalCallback
+    //       hash={"mintData?.hash"}
+    //       content={`Succesfully Opened position for`}
+    //     />,
+    //     true,
+    //   );
+    // },
+    // onError(error) {
+    //   console.log("setIsApprovedLongToken Short Error", error);
+    //   pushErrorModal("hash");
+    // },
   });
 
   const { config: configLong } = usePrepareContractWrite({
@@ -215,20 +227,24 @@ const LongShort = ({
     confirmations: 1,
     onSuccess(data) {
       console.log("useWaitForTransaction Long success", data);
+      const tokenAmount = parseTokenAmount(data?.logs);
       pushModal(
         <ModalCallback
-          hash={"mintData?.hash"}
-          content={`Succesfully Opened position for`}
+          hash={data?.transactionHash}
+          content={
+            <div>
+              <div>Successfully Opened Long</div>
+              <div>{`${tokenAmount} ETH at ${markPriceParser}`}</div>
+            </div>
+          }
         />,
         true,
       );
-      // getData();
-      //update bottom table
       fetchLongShortData();
     },
     onError(error) {
       pushErrorModal("hash");
-      console.log("Error", error);
+      console.log("Error - Fail", error);
     },
   });
 
@@ -260,11 +276,16 @@ const LongShort = ({
     confirmations: 1,
     onSuccess(data) {
       console.log("useWaitForTransaction Short success", data);
-      // getData();
+      const tokenAmount = parseTokenAmount(data?.logs);
       pushModal(
         <ModalCallback
-          hash={"mintData?.hash"}
-          content={`Succesfully Opened position for`}
+          hash={data?.transactionHash}
+          content={
+            <div>
+              <div>Successfully Opened Short</div>
+              <div>{`${tokenAmount} ETH at ${markPriceParser}`}</div>
+            </div>
+          }
         />,
         true,
       );
@@ -272,7 +293,7 @@ const LongShort = ({
     },
     onError(error) {
       pushErrorModal("hash");
-      console.log("useWaitForTransaction Short Error", error);
+      console.log("Error - Fail", error);
     },
   });
 

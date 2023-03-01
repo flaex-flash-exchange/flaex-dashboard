@@ -1,5 +1,6 @@
 import { useModalContext } from "context/ModalContext";
 import React from "react";
+import { ReactElement } from "react";
 import {
   FaExternalLinkAlt,
   FaRegCheckCircle,
@@ -12,7 +13,7 @@ const ModalCallback = ({
   type = "success",
 }: {
   hash: string;
-  content: string;
+  content: string | ReactElement;
   type?: string;
 }) => {
   const { closeModals } = useModalContext();

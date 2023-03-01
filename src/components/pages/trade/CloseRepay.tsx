@@ -1,7 +1,9 @@
 import BaseButton from "components/common/BaseButton";
 import SliderCustom from "components/common/SliderCustom";
 import { LiteWagmiBtnConnect } from "components/layout/ConnectButton";
+import ModalCallback from "components/modal/ModalCallback";
 import { contractAddress } from "constants/contractAddress";
+import { useModalContext } from "context/ModalContext";
 import { useContextTrade } from "context/TradeContext";
 import { flaexMain, testERC20 } from "contracts";
 import Decimal from "decimal.js";
@@ -9,10 +11,14 @@ import { constants, Contract } from "ethers";
 import { QuoterReturn } from "hooks/useQuote";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
-import { amountToHex } from "util/commons";
-import { Shippaple, tokenPair } from "util/constants";
-import { toBigNumber } from "util/convertValue";
 import { NumericFormat } from "react-number-format";
+import { amountToHex } from "util/commons";
+import { eventLogs, Shippaple, tokenPair } from "util/constants";
+import {
+  defineInterface,
+  parseTokenAmount,
+  toBigNumber,
+} from "util/convertValue";
 
 import {
   useAccount,
@@ -21,7 +27,6 @@ import {
   useProvider,
   useWaitForTransaction,
 } from "wagmi";
-import { ILongShortData } from "constants/interface";
 
 const CloseRepay = ({
   price,
@@ -37,6 +42,7 @@ const CloseRepay = ({
   const [btnConnected, setbtnConnected] = useState(false);
   const { setIsShowLong, repayCloseData } = useContextTrade();
   const { pairCrypto } = useContextTrade();
+  const { pushModal } = useModalContext();
 
   const { token0, token1, fee } = useMemo(() => {
     return tokenPair[pairCrypto.origin || ""];
@@ -70,7 +76,7 @@ const CloseRepay = ({
     }
   }, [address, provider, token0.address, token1.address]);
 
-  console.log({ repayCloseData });
+  // console.log({ repayCloseData });
   const available = repayCloseData
     ? isRepay
       ? new Decimal(repayCloseData?.quoteTokenAmount).mul(0.9999).toFixed(4)
@@ -184,9 +190,22 @@ const CloseRepay = ({
   const { isSuccess: isCloseConfirmed } = useWaitForTransaction({
     hash: dataClose?.hash,
     confirmations: 1,
-    onSuccess() {
-      console.log("close success");
+    onSuccess(data) {
+      console.log("close success", data);
       // getData();
+      pushModal(
+        <ModalCallback
+          hash={data?.transactionHash}
+          content={
+            <div>
+              <div>Successfully Closed Long!</div>
+              {/* <div>{`${tokenAmount} ETH at ${markPriceParser}`}</div> */}
+            </div>
+          }
+        />,
+        true,
+      );
+
       fetchLongShortData();
     },
   });
@@ -218,8 +237,22 @@ const CloseRepay = ({
   const { isSuccess: isRepayConfirmed } = useWaitForTransaction({
     hash: dataRepay?.hash,
     confirmations: 1,
-    onSuccess() {
-      console.log("Repay success");
+    onSuccess(data) {
+      console.log("Repay success", data);
+      pushModal(
+        <ModalCallback
+          hash={data?.transactionHash}
+          content={
+            <div>
+              <div>Successfully Repaid !</div>
+              {/* <div>{`${tokenAmount} ETH at ${markPriceParser}`}</div> */}
+            </div>
+          }
+        />,
+        true,
+      );
+      // const tokenAmount = parseTokenAmount(data?.logs, eventLogs.REPAY);
+
       // getData();
       fetchLongShortData();
     },
@@ -433,25 +466,25 @@ const CloseRepay = ({
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Entry Price:</p>
               <p className="text-sm font-semibold">
-                {repayCloseData?repayCloseData?.entryPrice:0}
+                {repayCloseData ? repayCloseData?.entryPrice : 0}
               </p>
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Current Price:</p>
               <p className="text-sm font-semibold">
-                {repayCloseData?repayCloseData?.markPrice:0}
+                {repayCloseData ? repayCloseData?.markPrice : 0}
               </p>
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Liquidation Price:</p>
               <p className="text-sm font-semibold">
-                {repayCloseData?repayCloseData?.liquidPrice:0}
+                {repayCloseData ? repayCloseData?.liquidPrice : 0}
               </p>
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Current Margin Ratio:</p>
               <p className="text-sm font-semibold">
-                {repayCloseData?repayCloseData?.marginRatio:0}
+                {repayCloseData ? repayCloseData?.marginRatio : 0}
               </p>
             </div>
             <div className="flex justify-between">
@@ -461,7 +494,7 @@ const CloseRepay = ({
             <div className="flex justify-between">
               <p className="text-xs font-light italic">PnL:</p>
               <p className="text-sm font-semibold">
-                {`${repayCloseData?repayCloseData?.pnlPercent:0} %`}
+                {`${repayCloseData ? repayCloseData?.pnlPercent : 0} %`}
               </p>
             </div>
           </>
@@ -470,25 +503,25 @@ const CloseRepay = ({
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Entry Price:</p>
               <p className="text-sm font-semibold">
-                {repayCloseData?repayCloseData?.entryPrice:0}
+                {repayCloseData ? repayCloseData?.entryPrice : 0}
               </p>
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Current Price:</p>
               <p className="text-sm font-semibold">
-                {repayCloseData?repayCloseData?.markPrice:0}
+                {repayCloseData ? repayCloseData?.markPrice : 0}
               </p>
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Liquidation Price:</p>
               <p className="text-sm font-semibold">
-                {repayCloseData?repayCloseData?.liquidPrice:0}
+                {repayCloseData ? repayCloseData?.liquidPrice : 0}
               </p>
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Current Margin Ratio:</p>
               <p className="text-sm font-semibold">
-                {repayCloseData?repayCloseData?.marginRatio:0}
+                {repayCloseData ? repayCloseData?.marginRatio : 0}
               </p>
             </div>
             {isRepay ? (
@@ -501,7 +534,7 @@ const CloseRepay = ({
             <div className="flex justify-between">
               <p className="text-xs font-light italic">PnL:</p>
               <p className="text-sm font-semibold">
-                {`${repayCloseData?repayCloseData?.pnlPercent:0} %`}
+                {`${repayCloseData ? repayCloseData?.pnlPercent : 0} %`}
               </p>
             </div>
             <div className="flex justify-between">

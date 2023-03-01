@@ -65,3 +65,12 @@ export const tokenPair: any = {
   // "BTC/USDC": 1,
   // "BTC/ETH": 2,
 };
+
+export const eventLogs = {
+  ORDER_OPEN: "OrderOpened",
+  REPAY: "repayPartialDebt",
+  CLOSE: "OrderClosed",
+};
+export const argNames = {
+  BASE_TOKEN_AMOUNT: "baseTokenAmount",
+};

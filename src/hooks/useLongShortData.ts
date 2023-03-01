@@ -23,6 +23,7 @@ query MyQuery {
     baseToken
     baseMarginTokenAmount
     id
+    entryPrice
   }
 }
 `;

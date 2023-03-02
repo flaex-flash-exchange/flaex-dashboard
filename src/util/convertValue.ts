@@ -67,15 +67,25 @@ export const getOpenInfo = (isLong: boolean, log: Array<any>) => {
   let Price: any = 0;
   if (isLong) {
     const loggedOpen = getEvent(log, eventLogs.ORDER_OPEN);
+    console.log("logged open here", loggedOpen);
+
     Amount = BigNumberToReadableAmount(loggedOpen[5], 18);
     Price = BigNumberToReadableAmount(
-      loggedOpen[6].mul(toBigNumber(1, 18)).div(loggedOpen[3]),
+      loggedOpen[6]
+        .mul(toBigNumber(1, 18))
+        .mul(toBigNumber(1, 4))
+        .div(loggedOpen[4])
+        .div(loggedOpen[3]),
       18,
     );
   } else {
     const loggedOpen = getEvent(log, eventLogs.ORDER_OPEN);
     Price = BigNumberToReadableAmount(
-      loggedOpen[3].mul(toBigNumber(1, 18)).div(loggedOpen[6]),
+      loggedOpen[3]
+        .mul(toBigNumber(1, 18))
+        .mul(loggedOpen[4])
+        .div(toBigNumber(1, 4))
+        .div(loggedOpen[6]),
       18,
     );
     Amount = BigNumberToReadableAmount(

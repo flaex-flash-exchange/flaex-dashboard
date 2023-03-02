@@ -25,4 +25,5 @@ export interface ILongShortData {
   quoteToken: string;
   quoteTokenAmount: string | number;
   trader: string;
+  entryPrice : string | number;
 }

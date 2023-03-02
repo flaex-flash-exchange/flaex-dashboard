@@ -352,15 +352,38 @@ const CloseRepay = ({
     }
   }, [amountValue, repayCloseData, isRepay]);
 
-  const receive = useMemo(() => {
-    return repayCloseData
-      ? new Decimal(repayCloseData?.quoteTokenAmount)
-          .mul(new Decimal(repayCloseData?.pnlPercent))
-          .div(100)
-          .mul(new Decimal(percentage).div(100))
-          .toFixed(4)
-      : 0;
-  }, [percentage, repayCloseData]);
+  const { receiveToken0 , receiveToken1} = useMemo(() => {
+    if(repayCloseData){
+      const priceFlash = repayCloseData?.isLong ? price.priceExactInputToken0: price.priceExactOutputToken1;
+      const flashSwap = repayCloseData?.isLong ? new Decimal(amountValue).mul(priceFlash).mul(0.9995) : new Decimal(amountValue).div(priceFlash).mul(0.9995);
+      if(flashSwap.gte(repayCloseData?.quoteTokenAmount || 0)){
+        if(repayCloseData?.isLong){
+          return {
+            receiveToken0 :new Decimal(repayCloseData?.baseTokenAmount).sub(amountValue).toFixed(4),
+            receiveToken1: new Decimal(flashSwap).sub(repayCloseData?.quoteTokenAmount).toFixed(4),
+          };
+        } else {
+          return {
+            receiveToken1 :new Decimal(repayCloseData?.baseTokenAmount).sub(amountValue).toFixed(4),
+            receiveToken0: new Decimal(flashSwap).sub(repayCloseData?.quoteTokenAmount).toFixed(4),
+          };
+        }
+      } else {
+        return {
+          receiveToken0 :new Decimal(0).toFixed(4),
+          receiveToken1:new Decimal(0).toFixed(4),
+        };
+      } 
+    }else {
+        return {
+          receiveToken0 :new Decimal(0).toFixed(4),
+          receiveToken1:new Decimal(0).toFixed(4),
+        };
+    }
+  
+  }, [amountValue, price.priceExactInputToken0, price.priceExactOutputToken1, repayCloseData]);
+
+ 
 
   useEffect(() => {
     if (percentage > 0) {
@@ -525,12 +548,13 @@ const CloseRepay = ({
                 {repayCloseData ? repayCloseData?.marginRatio : 0}
               </p>
             </div>
-            {isRepay ? (
+    
+            {/* {isRepay ? (
               <div className="flex justify-between">
                 <p className="text-xs font-light italic">Margin Ratio After:</p>
                 <p className="text-sm font-semibold">{marginRatioAfter}</p>
               </div>
-            ) : null}
+            ) : null} */}
 
             <div className="flex justify-between">
               <p className="text-xs font-light italic">PnL:</p>
@@ -538,12 +562,21 @@ const CloseRepay = ({
                 {`${repayCloseData ? repayCloseData?.pnlPercent : 0} %`}
               </p>
             </div>
-            <div className="flex justify-between">
+            {/* <div className="flex justify-between"> */}
               <p className="text-xs font-light italic">Receive:</p>
               <p className="text-sm font-semibold">
-                {Number(receive) < 0 ? 0 : receive}
+                <>
+                <div className="flex justify-between ">
+                <p className="text-xs font-light italic pl-2">{token0.symbol}:</p>
+                {Number(receiveToken0) < 0 ? 0 : receiveToken0}
+                </div>
+                <div className="flex justify-between">
+                <p className="text-xs font-light italic pl-2">{token1.symbol}:</p>
+                {Number(receiveToken1) < 0 ? 0 : receiveToken1}
+                </div>
+                </>
               </p>
-            </div>
+            {/* </div> */}
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Commission Fee:</p>
               <p className="text-sm font-semibold">{0}</p>

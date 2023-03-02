@@ -42,6 +42,7 @@ export const parseTokenAmount = (
   data: Array<any>,
   method: string = eventLogs.ORDER_OPEN,
   arg: string = argNames.BASE_TOKEN_AMOUNT,
+  isLong: boolean = true,
 ) => {
   const foundEvent = findEvent(data, method);
   if (foundEvent) {
@@ -49,10 +50,23 @@ export const parseTokenAmount = (
       BigNumber.from(foundEvent.args[arg]),
       18,
     );
+    const quotetokenAmount = foundEvent.args[argNames.QUOTE_TOKEN_AMOUNT];
+    const basemarginAmount = foundEvent.args[argNames.BASE_MARGIN_AMOUNT];
+    const marginLevel = foundEvent.args[argNames.MARGIN_LEVEL];
+
+    const entryPrice = isLong
+      ? quotetokenAmount.div(basemarginAmount.mul(marginLevel.div(10000)))
+      : basemarginAmount.mul(marginLevel.div(10000)).div(quotetokenAmount);
     if (result) {
-      return result;
+      return { amount: result, entryPrice: entryPrice.toNumber() };
     }
-    return 0;
+    return {
+      amount: 0,
+      entryPrice: 0,
+    };
   }
-  return 0;
+  return {
+    amount: 0,
+    entryPrice: 0,
+  };
 };

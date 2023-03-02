@@ -72,5 +72,8 @@ export const eventLogs = {
   CLOSE: "OrderClosed",
 };
 export const argNames = {
+  MARGIN_LEVEL: "marginLevel",
   BASE_TOKEN_AMOUNT: "baseTokenAmount",
+  BASE_MARGIN_AMOUNT: "baseMarginAmount",
+  QUOTE_TOKEN_AMOUNT: "quoteTokenAmount",
 };

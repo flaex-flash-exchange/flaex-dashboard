@@ -33,25 +33,33 @@ export function amountToHex(num: number | string, decimals: number) {
   return new Decimal(num).mul(new Decimal(10).pow(decimals)).toHex();
 }
 
-export function BigNumberToReadableAmount(num: BigNumber, decimals: number) {
+export function BigNumberToReadableAmount(
+  num: BigNumber,
+  decimals: number = 18,
+) {
   return new Decimal(num._hex).div(new Decimal(10).pow(decimals)).toFixed(4);
 }
 
 export function _onLongCalculator(
   percentage: number | string,
   amount: number | string,
-  payingValue:number | string,
+  payingValue: number | string,
   entryPrice: string,
-) : LongShortInfo {
-  if(new Decimal(percentage).greaterThan(0)){ 
-    if(new Decimal(payingValue).equals(0) && new Decimal(amount).greaterThan(0)){
+): LongShortInfo {
+  if (new Decimal(percentage).greaterThan(0)) {
+    if (
+      new Decimal(payingValue).equals(0) &&
+      new Decimal(amount).greaterThan(0)
+    ) {
       const leverage = new Decimal(percentage);
       const marginAmount = new Decimal(amount);
-      const payingAmount = marginAmount.div((leverage.div(100).add(1)));
+      const payingAmount = marginAmount.div(leverage.div(100).add(1));
       const flashSwap = payingAmount.mul(leverage.div(100));
       const borrowingToRepayFlash = flashSwap.mul(entryPrice).mul(1.0005);
       const liquidationPrice = borrowingToRepayFlash.div(marginAmount).mul(1.1);
-      const marginRatio = marginAmount.div((borrowingToRepayFlash.div(entryPrice)));
+      const marginRatio = marginAmount.div(
+        borrowingToRepayFlash.div(entryPrice),
+      );
       const commissionFee = flashSwap.mul(entryPrice).mul(0.0005);
       return {
         marginAmount,
@@ -64,14 +72,19 @@ export function _onLongCalculator(
         marginRatio: marginRatio,
         commissionFee: commissionFee,
       };
-    } else if(new Decimal(amount).equals(0) && new Decimal(payingValue).greaterThan(0)) {
+    } else if (
+      new Decimal(amount).equals(0) &&
+      new Decimal(payingValue).greaterThan(0)
+    ) {
       const leverage = new Decimal(percentage);
       const payingAmount = new Decimal(payingValue);
       const marginAmount = leverage.div(100).add(1).mul(payingAmount);
       const flashSwap = payingAmount.mul(leverage.div(100));
       const borrowingToRepayFlash = flashSwap.mul(entryPrice).mul(1.0005);
       const liquidationPrice = borrowingToRepayFlash.div(marginAmount).mul(1.1);
-      const marginRatio = marginAmount.div((borrowingToRepayFlash.div(entryPrice)));
+      const marginRatio = marginAmount.div(
+        borrowingToRepayFlash.div(entryPrice),
+      );
       const commissionFee = flashSwap.mul(entryPrice).mul(0.0005);
       return {
         marginAmount,
@@ -84,9 +97,12 @@ export function _onLongCalculator(
         marginRatio: marginRatio,
         commissionFee: commissionFee,
       };
-    } else if(new Decimal(amount).equals(0) && new Decimal(payingValue).equals(0)) {
+    } else if (
+      new Decimal(amount).equals(0) &&
+      new Decimal(payingValue).equals(0)
+    ) {
       return {
-        marginAmount : new Decimal(0),
+        marginAmount: new Decimal(0),
         leverage: new Decimal(0),
         paying: new Decimal(0),
         flashSwap: new Decimal(0),
@@ -97,9 +113,9 @@ export function _onLongCalculator(
         commissionFee: new Decimal(0),
       };
     }
-  } 
+  }
   return {
-    marginAmount : new Decimal(amount),
+    marginAmount: new Decimal(amount),
     leverage: new Decimal(0),
     paying: new Decimal(payingValue),
     flashSwap: new Decimal(0),
@@ -109,8 +125,7 @@ export function _onLongCalculator(
     marginRatio: new Decimal(0),
     commissionFee: new Decimal(0),
   };
-  
-  
+
   // const onParseLeverage = leverage / 100;
   // if (onParseLeverage >= 1) {
   //   const onParseEntryPrice = new Decimal(entryPrice).toNumber() || 0;
@@ -144,19 +159,25 @@ export function _onLongCalculator(
 export function _onShortCalculator(
   percentage: number,
   amount: number | string,
-  payingValue:number | string,
+  payingValue: number | string,
   entryPrice: string,
-) : LongShortInfo {
-
-  if(new Decimal(percentage).greaterThan(0)){ 
-    if(new Decimal(payingValue).equals(0) && new Decimal(amount).greaterThan(0)){
+): LongShortInfo {
+  if (new Decimal(percentage).greaterThan(0)) {
+    if (
+      new Decimal(payingValue).equals(0) &&
+      new Decimal(amount).greaterThan(0)
+    ) {
       const leverage = new Decimal(percentage);
       const marginAmount = new Decimal(amount);
-      const payingAmount = marginAmount.mul(entryPrice).div((leverage.div(100).add(1)));
+      const payingAmount = marginAmount
+        .mul(entryPrice)
+        .div(leverage.div(100).add(1));
       const flashSwap = payingAmount.mul(leverage.div(100));
       const borrowingToRepayFlash = flashSwap.div(entryPrice).mul(1.0005);
-      const liquidationPrice = new Decimal(1).div(borrowingToRepayFlash.div(marginAmount).mul(1.1));
-      const marginRatio = marginAmount.div((borrowingToRepayFlash));
+      const liquidationPrice = new Decimal(1).div(
+        borrowingToRepayFlash.div(marginAmount).mul(1.1),
+      );
+      const marginRatio = marginAmount.div(borrowingToRepayFlash);
       const commissionFee = flashSwap.div(entryPrice).mul(0.0005);
       return {
         marginAmount,
@@ -169,14 +190,23 @@ export function _onShortCalculator(
         marginRatio: marginRatio,
         commissionFee: commissionFee,
       };
-    } else if(new Decimal(amount).equals(0) && new Decimal(payingValue).greaterThan(0)) {
+    } else if (
+      new Decimal(amount).equals(0) &&
+      new Decimal(payingValue).greaterThan(0)
+    ) {
       const leverage = new Decimal(percentage);
       const payingAmount = new Decimal(payingValue);
-      const marginAmount = leverage.div(100).add(1).mul(payingAmount).div(entryPrice);
+      const marginAmount = leverage
+        .div(100)
+        .add(1)
+        .mul(payingAmount)
+        .div(entryPrice);
       const flashSwap = payingAmount.mul(leverage.div(100));
       const borrowingToRepayFlash = flashSwap.div(entryPrice).mul(1.0005);
-      const liquidationPrice = new Decimal(1).div(borrowingToRepayFlash.div(marginAmount).mul(1.1));
-      const marginRatio = marginAmount.div((borrowingToRepayFlash));
+      const liquidationPrice = new Decimal(1).div(
+        borrowingToRepayFlash.div(marginAmount).mul(1.1),
+      );
+      const marginRatio = marginAmount.div(borrowingToRepayFlash);
       const commissionFee = flashSwap.div(entryPrice).mul(0.0005);
       return {
         marginAmount,
@@ -189,9 +219,12 @@ export function _onShortCalculator(
         marginRatio: marginRatio,
         commissionFee: commissionFee,
       };
-    } else if(new Decimal(amount).equals(0) && new Decimal(payingValue).equals(0)) {
+    } else if (
+      new Decimal(amount).equals(0) &&
+      new Decimal(payingValue).equals(0)
+    ) {
       return {
-        marginAmount : new Decimal(0),
+        marginAmount: new Decimal(0),
         leverage: new Decimal(0),
         paying: new Decimal(0),
         flashSwap: new Decimal(0),
@@ -202,9 +235,9 @@ export function _onShortCalculator(
         commissionFee: new Decimal(0),
       };
     }
-  } 
+  }
   return {
-    marginAmount : new Decimal(amount),
+    marginAmount: new Decimal(amount),
     leverage: new Decimal(0),
     paying: new Decimal(payingValue),
     flashSwap: new Decimal(0),
@@ -214,7 +247,7 @@ export function _onShortCalculator(
     marginRatio: new Decimal(0),
     commissionFee: new Decimal(0),
   };
-  
+
   // const onParseLeverage = leverage / 100 || 0;
   // if (onParseLeverage >= 1) {
   //   const onParseEntryPrice = new Decimal(entryPrice).toNumber() || 0;

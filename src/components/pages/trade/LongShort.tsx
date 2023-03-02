@@ -16,7 +16,7 @@ import {
   _onLongCalculator,
   _onShortCalculator,
 } from "util/commons";
-import { LSBtn, tokenPair } from "util/constants";
+import { argNames, eventLogs, LSBtn, tokenPair } from "util/constants";
 import { parseTokenAmount } from "util/convertValue";
 import { LongShortInfo } from "util/type";
 
@@ -227,14 +227,18 @@ const LongShort = ({
     confirmations: 1,
     onSuccess(data) {
       console.log("useWaitForTransaction Long success", data);
-      const tokenAmount = parseTokenAmount(data?.logs);
+      const tokenAmount = parseTokenAmount(
+        data?.logs,
+        eventLogs.ORDER_OPEN,
+        argNames.BASE_TOKEN_AMOUNT,
+      );
       pushModal(
         <ModalCallback
           hash={data?.transactionHash}
           content={
             <div>
               <div>Successfully Opened Long</div>
-              <div>{`${tokenAmount} ETH at ${markPriceParser}`}</div>
+              <div>{`${tokenAmount?.amount} ETH at ${tokenAmount?.entryPrice}`}</div>
             </div>
           }
         />,
@@ -276,14 +280,19 @@ const LongShort = ({
     confirmations: 1,
     onSuccess(data) {
       console.log("useWaitForTransaction Short success", data);
-      const tokenAmount = parseTokenAmount(data?.logs);
+      const tokenAmount = parseTokenAmount(
+        data?.logs,
+        eventLogs.ORDER_OPEN,
+        argNames.BASE_TOKEN_AMOUNT,
+        false,
+      );
       pushModal(
         <ModalCallback
           hash={data?.transactionHash}
           content={
             <div>
               <div>Successfully Opened Short</div>
-              <div>{`${tokenAmount} ETH at ${markPriceParser}`}</div>
+              <div>{`${tokenAmount?.amount} DAI at ${tokenAmount?.entryPrice}`}</div>
             </div>
           }
         />,

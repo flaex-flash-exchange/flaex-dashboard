@@ -26,8 +26,8 @@ export const iFace = new utils.Interface(interfaceEvents);
 const getEvent = (log: Array<any>, eventName: string) => {
   for (let i = 0; i < log.length; i++) {
     let item = null;
-    let data = log[i].data;
-    let topics = log[i].topics;
+    const data = log[i].data;
+    const topics = log[i].topics;
     try {
       item = iFace.parseLog({ data, topics });
     } catch (err: any) {
@@ -45,11 +45,11 @@ const getERCTransferEvent = (
   userAddress: string,
   toUser: boolean,
 ) => {
-  let result = [];
+  const result = [];
   for (let i = 0; i < log.length; i++) {
     let item = null;
-    let data = log[i].data;
-    let topics = log[i].topics;
+    const data = log[i].data;
+    const topics = log[i].topics;
     try {
       item = iFace.parseLog({ data, topics });
     } catch (err: any) {
@@ -95,7 +95,6 @@ export const getCloseInfo = (
   let Price: any = 0;
   let receiveBase: any = 0;
   let receiveQuote: any = 0;
-  let isLong: boolean;
 
   const sqrt = toBigNumber(2 ** 96, 0);
 
@@ -110,7 +109,7 @@ export const getCloseInfo = (
 
   const baseLtQuote = loggedClosed[1] < loggedClosed[2];
 
-  isLong = loggedClosed[1] === token0;
+  const isLong = loggedClosed[1] === token0;
 
   if (isLong) {
     Amount = BigNumberToReadableAmount(loggedClosed[3], 18);

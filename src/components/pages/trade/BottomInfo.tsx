@@ -1,17 +1,14 @@
-import { ApolloClient, gql, InMemoryCache } from "@apollo/client";
 import { validateAndParseAddress } from "@uniswap/sdk-core";
-import { IBottomProps, ILongShortData } from "constants/interface";
+import { ILongShortData } from "constants/interface";
 import { useContextTrade } from "context/TradeContext";
 import Decimal from "decimal.js";
 import { BigNumber } from "ethers";
-import { useLongShortData } from "hooks/useLongShortData";
 // import { useLongShortData } from "hooks/useLongShortData";
 import useQuoter from "hooks/useQuote";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { BigNumberToReadableAmount } from "util/commons";
 import { tokenPair } from "util/constants";
 import { parseAmount } from "util/convertValue";
-import { Address } from "wagmi";
 import HistoryTable from "./HistoryTable";
 
 const BottomInfo = ({ tableData }: { tableData: Array<ILongShortData> }) => {
@@ -32,7 +29,7 @@ const BottomInfo = ({ tableData }: { tableData: Array<ILongShortData> }) => {
   );
 
   const longShortHistory = useMemo(() => {
-    return tableData?.map((item: ILongShortData, idx: number) => {
+    return tableData?.map((item: ILongShortData) => {
       const isLong =
         validateAndParseAddress(item.baseToken) ==
         validateAndParseAddress(token0.address);
@@ -159,29 +156,47 @@ const titleHistoryRow = [
   {
     title: "Leverage",
     field: (data: any) => {
-      return (
-        <div className="whitespace-nowrap">{`${data.marginLevel} %`}</div>
-      );
+      return <div className="whitespace-nowrap">{`${data.marginLevel} %`}</div>;
     },
   },
   {
     title: "Collateral",
     field: (data: any) => {
       return (
-        <div className="whitespace-nowrap">{`${data.baseTokenAmount} ${
-          data.direction.toLowerCase() === "long" ? data.token0 : data.token1
-        }`}</div>
+        <div className="whitespace-nowrap">{`${data.baseTokenAmount} ${data.token0}`}</div>
       );
     },
   },
-  // { title: "Collateral", field: "baseTokenAmount" },
-  { title: "Debt", field: (data: any) => {
-    return (
-      <div className="whitespace-nowrap">{`${data.quoteTokenAmount} ${
-        data.direction.toLowerCase() === "long" ? data.token1 : data.token0
-      }`}</div>
-    );
-  }, },
+  {
+    title: "Debt",
+    field: (data: any) => {
+      return (
+        <div className="whitespace-nowrap">{`${data.quoteTokenAmount} ${data.token1}`}</div>
+      );
+    },
+  },
+  // {
+  //   title: "Collateral",
+  //   field: (data: any) => {
+  //     console.log({ data });
+
+  //     return (
+  //       <div className="whitespace-nowrap">{`${data.baseTokenAmount} ${
+  //         data.direction.toLowerCase() === "long" ? data.token0 : data.token1
+  //       }`}</div>
+  //     );
+  //   },
+  // },
+  // {
+  //   title: "Debt",
+  //   field: (data: any) => {
+  //     return (
+  //       <div className="whitespace-nowrap">{`${data.quoteTokenAmount} ${
+  //         data.direction.toLowerCase() === "long" ? data.token1 : data.token0
+  //       }`}</div>
+  //     );
+  //   },
+  // },
   { title: "Entry Price", field: "entryPrice" },
   { title: "Mark Price", field: "markPrice" },
   { title: "Liquidation Price", field: "liquidPrice" },
@@ -208,3 +223,16 @@ const titleHistoryRow = [
   //   },
   // },
 ];
+
+// const turnToken = (data: any, type: string) => {
+//   switch (type) {
+//     case "long":
+//       return {
+//         token0: data?.token0,
+//         token1: data?.token1,
+//       };
+
+//     default:
+//       return
+//   }
+// };

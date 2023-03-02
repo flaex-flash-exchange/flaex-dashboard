@@ -2,22 +2,23 @@ import { ADDRESS_ZERO } from "@uniswap/v3-sdk";
 import BaseButton from "components/common/BaseButton";
 import SliderCustom from "components/common/SliderCustom";
 import { LiteWagmiBtnConnect } from "components/layout/ConnectButton";
+import ModalCallback from "components/modal/ModalCallback";
 import { contractAddress } from "constants/contractAddress";
+import { useModalContext } from "context/ModalContext";
 import { useContextTrade } from "context/TradeContext";
 import Decimal from "decimal.js";
 import { BigNumber, constants, Contract } from "ethers";
-import { useLongShortData } from "hooks/useLongShortData";
-import { QuoterReturn } from "hooks/useQuote";
+import useQuoter, { QuoterReturn } from "hooks/useQuote";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { NumericFormat } from "react-number-format";
 import {
-  amountToHex,
   BigNumberToReadableAmount,
   _onLongCalculator,
   _onShortCalculator,
 } from "util/commons";
 import { LSBtn, tokenPair } from "util/constants";
+import { getOpenInfo } from "util/convertValue";
 import { LongShortInfo } from "util/type";
-import { NumericFormat } from 'react-number-format';
 
 import {
   useAccount,
@@ -29,9 +30,17 @@ import {
 } from "wagmi";
 import { flaexMain, testERC20 } from "../../../contracts";
 
-const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLongShortData :()=>void}) => {
+const LongShort = ({
+  price,
+  fetchLongShortData,
+}: {
+  price: QuoterReturn;
+  fetchLongShortData: () => void;
+}) => {
   const { address, isConnected } = useAccount();
   const { pairCrypto } = useContextTrade();
+  const { pushModal } = useModalContext();
+
   const [isMouted, setIsMouted] = useState(false);
   const provider = useProvider();
   const [isLong, setIsLong] = useState<boolean>(true);
@@ -48,7 +57,26 @@ const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLo
 
   const btnLabel = useMemo(() => (isLong ? LSBtn.LONG : LSBtn.SHORT), [isLong]);
 
-  const longShortInfo : LongShortInfo = useMemo(
+  const quotedAmountOut = useQuoter(
+    token1,
+    token0,
+    1,
+    token0.decimals,
+    token1.decimals,
+    fee,
+  );
+  const markPriceParser = isLong
+    ? quotedAmountOut.priceExactInputToken0
+    : quotedAmountOut.priceExactOutputToken1;
+
+  const pushErrorModal = (hash: string) => {
+    pushModal(
+      <ModalCallback hash={hash} content="Transaction Failed !" type="error" />,
+      true,
+    );
+  };
+
+  const longShortInfo: LongShortInfo = useMemo(
     () =>
       isLong
         ? _onLongCalculator(
@@ -63,7 +91,7 @@ const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLo
             payingValue,
             price.priceExactInputToken0,
           ),
-    [percentage, amountValue, payingValue ,price, isLong],
+    [percentage, amountValue, payingValue, price, isLong],
   );
 
   const fetchAllowance = useCallback(async () => {
@@ -120,9 +148,21 @@ const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLo
   useWaitForTransaction({
     hash: approvalShortTokenData?.hash,
     confirmations: 1,
-    onSuccess() {
-      setIsApprovedShortToken(true);
-    },
+    // onSuccess(data) {
+    //   console.log("onSuccess - setIsApprovedShortToken", data);
+    //   pushModal(
+    //     <ModalCallback
+    //       hash={"mintData?.hash"}
+    //       content={`Succesfully Opened position for`}
+    //     />,
+    //     true,
+    //   );
+    //   setIsApprovedShortToken(true);
+    // },
+    // onError(error) {
+    //   pushErrorModal("hash");
+    //   console.log("setIsApprovedShortToken Short Error", error);
+    // },
   });
 
   const { config: configApprovalLongToken } = usePrepareContractWrite({
@@ -141,9 +181,21 @@ const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLo
   useWaitForTransaction({
     hash: approvalLongTokenData?.hash,
     confirmations: 1,
-    onSuccess() {
-      setIsApprovedLongToken(true);
-    },
+    // onSuccess(data) {
+    //   console.log("onSuccess - setIsApprovedLongToken", data);
+    //   setIsApprovedLongToken(true);
+    //   pushModal(
+    //     <ModalCallback
+    //       hash={"mintData?.hash"}
+    //       content={`Succesfully Opened position for`}
+    //     />,
+    //     true,
+    //   );
+    // },
+    // onError(error) {
+    //   console.log("setIsApprovedLongToken Short Error", error);
+    //   pushErrorModal("hash");
+    // },
   });
 
   const { config: configLong } = usePrepareContractWrite({
@@ -153,7 +205,9 @@ const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLo
     args: [
       token0.address,
       token1.address,
-      new Decimal(longShortInfo.paying.toFixed(4)).mul(new Decimal(10).pow(token0.decimals)).toHex(),
+      new Decimal(longShortInfo.paying.toFixed(4))
+        .mul(new Decimal(10).pow(token0.decimals))
+        .toHex(),
       constants.MaxUint256,
       fee,
       longShortInfo.leverage.mul(100).toHex(),
@@ -171,11 +225,25 @@ const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLo
   const { isSuccess: isLongConfirmed } = useWaitForTransaction({
     hash: longData?.hash,
     confirmations: 1,
-    onSuccess() {
-      console.log("Long success");
-      // getData();
-      //update bottom table
+    onSuccess(data) {
+      const result = getOpenInfo(true, data?.logs);
+      pushModal(
+        <ModalCallback
+          hash={data?.transactionHash}
+          content={
+            <div>
+              <div>Successfully Opened Long</div>
+              <div>{`${result.Amount} ETH at ${result.Price}`}</div>
+            </div>
+          }
+        />,
+        true,
+      );
       fetchLongShortData();
+    },
+    onError(error) {
+      pushErrorModal("hash");
+      console.log("Error - Fail", error);
     },
   });
 
@@ -186,7 +254,9 @@ const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLo
     args: [
       token1.address,
       token0.address,
-      new Decimal(longShortInfo.paying.toFixed(4)).mul(new Decimal(10).pow(token1.decimals)).toHex(),
+      new Decimal(longShortInfo.paying.toFixed(4))
+        .mul(new Decimal(10).pow(token1.decimals))
+        .toHex(),
       constants.MaxUint256,
       fee,
       longShortInfo.leverage.mul(100).toHex(),
@@ -203,10 +273,26 @@ const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLo
   const { isSuccess: isShortConfirmed } = useWaitForTransaction({
     hash: dataShort?.hash,
     confirmations: 1,
-    onSuccess() {
-      console.log("Short success");
-      // getData();
+    onSuccess(data) {
+      const result = getOpenInfo(false, data?.logs);
+
+      pushModal(
+        <ModalCallback
+          hash={data?.transactionHash}
+          content={
+            <div>
+              <div>Successfully Opened Short</div>
+              <div>{`${result.Amount} ETH at ${result.Price}`}</div>
+            </div>
+          }
+        />,
+        true,
+      );
       fetchLongShortData();
+    },
+    onError(error) {
+      pushErrorModal("hash");
+      console.log("Error - Fail", error);
     },
   });
 
@@ -233,48 +319,52 @@ const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLo
   };
 
   const _onBalance = isLong
-  ? BigNumberToReadableAmount(
-      baseBalance ? (baseBalance as BigNumber) : BigNumber.from(0),
-      token0.decimals,
-    )
-  : BigNumberToReadableAmount(
-      quoteBalance ? (quoteBalance as BigNumber) : BigNumber.from(0),
-      token1.decimals,
-    );
-
+    ? BigNumberToReadableAmount(
+        baseBalance ? (baseBalance as BigNumber) : BigNumber.from(0),
+        token0.decimals,
+      )
+    : BigNumberToReadableAmount(
+        quoteBalance ? (quoteBalance as BigNumber) : BigNumber.from(0),
+        token1.decimals,
+      );
 
   const handleChangeAmount = (e: any) => {
     let eAmount = e.floatValue;
     // -> keep amount and percen , calculate paying value
-    if(isNaN(eAmount)){
+    if (isNaN(eAmount)) {
       setAmount(0);
       setpayingValue(0);
     } else if (/^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$/.test(eAmount)) {
-       if(new Decimal(eAmount).greaterThan(new Decimal(_onBalance).mul(100+percentage).div(100))){
-        eAmount= new Decimal(_onBalance).mul(100+percentage).div(100).toNumber();
-       }
+      if (
+        new Decimal(eAmount).greaterThan(
+          new Decimal(_onBalance).mul(100 + percentage).div(100),
+        )
+      ) {
+        eAmount = new Decimal(_onBalance)
+          .mul(100 + percentage)
+          .div(100)
+          .toNumber();
+      }
       // -> keep paying and percen , calculate amount value
-        setAmount(eAmount);
-        setpayingValue(0);
+      setAmount(eAmount);
+      setpayingValue(0);
     }
   };
 
-  const handleChangePaying = (
-    (e: any) => {
-      let ePaying = e.floatValue;
-      if(isNaN(ePaying)){
-        setpayingValue(0);
-        setAmount(0);
-      } else if (/^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$/.test(ePaying)) {
-        if(new Decimal(ePaying).greaterThan(_onBalance)){
-          ePaying= new Decimal(_onBalance).toNumber();
-         }
-        // -> keep paying and percen , calculate amount value
-        setpayingValue(ePaying);
-        setAmount(0);
+  const handleChangePaying = (e: any) => {
+    let ePaying = e.floatValue;
+    if (isNaN(ePaying)) {
+      setpayingValue(0);
+      setAmount(0);
+    } else if (/^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$/.test(ePaying)) {
+      if (new Decimal(ePaying).greaterThan(_onBalance)) {
+        ePaying = new Decimal(_onBalance).toNumber();
       }
+      // -> keep paying and percen , calculate amount value
+      setpayingValue(ePaying);
+      setAmount(0);
     }
-  );
+  };
 
   const _onSetBalance = (_balance: any) => {
     setAmount(0);
@@ -289,8 +379,6 @@ const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLo
       setIsMouted(true);
     }
   }, [isConnected, fetchAllowance, isMouted]);
-
-
 
   return (
     <>
@@ -350,11 +438,15 @@ const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLo
 
             <div className="flex justify-between mt-2.5 font-normal text-sm">
               <NumericFormat
-                className="bg-transparent outline-none w-full"         
+                className="bg-transparent outline-none w-full"
                 onValueChange={handleChangeAmount}
                 allowNegative={false}
                 decimalScale={4}
-                value={amountValue?amountValue:longShortInfo.marginAmount.toNumber()}
+                value={
+                  amountValue
+                    ? amountValue
+                    : longShortInfo.marginAmount.toNumber()
+                }
               />
               <span>{pairCrypto?.base}</span>
             </div>
@@ -373,7 +465,9 @@ const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLo
                 onValueChange={handleChangePaying}
                 allowNegative={false}
                 decimalScale={4}
-                value={payingValue?payingValue:longShortInfo.paying.toNumber()}
+                value={
+                  payingValue ? payingValue : longShortInfo.paying.toNumber()
+                }
               />
               <span
                 className="cursor-pointer whitespace-nowrap"
@@ -385,13 +479,17 @@ const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLo
           </div>
           <div className="mt-5">
             <div className="flex justify-between">
-                <p className="text-xs font-light italic">Total Collateral:</p>
-                <p className="text-sm font-semibold whitespace-nowrap ">{`
-                ${isLong ? longShortInfo.marginAmount.toFixed(4) : longShortInfo.flashSwap.add(longShortInfo.paying).toFixed(4)}
-                
+              <p className="text-xs font-light italic">Total Collateral:</p>
+              <p className="text-sm font-semibold whitespace-nowrap ">{`
                 ${
-                  isLong ? pairCrypto?.base : pairCrypto?.quote
-                }`}</p>
+                  isLong
+                    ? longShortInfo.marginAmount.toFixed(4)
+                    : longShortInfo.flashSwap
+                        .add(longShortInfo.paying)
+                        .toFixed(4)
+                }
+                
+                ${isLong ? pairCrypto?.base : pairCrypto?.quote}`}</p>
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Flash Swap:</p>
@@ -413,21 +511,27 @@ const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLo
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Entry Price:</p>
-              <p className="text-sm font-semibold whitespace-nowrap">{`${longShortInfo?.entryPrice.toFixed(4)}`}</p>
+              <p className="text-sm font-semibold whitespace-nowrap">{`${longShortInfo?.entryPrice.toFixed(
+                4,
+              )}`}</p>
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Liquidation Price:</p>
-              <p className="text-sm font-semibold whitespace-nowrap">{`${longShortInfo?.liquidationPrice.toFixed(4)}`}</p>
+              <p className="text-sm font-semibold whitespace-nowrap">{`${longShortInfo?.liquidationPrice.toFixed(
+                4,
+              )}`}</p>
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Margin Ratio:</p>
-              <p className="text-sm font-semibold whitespace-nowrap">{`${longShortInfo?.marginRatio.toFixed(4)}`}</p>
+              <p className="text-sm font-semibold whitespace-nowrap">{`${longShortInfo?.marginRatio.toFixed(
+                4,
+              )}`}</p>
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Commission Fee:</p>
-              <p className="text-sm font-semibold whitespace-nowrap">{`${
-                longShortInfo?.commissionFee.toFixed(4)
-              } ${isLong ? pairCrypto?.quote : pairCrypto?.base}`}</p>
+              <p className="text-sm font-semibold whitespace-nowrap">{`${longShortInfo?.commissionFee.toFixed(
+                4,
+              )} ${isLong ? pairCrypto?.quote : pairCrypto?.base}`}</p>
             </div>
           </div>
           <div className="flex-1 flex flex-col justify-end">
@@ -474,30 +578,38 @@ const LongShort = ({ price , fetchLongShortData}: { price: QuoterReturn ,fetchLo
                         {isMouted && isLong && isApprovedShortToken ? (
                           <BaseButton
                             disabled={
-                              !longFunc || isLongLoading || (isLongSuccess && !isLongConfirmed)
+                              !longFunc ||
+                              isLongLoading ||
+                              (isLongSuccess && !isLongConfirmed)
                             }
                             onButtonClick={() => longFunc?.()}
                             moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
                           >
-                            {((!isLongLoading &&
-                               !isLongSuccess ) || isLongConfirmed) &&
+                            {((!isLongLoading && !isLongSuccess) ||
+                              isLongConfirmed) &&
                               `${btnLabel} ${pairCrypto?.origin}`}
                             {isLongLoading && `Waiting for signing`}
-                            {(isLongSuccess && !isLongConfirmed ) && `Waiting for network`}
+                            {isLongSuccess &&
+                              !isLongConfirmed &&
+                              `Waiting for network`}
                           </BaseButton>
                         ) : (
                           <BaseButton
                             disabled={
-                              !shortFunc || isShortLoading || (isShortSuccess && !isShortConfirmed)
+                              !shortFunc ||
+                              isShortLoading ||
+                              (isShortSuccess && !isShortConfirmed)
                             }
                             onButtonClick={() => shortFunc?.()}
                             moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
                           >
-                            {((!isShortLoading &&
-                              !isShortSuccess) || isShortConfirmed ) &&
+                            {((!isShortLoading && !isShortSuccess) ||
+                              isShortConfirmed) &&
                               `${btnLabel} ${pairCrypto?.origin}`}
                             {isShortLoading && `Waiting for signing`}
-                            {(isShortSuccess && !isShortConfirmed) && `Waiting for network`}
+                            {isShortSuccess &&
+                              !isShortConfirmed &&
+                              `Waiting for network`}
                           </BaseButton>
                         )}
                       </>

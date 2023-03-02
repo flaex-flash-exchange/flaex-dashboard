@@ -60,8 +60,14 @@ const MainMint = () => {
       pushModal(
         <ModalCallback
           hash={mintData?.hash}
-          content={`Succesfully Mint
-      ${amount} ${tokenSelected === 0 ? "WETH" : "DAI"} `}
+          content={
+            <div>
+              <div>Successfully Minted</div>
+              <div>
+                {amount} {tokenSelected === 0 ? " WETH" : " DAI"}
+              </div>
+            </div>
+          }
         />,
         true,
       );

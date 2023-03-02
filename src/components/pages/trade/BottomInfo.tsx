@@ -163,7 +163,7 @@ const titleHistoryRow = [
     title: "Collateral",
     field: (data: any) => {
       return (
-        <div className="whitespace-nowrap">{`${data.baseTokenAmount} ${data.token0}`}</div>
+        <div className="whitespace-nowrap">{`${data.baseTokenAmount} ${ data.isLong?data.token0:data.token1}`}</div>
       );
     },
   },
@@ -171,7 +171,7 @@ const titleHistoryRow = [
     title: "Debt",
     field: (data: any) => {
       return (
-        <div className="whitespace-nowrap">{`${data.quoteTokenAmount} ${data.token1}`}</div>
+        <div className="whitespace-nowrap">{`${data.quoteTokenAmount} ${data.isLong?data.token1:data.token0}`}</div>
       );
     },
   },

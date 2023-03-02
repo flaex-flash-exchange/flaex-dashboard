@@ -182,7 +182,7 @@ const CloseRepay = ({
     write: closeFunc,
   } = useContractWrite(configClose);
 
-  const { isSuccess: isCloseConfirmed } = useWaitForTransaction({
+  const { isSuccess: isCloseConfirmed , isError : isCloseEroor } = useWaitForTransaction({
     hash: dataClose?.hash,
     confirmations: 1,
     onSuccess(data) {
@@ -212,6 +212,8 @@ const CloseRepay = ({
     },
   });
 
+  const txCloseDone = isCloseConfirmed ||  isCloseEroor;
+
   const { config: configRepay } = usePrepareContractWrite({
     address: contractAddress.FlaexMain as `0x${string}`,
     abi: flaexMain.abi,
@@ -236,7 +238,7 @@ const CloseRepay = ({
     write: repayFunc,
   } = useContractWrite(configRepay);
 
-  const { isSuccess: isRepayConfirmed } = useWaitForTransaction({
+  const { isSuccess: isRepayConfirmed, isError: isRepayError } = useWaitForTransaction({
     hash: dataRepay?.hash,
     confirmations: 1,
     onSuccess(data) {
@@ -258,6 +260,8 @@ const CloseRepay = ({
       fetchLongShortData();
     },
   });
+
+  const txRepayDone = isRepayConfirmed || isRepayError;
 
   const { config: configApprovalRepayShortToken } = usePrepareContractWrite({
     address: token1.address,
@@ -595,17 +599,17 @@ const CloseRepay = ({
                     disabled={
                       !repayFunc ||
                       isRepayLoading ||
-                      (isRepaySuccess && !isRepayConfirmed)
+                      (isRepaySuccess && !txRepayDone)
                     }
                     onButtonClick={() => repayFunc?.()}
                     moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full"
                   >
                     {((!isRepayLoading && !isRepaySuccess) ||
-                      isRepayConfirmed) &&
+                      txRepayDone) &&
                       `Repay Partition Debt`}
                     {isRepayLoading && `Waiting for signing`}
                     {isRepaySuccess &&
-                      !isRepayConfirmed &&
+                      !txRepayDone &&
                       `Waiting for network`}
                   </BaseButton>
                 </>
@@ -659,15 +663,15 @@ const CloseRepay = ({
                   disabled={
                     !closeFunc ||
                     isCloseLoading ||
-                    (isCloseSuccess && !isCloseConfirmed)
+                    (isCloseSuccess && !txCloseDone)
                   }
                   onButtonClick={() => closeFunc?.()}
                   moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full"
                 >
-                  {((!isCloseLoading && !isCloseSuccess) || isCloseConfirmed) &&
+                  {((!isCloseLoading && !isCloseSuccess) || txCloseDone) &&
                     `Close Position`}
                   {isCloseLoading && `Waiting for signing`}
-                  {isCloseSuccess && !isCloseConfirmed && `Waiting for network`}
+                  {isCloseSuccess && !txCloseDone && `Waiting for network`}
                 </BaseButton>
               </>
             )}

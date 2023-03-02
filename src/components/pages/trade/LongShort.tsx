@@ -222,18 +222,18 @@ const LongShort = ({
     write: longFunc,
   } = useContractWrite(configLong);
 
-  const { isSuccess: isLongConfirmed } = useWaitForTransaction({
+  const { isSuccess: isLongConfirmed , isError : isLongError } = useWaitForTransaction({
     hash: longData?.hash,
     confirmations: 1,
     onSuccess(data) {
-      const result = getOpenInfo(true, data?.logs);
+      const result = getOpenInfo(true, data?.logs, token0.decimals, token1.decimals);
       pushModal(
         <ModalCallback
           hash={data?.transactionHash}
           content={
             <div>
               <div>Successfully Opened Long</div>
-              <div>{`${result.Amount} ETH at ${result.Price}`}</div>
+              <div>{`${result.Amount.toFixed(4)} ${token0.symbol} at ${new Decimal(result.Price).toFixed(4)}`}</div>
             </div>
           }
         />,
@@ -246,6 +246,8 @@ const LongShort = ({
       console.log("Error - Fail", error);
     },
   });
+
+  const txLongDone = isLongConfirmed || isLongError;
 
   const { config: configShort } = usePrepareContractWrite({
     address: contractAddress.FlaexMain as `0x${string}`,
@@ -270,11 +272,11 @@ const LongShort = ({
     write: shortFunc,
   } = useContractWrite(configShort);
 
-  const { isSuccess: isShortConfirmed } = useWaitForTransaction({
+  const { isSuccess: isShortConfirmed , isError : isShortError} = useWaitForTransaction({
     hash: dataShort?.hash,
     confirmations: 1,
     onSuccess(data) {
-      const result = getOpenInfo(false, data?.logs);
+      const result = getOpenInfo(false, data?.logs, token0.decimals, token1.decimals);
 
       pushModal(
         <ModalCallback
@@ -282,7 +284,7 @@ const LongShort = ({
           content={
             <div>
               <div>Successfully Opened Short</div>
-              <div>{`${result.Amount} ETH at ${result.Price}`}</div>
+              <div>{`${result.Amount.toFixed(4)} ${token0.symbol} at ${new Decimal(result.Price).toFixed(4)}`}</div>
             </div>
           }
         />,
@@ -295,6 +297,8 @@ const LongShort = ({
       console.log("Error - Fail", error);
     },
   });
+
+  const txShortDone = isShortConfirmed || isShortError;
 
   const handleChangeLongShort = (clickedLong: boolean) => {
     if (clickedLong) {
@@ -580,17 +584,17 @@ const LongShort = ({
                             disabled={
                               !longFunc ||
                               isLongLoading ||
-                              (isLongSuccess && !isLongConfirmed)
+                              (isLongSuccess && !txLongDone)
                             }
                             onButtonClick={() => longFunc?.()}
                             moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
                           >
                             {((!isLongLoading && !isLongSuccess) ||
-                              isLongConfirmed) &&
+                              txLongDone) &&
                               `${btnLabel} ${pairCrypto?.origin}`}
                             {isLongLoading && `Waiting for signing`}
                             {isLongSuccess &&
-                              !isLongConfirmed &&
+                              !txLongDone &&
                               `Waiting for network`}
                           </BaseButton>
                         ) : (
@@ -598,17 +602,17 @@ const LongShort = ({
                             disabled={
                               !shortFunc ||
                               isShortLoading ||
-                              (isShortSuccess && !isShortConfirmed)
+                              (isShortSuccess && !txShortDone)
                             }
                             onButtonClick={() => shortFunc?.()}
                             moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
                           >
                             {((!isShortLoading && !isShortSuccess) ||
-                              isShortConfirmed) &&
+                              txShortDone) &&
                               `${btnLabel} ${pairCrypto?.origin}`}
                             {isShortLoading && `Waiting for signing`}
                             {isShortSuccess &&
-                              !isShortConfirmed &&
+                              !txShortDone &&
                               `Waiting for network`}
                           </BaseButton>
                         )}

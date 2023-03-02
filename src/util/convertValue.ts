@@ -3,6 +3,7 @@ import { BigNumber, utils } from "ethers";
 import { testERC20, interfaceEvents } from "contracts";
 import { amountToHex, BigNumberToReadableAmount } from "./commons";
 import { argNames, eventLogs } from "./constants";
+import { type } from "os";
 
 export const convertCurrency = (number: number) => {
   return "$" + number;
@@ -62,26 +63,17 @@ const getERCTransferEvent = (
   return result;
 };
 
-export const getOpenInfo = (isLong: boolean, log: Array<any>) => {
+export const getOpenInfo = (isLong: boolean, log: Array<any>, token0Decimal: number, token1Decimal: number) => {
   let Amount: any = 0;
   let Price: any = 0;
   if (isLong) {
     const loggedOpen = getEvent(log, eventLogs.ORDER_OPEN);
-    Amount = BigNumberToReadableAmount(loggedOpen[5], 18);
-    Price = BigNumberToReadableAmount(
-      loggedOpen[6].mul(toBigNumber(1, 18)).div(loggedOpen[3]),
-      18,
-    );
+    Amount = BigNumberToReadableAmount(loggedOpen.baseTokenAmount,token0Decimal);
+    Price = new Decimal(loggedOpen.quoteTokenAmount._hex).div(loggedOpen.baseMarginAmount._hex.mul(loggedOpen.marginLevel._hex).div(10000));
   } else {
     const loggedOpen = getEvent(log, eventLogs.ORDER_OPEN);
-    Price = BigNumberToReadableAmount(
-      loggedOpen[3].mul(toBigNumber(1, 18)).div(loggedOpen[6]),
-      18,
-    );
-    Amount = BigNumberToReadableAmount(
-      loggedOpen[5].div(loggedOpen[3].div(loggedOpen[6])),
-      18,
-    );
+    Price = new Decimal(loggedOpen.baseMarginAmount._hex).mul(loggedOpen.marginLevel._hex).div(loggedOpen.quoteTokenAmount._hex).div(10000),
+    Amount =   new Decimal(loggedOpen.baseTokenAmount._hex).div(Price).div(new Decimal(10).pow(token1Decimal));
   }
   return { Amount, Price };
 };

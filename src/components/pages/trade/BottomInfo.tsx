@@ -37,18 +37,7 @@ const BottomInfo = ({ tableData }: { tableData: Array<ILongShortData> }) => {
         validateAndParseAddress(item.baseToken) ==
         validateAndParseAddress(token0.address);
 
-      const entryPriceParser = isLong
-        ? new Decimal(item?.quoteTokenAmount)
-            .div(
-              new Decimal(item?.baseMarginTokenAmount).mul(
-                new Decimal(item?.marginLevel).div(10000),
-              ),
-            )
-            .toFixed(4)
-        : new Decimal(item?.baseMarginTokenAmount)
-            .mul(new Decimal(item?.marginLevel).div(10000))
-            .div(new Decimal(item?.quoteTokenAmount))
-            .toFixed(4);
+      const entryPriceParser = new Decimal(item?.entryPrice).toFixed(4);
       const markPriceParser = isLong
         ? quotedAmountOut.priceExactInputToken0
         : quotedAmountOut.priceExactOutputToken1;
@@ -108,8 +97,8 @@ const BottomInfo = ({ tableData }: { tableData: Array<ILongShortData> }) => {
             ),
         direction: isLong ? "long" : "short",
         marginLevel: new Decimal(item?.marginLevel).div(100).toNumber(),
-        token0: isLong? token0.symbol : token1.symbol,
-        token1: isLong? token1.symbol: token0.symbol,
+        token0: token0.symbol,
+        token1: token1.symbol,
         entryPrice: entryPriceParser,
         markPrice: markPriceParser,
         liquidPrice: liquidatePrice,
@@ -129,12 +118,7 @@ const BottomInfo = ({ tableData }: { tableData: Array<ILongShortData> }) => {
         isLong,
       };
     });
-  }, [
-    quotedAmountOut.priceExactInputToken0,
-    quotedAmountOut.priceExactOutputToken1,
-    tableData,
-    token0.address,
-  ]);
+  }, [quotedAmountOut.priceExactInputToken0, quotedAmountOut.priceExactOutputToken1, tableData, token0.address, token0.decimals, token0.symbol, token1.decimals, token1.symbol]);
 
   useEffect(() => {
     if (repayCloseData?.isLong) {

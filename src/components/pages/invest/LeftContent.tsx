@@ -1,5 +1,5 @@
+import HorizontalTable from "components/common/HorizontalTable";
 import React from "react";
-import InvestTable from "./InvestTable";
 
 const LeftContent = () => {
   return (
@@ -10,7 +10,7 @@ const LeftContent = () => {
       </div>
 
       <div className="mt-2.5">
-        <InvestTable totalRow={totalRowTerm} detailRows={detailRowsTerm} />
+        <HorizontalTable totalRow={totalRowTerm} detailRows={detailRowsTerm} />
       </div>
 
       <div className="bg-border-flaex mt-2.5 pb-[12px] pt-[10px] px-[19px]">

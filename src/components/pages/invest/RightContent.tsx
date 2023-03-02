@@ -1,7 +1,7 @@
+import HorizontalTable from "components/common/HorizontalTable";
 import React from "react";
 import AmountInvest from "./AmountInvest";
 import DrawAmountInvest from "./DrawAmountInvest";
-import InvestTable from "./InvestTable";
 
 const RightContent = () => {
   return (
@@ -12,7 +12,7 @@ const RightContent = () => {
       </div>
 
       <div className="mt-2.5">
-        <InvestTable totalRow={totalRowTerm} detailRows={detailRowsTerm} />
+        <HorizontalTable totalRow={totalRowTerm} detailRows={detailRowsTerm} />
       </div>
 
       <div className="mt-2 grid grid-cols-5 gap-2.5">

@@ -89,7 +89,12 @@ export const getOpenInfo = (isLong: boolean, log: Array<any>) => {
       18,
     );
     Amount = BigNumberToReadableAmount(
-      loggedOpen[5].div(loggedOpen[3].div(loggedOpen[6])),
+      loggedOpen[5].div(
+        loggedOpen[3]
+          .mul(loggedOpen[4])
+          .div(toBigNumber(1, 4))
+          .div(loggedOpen[6]),
+      ),
       18,
     );
   }

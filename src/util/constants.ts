@@ -69,7 +69,12 @@ export const tokenPair: any = {
 export const eventLogs = {
   ORDER_OPEN: "OrderOpened",
   REPAY: "repayPartialDebt",
-  CLOSE: "OrderClosed",
+  ORDER_CLOSE: "OrderClosed",
+  ASSET_PROVIDED: "AssetProvided",
+  ASSET_WITHDRAWN: "assetWithdrawn",
+  YIELD_CLAIMED: "yieldClaimed",
+  TRANSFER: "Transfer",
+  SWAP: "Swap",
 };
 export const argNames = {
   BASE_TOKEN_AMOUNT: "baseTokenAmount",

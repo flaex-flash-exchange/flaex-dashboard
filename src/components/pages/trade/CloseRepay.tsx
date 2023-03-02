@@ -14,11 +14,7 @@ import { FaArrowLeft } from "react-icons/fa";
 import { NumericFormat } from "react-number-format";
 import { amountToHex } from "util/commons";
 import { eventLogs, Shippaple, tokenPair } from "util/constants";
-import {
-  defineInterface,
-  parseTokenAmount,
-  toBigNumber,
-} from "util/convertValue";
+import { toBigNumber, getCloseInfo, getRepayInfo } from "util/convertValue";
 
 import {
   useAccount,
@@ -76,7 +72,6 @@ const CloseRepay = ({
     }
   }, [address, provider, token0.address, token1.address]);
 
-  // console.log({ repayCloseData });
   const available = repayCloseData
     ? isRepay
       ? new Decimal(repayCloseData?.quoteTokenAmount).mul(0.9999).toFixed(4)
@@ -191,15 +186,22 @@ const CloseRepay = ({
     hash: dataClose?.hash,
     confirmations: 1,
     onSuccess(data) {
-      console.log("close success", data);
-      // getData();
+      const result = getCloseInfo(token0.address, data?.logs, address);
+      const isLong = result.isLong;
       pushModal(
         <ModalCallback
           hash={data?.transactionHash}
           content={
             <div>
-              <div>Successfully Closed Long!</div>
-              {/* <div>{`${tokenAmount} ETH at ${markPriceParser}`}</div> */}
+              <div>Successfully Closed {isLong ? "Long" : "Short"}</div>
+              <div>{`${result.Amount} ETH at ${result.Price}`}</div>
+              <div>
+                Receive {isLong ? result.receiveBase : result.receiveQuote} ETH
+                and{" "}
+                <div>
+                  {isLong ? result.receiveQuote : result.receiveBase} DAI
+                </div>
+              </div>
             </div>
           }
         />,
@@ -238,22 +240,21 @@ const CloseRepay = ({
     hash: dataRepay?.hash,
     confirmations: 1,
     onSuccess(data) {
-      console.log("Repay success", data);
+      const result = getRepayInfo(token0.address, data?.logs, address);
       pushModal(
         <ModalCallback
           hash={data?.transactionHash}
           content={
             <div>
-              <div>Successfully Repaid !</div>
-              {/* <div>{`${tokenAmount} ETH at ${markPriceParser}`}</div> */}
+              <div>Successfully Repaid </div>
+              <div>
+                {result.Amount} {result.isLong ? " ETH" : " DAI"}
+              </div>
             </div>
           }
         />,
         true,
       );
-      // const tokenAmount = parseTokenAmount(data?.logs, eventLogs.REPAY);
-
-      // getData();
       fetchLongShortData();
     },
   });

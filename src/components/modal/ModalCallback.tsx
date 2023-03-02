@@ -23,7 +23,7 @@ const ModalCallback = ({
   };
 
   return (
-    <div className="w-[226px] h-[199px] pb-[2px]">
+    <div className="w-[250px] h-[240px] pb-[2px]">
       <div className="mt-2 flex flex-col justify-between items-center h-full">
         <div>
           <div
@@ -37,12 +37,12 @@ const ModalCallback = ({
               <FaTimesCircle size={32} />
             )}
           </div>
-          <div className="text-[14px] text-center font-semibold max-w-[220px] mt-6">
+          <div className="text-[16px] text-center font-semibold max-w-[240px] h-[105px] h-full mt-6">
             {content}
           </div>
         </div>
 
-        <div>
+        <div className="h-full">
           <a
             href={`https://goerli.etherscan.io/tx/${hash}`}
             className="w-full text-center justify-center cursor-pointer flex items-center italic font-normal gap-2 text-[12px] hover:underline hover:decoration-solid duration-200"

@@ -107,7 +107,7 @@ const AmountInvest = ({balance}:{balance:any}) => {
                 isApprovalSuccess 
               }
               onButtonClick={() => approvalTokenFunc?.()}
-              moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
+              moreClass="col-span-2 button-primary"
             >
               {!isApprovalLoading &&
                 !isApprovalSuccess &&
@@ -125,7 +125,7 @@ const AmountInvest = ({balance}:{balance:any}) => {
                 (isInvestSuccess && !txInvestDone)
               }
               onButtonClick={() => investFunc?.()}
-              moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
+              moreClass="col-span-2 button-primary"
             >
               {((!isInvestLoading &&
                 !isInvestSuccess ) || txInvestDone ) &&

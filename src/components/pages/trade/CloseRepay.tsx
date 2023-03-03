@@ -5,7 +5,7 @@ import ModalCallback from "components/modal/ModalCallback";
 import { contractAddress } from "constants/contractAddress";
 import { useModalContext } from "context/ModalContext";
 import { useContextTrade } from "context/TradeContext";
-import { flaexMain, testERC20 } from "contracts";
+import { FlaexMain, TestERC20 } from "contracts";
 import Decimal from "decimal.js";
 import { constants, Contract } from "ethers";
 import { QuoterReturn } from "hooks/useQuote";
@@ -50,8 +50,8 @@ const CloseRepay = ({
     useState<boolean>(true);
 
   const fetchAllowance = useCallback(async () => {
-    const longToken = new Contract(token1.address, testERC20.abi, provider);
-    const shortToken = new Contract(token0.address, testERC20.abi, provider);
+    const longToken = new Contract(token1.address, TestERC20.abi, provider);
+    const shortToken = new Contract(token0.address, TestERC20.abi, provider);
     if (!longToken || !address || !shortToken) {
       return;
     } else {
@@ -152,7 +152,7 @@ const CloseRepay = ({
   );
   const { config: configClose, error } = usePrepareContractWrite({
     address: contractAddress.FlaexMain as `0x${string}`,
-    abi: flaexMain.abi,
+    abi: FlaexMain.abi,
     functionName: "closeExactInput",
     args: repayCloseData?.isLong
       ? [
@@ -216,7 +216,7 @@ const CloseRepay = ({
 
   const { config: configRepay } = usePrepareContractWrite({
     address: contractAddress.FlaexMain as `0x${string}`,
-    abi: flaexMain.abi,
+    abi: FlaexMain.abi,
     functionName: "repayPartialDebt",
     args: repayCloseData?.isLong
       ? [
@@ -265,7 +265,7 @@ const CloseRepay = ({
 
   const { config: configApprovalRepayShortToken } = usePrepareContractWrite({
     address: token1.address,
-    abi: testERC20.abi,
+    abi: TestERC20.abi,
     functionName: "approve",
     args: [contractAddress.FlaexMain, constants.MaxUint256],
   });
@@ -287,7 +287,7 @@ const CloseRepay = ({
 
   const { config: configApprovalRepayLongToken } = usePrepareContractWrite({
     address: token0.address,
-    abi: testERC20.abi,
+    abi: TestERC20.abi,
     functionName: "approve",
     args: [contractAddress.FlaexMain, constants.MaxUint256],
   });

@@ -11,7 +11,7 @@ const InvestTable = ({
     <div className="bg-border-flaex">
       <div className="flex justify-between text-[18px] font-semibold pt-3.5 pb-3 px-[19px] border-b-[0.2px] border-flaex-border-table ">
         <div>{totalRow.title}</div>
-        <div className="font-bold">{totalRow.value}</div>
+        <div className="font-bold">{`${totalRow.value.toFixed(2)} %`}</div>
       </div>
 
       <div className="pt-1 pb-[10px] px-[22px]">
@@ -21,7 +21,7 @@ const InvestTable = ({
               <div key={idx} className="mt-1.5">
                 <div className="flex justify-between text-[16px] font-semibold">
                   <div>{item.title}</div>
-                  <div className="font-bold">{item.value}</div>
+                  <div className="font-bold">{`${item.value.toFixed(2)} %`}</div>
                 </div>
                 <div className="pl-3.5 mt-[5px]">
                   {item.children.map((itemChild: any, idxChild: any) => {
@@ -31,7 +31,7 @@ const InvestTable = ({
                         key={idxChild}
                       >
                         <div>{itemChild.title}</div>
-                        <div className="font-normal">{itemChild.value}</div>
+                        <div className="font-normal">{`${itemChild?.value?.toFixed(2)} %`}</div>
                       </div>
                     );
                   })}
@@ -51,7 +51,7 @@ const InvestTable = ({
               >
                 {item.title}
               </div>
-              <div className="font-bold">{item.value}</div>
+              <div className="font-bold">{`${item.value.toFixed(2)} %`}</div>
             </div>
           );
         })}

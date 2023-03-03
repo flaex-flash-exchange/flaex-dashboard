@@ -1,6 +1,6 @@
 import { Decimal } from "decimal.js";
 import { BigNumber, utils } from "ethers";
-import { testERC20, interfaceEvents } from "contracts";
+import { TestERC20, interfaceEvents } from "contracts";
 import { amountToHex, BigNumberToReadableAmount } from "./commons";
 import { argNames, eventLogs } from "./constants";
 import { type } from "os";
@@ -68,8 +68,8 @@ export const getOpenInfo = (isLong: boolean, log: Array<any>, token0Decimal: num
   let Price: any = 0;
   if (isLong) {
     const loggedOpen = getEvent(log, eventLogs.ORDER_OPEN);
-    Amount = BigNumberToReadableAmount(loggedOpen.baseTokenAmount,token0Decimal);
-    Price = new Decimal(loggedOpen.quoteTokenAmount._hex).div(loggedOpen.baseMarginAmount._hex.mul(loggedOpen.marginLevel._hex).div(10000));
+    Amount = new Decimal(loggedOpen.baseTokenAmount._hex).div(new Decimal(10).pow(token0Decimal));
+    Price = new Decimal(loggedOpen.quoteTokenAmount._hex).div(new Decimal(loggedOpen.baseMarginAmount._hex).mul(loggedOpen.marginLevel._hex).div(10000));
   } else {
     const loggedOpen = getEvent(log, eventLogs.ORDER_OPEN);
     Price = new Decimal(loggedOpen.baseMarginAmount._hex).mul(loggedOpen.marginLevel._hex).div(loggedOpen.quoteTokenAmount._hex).div(10000),

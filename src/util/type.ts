@@ -20,6 +20,29 @@ export interface FormatedUserData {
     quoteTokenAmount: number | string;
 }
 
+export interface FlaexCollateralInfo {
+    healthFactor:BigNumber;
+    availableBorrowsBase:BigNumber;
+    totalCollateralBase: BigNumber;
+    totalDebtBase: BigNumber;
+    ltv: number | BigNumber;
+    currentLiquidationThreshold: BigNumber;
+}
+
+export interface UserInvestYield {
+    addressess:Array<string>;
+    amounts : Array<BigNumber>;
+}
+
+export interface TokenYieldList {
+    address: string;
+    symbol: string;
+    decimals: number;
+    name:string;
+    price: number;
+}
+
+
 export interface LongShortInfo {
     paying: Decimal,
     flashSwap: Decimal,

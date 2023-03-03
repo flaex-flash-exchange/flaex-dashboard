@@ -28,7 +28,7 @@ import {
   useProvider,
   useWaitForTransaction,
 } from "wagmi";
-import { flaexMain, testERC20 } from "../../../contracts";
+import { FlaexMain, TestERC20 } from "../../../contracts";
 
 const LongShort = ({
   price,
@@ -95,8 +95,8 @@ const LongShort = ({
   );
 
   const fetchAllowance = useCallback(async () => {
-    const longToken = new Contract(token0.address, testERC20.abi, provider);
-    const shortToken = new Contract(token1.address, testERC20.abi, provider);
+    const longToken = new Contract(token0.address, TestERC20.abi, provider);
+    const shortToken = new Contract(token1.address, TestERC20.abi, provider);
     if (!longToken || !address || !shortToken) {
       return;
     } else {
@@ -118,14 +118,14 @@ const LongShort = ({
   }, [address, provider, token0.address, token1.address]);
 
   const { data: baseBalance } = useContractRead({
-    abi: testERC20.abi,
+    abi: TestERC20.abi,
     address: token0.address,
     functionName: "balanceOf",
     args: [address ? address : ADDRESS_ZERO],
   });
 
   const { data: quoteBalance } = useContractRead({
-    abi: testERC20.abi,
+    abi: TestERC20.abi,
     address: token1.address,
     functionName: "balanceOf",
     args: [address ? address : ADDRESS_ZERO],
@@ -133,7 +133,7 @@ const LongShort = ({
 
   const { config: configApprovalShortToken } = usePrepareContractWrite({
     address: token1.address,
-    abi: testERC20.abi,
+    abi: TestERC20.abi,
     functionName: "approve",
     args: [contractAddress.FlaexMain, constants.MaxUint256],
   });
@@ -148,7 +148,7 @@ const LongShort = ({
   useWaitForTransaction({
     hash: approvalShortTokenData?.hash,
     confirmations: 1,
-    // onSuccess(data) {
+    onSuccess(data) {
     //   console.log("onSuccess - setIsApprovedShortToken", data);
     //   pushModal(
     //     <ModalCallback
@@ -157,8 +157,8 @@ const LongShort = ({
     //     />,
     //     true,
     //   );
-    //   setIsApprovedShortToken(true);
-    // },
+      setIsApprovedShortToken(true);
+    },
     // onError(error) {
     //   pushErrorModal("hash");
     //   console.log("setIsApprovedShortToken Short Error", error);
@@ -167,7 +167,7 @@ const LongShort = ({
 
   const { config: configApprovalLongToken } = usePrepareContractWrite({
     address: token0.address,
-    abi: testERC20.abi,
+    abi: TestERC20.abi,
     functionName: "approve",
     args: [contractAddress.FlaexMain, constants.MaxUint256],
   });
@@ -181,9 +181,9 @@ const LongShort = ({
   useWaitForTransaction({
     hash: approvalLongTokenData?.hash,
     confirmations: 1,
-    // onSuccess(data) {
+    onSuccess(data) {
     //   console.log("onSuccess - setIsApprovedLongToken", data);
-    //   setIsApprovedLongToken(true);
+      setIsApprovedLongToken(true);
     //   pushModal(
     //     <ModalCallback
     //       hash={"mintData?.hash"}
@@ -195,12 +195,12 @@ const LongShort = ({
     // onError(error) {
     //   console.log("setIsApprovedLongToken Short Error", error);
     //   pushErrorModal("hash");
-    // },
+    },
   });
 
   const { config: configLong } = usePrepareContractWrite({
     address: contractAddress.FlaexMain as `0x${string}`,
-    abi: flaexMain.abi,
+    abi: FlaexMain.abi,
     functionName: "openExactOutput",
     args: [
       token0.address,
@@ -251,7 +251,7 @@ const LongShort = ({
 
   const { config: configShort } = usePrepareContractWrite({
     address: contractAddress.FlaexMain as `0x${string}`,
-    abi: flaexMain.abi,
+    abi: FlaexMain.abi,
     functionName: "openExactOutput",
     args: [
       token1.address,

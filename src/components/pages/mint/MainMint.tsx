@@ -1,9 +1,12 @@
 import BaseButton from "components/common/BaseButton";
 import { LiteWagmiBtnConnect } from "components/layout/ConnectButton";
-import ModalCallback from "components/modal/ModalCallback";
-import { useModalContext } from "context/ModalContext";
-import { testERC20 } from "contracts";
-import React, { useEffect, useMemo, useState } from "react";
+import { contractAddress } from "constants/contractAddress";
+import { useContextTrade } from "context/TradeContext";
+import { TestERC20 } from "contracts";
+import { constants } from "ethers";
+import React, { ReactNode, useEffect, useMemo, useState } from "react";
+import { FaCog, FaExternalLinkAlt, FaRegCheckCircle } from "react-icons/fa";
+import { toast, ToastContent } from "react-toastify";
 import { amountToHex } from "util/commons";
 import { tokenPair } from "util/constants";
 import {
@@ -14,6 +17,8 @@ import {
 } from "wagmi";
 import SelectToken from "./SelectToken";
 import { BounceLoader } from "react-spinners";
+import { useModalContext } from "context/ModalContext";
+import ModalCallback from "components/modal/ModalCallback";
 
 const MainMint = () => {
   const { address, isConnected } = useAccount();
@@ -27,7 +32,7 @@ const MainMint = () => {
 
   const { token0, token1, fee } = tokenPair["wETH/DAI"];
 
-  const onSelectToken = (value) => {
+  const onSelectToken = (value: any) => {
     setTokenSelected(value);
   };
 
@@ -36,7 +41,7 @@ const MainMint = () => {
       tokenSelected === 0
         ? (token0.address as `0x${string}`)
         : (token1.address as `0x${string}`),
-    abi: testERC20.abi,
+    abi: TestERC20.abi,
     functionName: "mint(uint256)",
     args: [
       amountToHex(

@@ -62,7 +62,6 @@ export const cartSlice = createSlice({
           (item) => item.id === productId,
         );
 
-        console.log(existingItem);
         if (existingItem) {
           state.cartItems = state.cartItems
             .slice()

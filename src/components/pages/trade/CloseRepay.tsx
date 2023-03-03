@@ -356,7 +356,7 @@ const CloseRepay = ({
     }
   }, [amountValue, repayCloseData, isRepay]);
 
-  const { receiveToken0 , receiveToken1 , feeToken0, feeToken1 } = useMemo(() => {
+  const { receiveToken0 , receiveToken1 , commissionFee } = useMemo(() => {
     if(repayCloseData){
       const priceFlash = repayCloseData?.isLong ? price.priceExactInputToken0: price.priceExactOutputToken1;
       const flashSwap = repayCloseData?.isLong ? new Decimal(amountValue).mul(priceFlash).mul(0.9995) : new Decimal(amountValue).div(priceFlash).mul(0.9995);
@@ -365,31 +365,27 @@ const CloseRepay = ({
           return {
             receiveToken0 :new Decimal(repayCloseData?.baseTokenAmount).sub(amountValue).toFixed(4),
             receiveToken1: new Decimal(flashSwap).sub(repayCloseData?.quoteTokenAmount).toFixed(4),
-            feeToken0:new Decimal(0).toFixed(4),
-            feeToken1:new Decimal(flashSwap).mul(0.0005).toFixed(4),
+            commissionFee:new Decimal(flashSwap).mul(0.0005).toFixed(4),
           };
         } else {
           return {
             receiveToken1 :new Decimal(repayCloseData?.baseTokenAmount).sub(amountValue).toFixed(4),
             receiveToken0: new Decimal(flashSwap).sub(repayCloseData?.quoteTokenAmount).toFixed(4),
-            feeToken0:new Decimal(flashSwap).mul(0.0005).toFixed(4),
-            feeToken1:new Decimal(0).toFixed(4),
+            commissionFee:new Decimal(flashSwap).mul(0.0005).toFixed(4),
           };
         }
       } else {
         return {
           receiveToken0 :new Decimal(0).toFixed(4),
           receiveToken1:new Decimal(0).toFixed(4),
-          feeToken0:new Decimal(0).toFixed(4),
-          feeToken1:new Decimal(0).toFixed(4),
+          commissionFee:new Decimal(0).toFixed(4),
         };
       } 
     }else {
         return {
           receiveToken0 :new Decimal(0).toFixed(4),
           receiveToken1:new Decimal(0).toFixed(4),
-          feeToken0:new Decimal(0).toFixed(4),
-          feeToken1:new Decimal(0).toFixed(4),
+          commissionFee:new Decimal(0).toFixed(4),
         };
     }
   
@@ -589,20 +585,12 @@ const CloseRepay = ({
                 </>
               </p>
             {/* </div> */}
-            {/* <div className="flex justify-between"> */}
+            <div className="flex justify-between">
               <p className="text-xs font-light italic">Commission Fee:</p>
               <p className="text-sm font-semibold">
-              <>
-                <div className="flex justify-between ">
-                <p className="text-xs font-light italic pl-2">{token0.symbol}:</p>
-                {Number(feeToken0) < 0 ? 0 : feeToken0}
-                </div>
-                <div className="flex justify-between">
-                <p className="text-xs font-light italic pl-2">{token1.symbol}:</p>
-                {Number(feeToken1) < 0 ? 0 : feeToken1}
-                </div>
-              </>
+                {`${Number(commissionFee) < 0 ? 0 : commissionFee} ${repayCloseData?.isLong?token1.symbol:token0.symbol}` }
               </p>
+              </div>
           </>
         )}
       </div>

@@ -1,7 +1,9 @@
 import BaseButton from "components/common/BaseButton";
 import SliderCustom from "components/common/SliderCustom";
 import { LiteWagmiBtnConnect } from "components/layout/ConnectButton";
+import ModalCallback from "components/modal/ModalCallback";
 import { contractAddress } from "constants/contractAddress";
+import { useModalContext } from "context/ModalContext";
 import { useContextTrade } from "context/TradeContext";
 import { FlaexMain, TestERC20 } from "contracts";
 import Decimal from "decimal.js";
@@ -9,9 +11,11 @@ import { constants, Contract } from "ethers";
 import { QuoterReturn } from "hooks/useQuote";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
+import { NumericFormat } from "react-number-format";
 import { amountToHex } from "util/commons";
-import { Shippaple, tokenPair } from "util/constants";
-import { toBigNumber } from "util/convertValue";
+import { eventLogs, Shippaple, tokenPair } from "util/constants";
+import { toBigNumber, getCloseInfo, getRepayInfo } from "util/convertValue";
+
 import {
   useAccount,
   useContractWrite,
@@ -24,26 +28,26 @@ const CloseRepay = ({
   price,
   fetchLongShortData,
 }: {
-  price:QuoterReturn,
+  price: QuoterReturn;
   fetchLongShortData: () => void;
 }) => {
   const { address, isConnected } = useAccount();
   const provider = useProvider();
   const [isRepay, setIsPay] = useState<boolean>(true);
-  const [percentage, setPercentage] = useState<number| string>(0);
+  const [percentage, setPercentage] = useState<number | string>(0);
   const [btnConnected, setbtnConnected] = useState(false);
   const { setIsShowLong, repayCloseData } = useContextTrade();
   const { pairCrypto } = useContextTrade();
+  const { pushModal } = useModalContext();
 
   const { token0, token1, fee } = useMemo(() => {
     return tokenPair[pairCrypto.origin || ""];
   }, [pairCrypto]);
 
-
-  const [isApprovedRepayLongToken, setIsApprovedRepayLongToken] = useState<boolean>(true);
+  const [isApprovedRepayLongToken, setIsApprovedRepayLongToken] =
+    useState<boolean>(true);
   const [isApprovedRepayShortToken, setIsApprovedRepayShortToken] =
     useState<boolean>(true);
-
 
   const fetchAllowance = useCallback(async () => {
     const longToken = new Contract(token1.address, TestERC20.abi, provider);
@@ -68,21 +72,27 @@ const CloseRepay = ({
     }
   }, [address, provider, token0.address, token1.address]);
 
-
-
-  const available = isRepay
-    ? new Decimal(repayCloseData?.quoteTokenAmount).mul(0.9999).toFixed(4)
-    : new Decimal(repayCloseData?.baseTokenAmount).toFixed(4);
+  const available = repayCloseData
+    ? isRepay
+      ? new Decimal(repayCloseData?.quoteTokenAmount).mul(0.9999).toFixed(4)
+      : new Decimal(repayCloseData?.baseTokenAmount).toFixed(4)
+    : 0;
 
   const [amountValue, setAmount] = useState<number | string>(
-    new Decimal(available).mul(percentage).div(100).toFixed(4),
+    repayCloseData
+      ? new Decimal(available).mul(percentage).div(100).toFixed(4)
+      : 0,
   );
 
   const handleChangeLongShort = (clicked: boolean) => {
     if (clicked) {
+      setAmount(0);
       setIsPay(true);
+      setPercentage(0);
     } else {
+      setAmount(0);
       setIsPay(false);
+      setPercentage(0);
     }
   };
 
@@ -97,18 +107,49 @@ const CloseRepay = ({
     setPercentage(value);
   };
 
-  const handleChangeAmount = (value: number) => {
-    const percen = new Decimal(value).div(repayCloseData?.quoteTokenAmount).mul(100).toFixed(4);
-    setAmount(value);
-    setPercentage(percen);
+  const handleChangeAmount = (e: any) => {
+    let value = e.floatValue;
+    if (isNaN(value)) {
+      setAmount(0);
+      setPercentage(0);
+    } else if (/^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$/.test(value)) {
+      if (new Decimal(value).greaterThan(available)) {
+        value = new Decimal(available).toNumber();
+      }
+      // -> keep paying and percen , calculate amount value
+      if (isRepay) {
+        const percen = new Decimal(value)
+          .div(repayCloseData?.quoteTokenAmount)
+          .mul(100)
+          .toFixed(4);
+        setPercentage(percen);
+      } else {
+        const percen = new Decimal(value)
+          .div(repayCloseData?.baseTokenAmount)
+          .mul(100)
+          .toFixed(4);
+        setPercentage(percen);
+      }
+      setAmount(value);
+    }
   };
 
   const handleBackToTrade = () => {
     setIsShowLong(true);
   };
 
-  const minQuoteTokenAmountLong = toBigNumber(new Decimal(price.priceExactInputToken0).mul(amountValue).mul(1+Shippaple.HIGH),token1.decimals);
-  const minQuoteTokenAmountShort  = toBigNumber(new Decimal(price.priceExactOutputToken1).mul(amountValue).mul(1+Shippaple.HIGH),token0.decimals);
+  const minQuoteTokenAmountLong = toBigNumber(
+    new Decimal(price.priceExactInputToken0)
+      .mul(amountValue)
+      .mul(1 + Shippaple.HIGH),
+    token1.decimals,
+  );
+  const minQuoteTokenAmountShort = toBigNumber(
+    new Decimal(price.priceExactOutputToken1)
+      .mul(amountValue)
+      .mul(1 + Shippaple.HIGH),
+    token0.decimals,
+  );
   const { config: configClose, error } = usePrepareContractWrite({
     address: contractAddress.FlaexMain as `0x${string}`,
     abi: FlaexMain.abi,
@@ -141,16 +182,37 @@ const CloseRepay = ({
     write: closeFunc,
   } = useContractWrite(configClose);
 
-  const { isSuccess: isCloseConfirmed } = useWaitForTransaction({
+  const { isSuccess: isCloseConfirmed , isError : isCloseEroor } = useWaitForTransaction({
     hash: dataClose?.hash,
     confirmations: 1,
-    onSuccess() {
-      console.log("close success");
-      // getData();
+    onSuccess(data) {
+      const result = getCloseInfo(token0.address, data?.logs, address);
+      const isLong = result.isLong;
+      pushModal(
+        <ModalCallback
+          hash={data?.transactionHash}
+          content={
+            <div>
+              <div>Successfully Closed {isLong ? "Long" : "Short"}</div>
+              <div>{`${result.Amount} ETH at ${result.Price}`}</div>
+              <div>
+                Receive {isLong ? result.receiveBase : result.receiveQuote} ETH
+                and{" "}
+                <div>
+                  {isLong ? result.receiveQuote : result.receiveBase} DAI
+                </div>
+              </div>
+            </div>
+          }
+        />,
+        true,
+      );
+
       fetchLongShortData();
     },
   });
 
+  const txCloseDone = isCloseConfirmed ||  isCloseEroor;
 
   const { config: configRepay } = usePrepareContractWrite({
     address: contractAddress.FlaexMain as `0x${string}`,
@@ -176,15 +238,30 @@ const CloseRepay = ({
     write: repayFunc,
   } = useContractWrite(configRepay);
 
-  const { isSuccess: isRepayConfirmed } = useWaitForTransaction({
+  const { isSuccess: isRepayConfirmed, isError: isRepayError } = useWaitForTransaction({
     hash: dataRepay?.hash,
     confirmations: 1,
-    onSuccess() {
-      console.log("Repay success");
-      // getData();
+    onSuccess(data) {
+      const result = getRepayInfo(token0.address, data?.logs, address);
+      pushModal(
+        <ModalCallback
+          hash={data?.transactionHash}
+          content={
+            <div>
+              <div>Successfully Repaid </div>
+              <div>
+                {result.Amount} {result.isLong ? " ETH" : " DAI"}
+              </div>
+            </div>
+          }
+        />,
+        true,
+      );
       fetchLongShortData();
     },
   });
+
+  const txRepayDone = isRepayConfirmed || isRepayError;
 
   const { config: configApprovalRepayShortToken } = usePrepareContractWrite({
     address: token1.address,
@@ -229,17 +306,16 @@ const CloseRepay = ({
     },
   });
 
-
   useEffect(() => {
     setbtnConnected(isConnected);
   }, [isConnected]);
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchAllowance();
-  },[fetchAllowance]);
+  }, [fetchAllowance]);
 
   const marginRatioAfter = useMemo(() => {
-    if (!amountValue) return 0;
+    if (!amountValue || !repayCloseData) return 0;
     const amountValueParser = new Decimal(amountValue);
     const debtMinusAmount = new Decimal(repayCloseData?.quoteTokenAmount).minus(
       amountValueParser,
@@ -280,13 +356,38 @@ const CloseRepay = ({
     }
   }, [amountValue, repayCloseData, isRepay]);
 
-  const receive = useMemo(() => {
-    return new Decimal(repayCloseData?.quoteTokenAmount)
-      .mul(new Decimal(repayCloseData?.pnlPercent))
-      .div(100)
-      .mul(new Decimal(percentage).div(100))
-      .toFixed(4);
-  }, [percentage, repayCloseData]);
+  const { receiveToken0 , receiveToken1} = useMemo(() => {
+    if(repayCloseData){
+      const priceFlash = repayCloseData?.isLong ? price.priceExactInputToken0: price.priceExactOutputToken1;
+      const flashSwap = repayCloseData?.isLong ? new Decimal(amountValue).mul(priceFlash).mul(0.9995) : new Decimal(amountValue).div(priceFlash).mul(0.9995);
+      if(flashSwap.gte(repayCloseData?.quoteTokenAmount || 0)){
+        if(repayCloseData?.isLong){
+          return {
+            receiveToken0 :new Decimal(repayCloseData?.baseTokenAmount).sub(amountValue).toFixed(4),
+            receiveToken1: new Decimal(flashSwap).sub(repayCloseData?.quoteTokenAmount).toFixed(4),
+          };
+        } else {
+          return {
+            receiveToken1 :new Decimal(repayCloseData?.baseTokenAmount).sub(amountValue).toFixed(4),
+            receiveToken0: new Decimal(flashSwap).sub(repayCloseData?.quoteTokenAmount).toFixed(4),
+          };
+        }
+      } else {
+        return {
+          receiveToken0 :new Decimal(0).toFixed(4),
+          receiveToken1:new Decimal(0).toFixed(4),
+        };
+      } 
+    }else {
+        return {
+          receiveToken0 :new Decimal(0).toFixed(4),
+          receiveToken1:new Decimal(0).toFixed(4),
+        };
+    }
+  
+  }, [amountValue, price.priceExactInputToken0, price.priceExactOutputToken1, repayCloseData]);
+
+ 
 
   useEffect(() => {
     if (percentage > 0) {
@@ -373,11 +474,13 @@ const CloseRepay = ({
           </span>
         </div>
         <div className="flex justify-between mt-2.5 font-normal text-sm">
-          <input
+          <NumericFormat
             className="bg-transparent outline-none w-full"
-            onChange={(e: any) => handleChangeAmount(e.target.value)}
+            onValueChange={handleChangeAmount}
             value={amountValue}
-            // readOnly={!isRepay}
+            max={available}
+            allowNegative={false}
+            decimalScale={4}
           />
           <span className="cursor-pointer" onClick={() => onSetMax()}>
             {available}
@@ -391,25 +494,25 @@ const CloseRepay = ({
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Entry Price:</p>
               <p className="text-sm font-semibold">
-                {repayCloseData?.entryPrice}
+                {repayCloseData ? repayCloseData?.entryPrice : 0}
               </p>
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Current Price:</p>
               <p className="text-sm font-semibold">
-                {repayCloseData?.markPrice}
+                {repayCloseData ? repayCloseData?.markPrice : 0}
               </p>
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Liquidation Price:</p>
               <p className="text-sm font-semibold">
-                {repayCloseData?.liquidPrice}
+                {repayCloseData ? repayCloseData?.liquidPrice : 0}
               </p>
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Current Margin Ratio:</p>
               <p className="text-sm font-semibold">
-                {repayCloseData?.marginRatio}
+                {repayCloseData ? repayCloseData?.marginRatio : 0}
               </p>
             </div>
             <div className="flex justify-between">
@@ -419,7 +522,7 @@ const CloseRepay = ({
             <div className="flex justify-between">
               <p className="text-xs font-light italic">PnL:</p>
               <p className="text-sm font-semibold">
-                {`${repayCloseData?.pnlPercent} %`}
+                {`${repayCloseData ? repayCloseData?.pnlPercent : 0} %`}
               </p>
             </div>
           </>
@@ -428,46 +531,56 @@ const CloseRepay = ({
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Entry Price:</p>
               <p className="text-sm font-semibold">
-                {repayCloseData?.entryPrice}
+                {repayCloseData ? repayCloseData?.entryPrice : 0}
               </p>
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Current Price:</p>
               <p className="text-sm font-semibold">
-                {repayCloseData?.markPrice}
+                {repayCloseData ? repayCloseData?.markPrice : 0}
               </p>
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Liquidation Price:</p>
               <p className="text-sm font-semibold">
-                {repayCloseData?.liquidPrice}
+                {repayCloseData ? repayCloseData?.liquidPrice : 0}
               </p>
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Current Margin Ratio:</p>
               <p className="text-sm font-semibold">
-                {repayCloseData?.marginRatio}
+                {repayCloseData ? repayCloseData?.marginRatio : 0}
               </p>
             </div>
-            {isRepay ? (
+    
+            {/* {isRepay ? (
               <div className="flex justify-between">
                 <p className="text-xs font-light italic">Margin Ratio After:</p>
                 <p className="text-sm font-semibold">{marginRatioAfter}</p>
               </div>
-            ) : null}
+            ) : null} */}
 
             <div className="flex justify-between">
               <p className="text-xs font-light italic">PnL:</p>
               <p className="text-sm font-semibold">
-                {`${repayCloseData?.pnlPercent} %`}
+                {`${repayCloseData ? repayCloseData?.pnlPercent : 0} %`}
               </p>
             </div>
-            <div className="flex justify-between">
+            {/* <div className="flex justify-between"> */}
               <p className="text-xs font-light italic">Receive:</p>
               <p className="text-sm font-semibold">
-                {Number(receive) < 0 ? 0 : receive}
+                <>
+                <div className="flex justify-between ">
+                <p className="text-xs font-light italic pl-2">{token0.symbol}:</p>
+                {Number(receiveToken0) < 0 ? 0 : receiveToken0}
+                </div>
+                <div className="flex justify-between">
+                <p className="text-xs font-light italic pl-2">{token1.symbol}:</p>
+                {Number(receiveToken1) < 0 ? 0 : receiveToken1}
+                </div>
+                </>
               </p>
-            </div>
+            {/* </div> */}
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Commission Fee:</p>
               <p className="text-sm font-semibold">{0}</p>
@@ -478,58 +591,87 @@ const CloseRepay = ({
       <div className="flex-1 flex flex-col justify-end">
         {btnConnected ? (
           <>
-            {isRepay && ((repayCloseData?.isLong && isApprovedRepayLongToken ) || (!repayCloseData?.isLong && isApprovedRepayShortToken)) && (
+            {isRepay &&
+              ((repayCloseData?.isLong && isApprovedRepayLongToken) ||
+                (!repayCloseData?.isLong && isApprovedRepayShortToken)) && (
+                <>
+                  <BaseButton
+                    disabled={
+                      !repayFunc ||
+                      isRepayLoading ||
+                      (isRepaySuccess && !txRepayDone)
+                    }
+                    onButtonClick={() => repayFunc?.()}
+                    moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full"
+                  >
+                    {((!isRepayLoading && !isRepaySuccess) ||
+                      txRepayDone) &&
+                      `Repay Partition Debt`}
+                    {isRepayLoading && `Waiting for signing`}
+                    {isRepaySuccess &&
+                      !txRepayDone &&
+                      `Waiting for network`}
+                  </BaseButton>
+                </>
+              )}
+
+            {isRepay && repayCloseData?.isLong && !isApprovedRepayLongToken && (
               <>
                 <BaseButton
-                  disabled={!repayFunc || isRepayLoading || (isRepaySuccess && !isRepayConfirmed)}
-                  onButtonClick={() => repayFunc?.()}
+                  disabled={
+                    !approvalRepayLongTokenFunc ||
+                    isApprovalRepayLongLoading ||
+                    isApprovalRepayLongSuccess
+                  }
+                  onButtonClick={() => approvalRepayLongTokenFunc?.()}
                   moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full"
                 >
-                  {((!isRepayLoading && !isRepaySuccess) || isRepayConfirmed) && `Repay Partition Dept`}
-                  {isRepayLoading && `Waiting for signing`}
-                  {isRepaySuccess && `Waiting for network`}
+                  {!isApprovalRepayLongLoading &&
+                    !isApprovalRepayLongSuccess &&
+                    `Approval ${token1.name}`}
+                  {isApprovalRepayLongLoading && `Waiting for signing`}
+                  {isApprovalRepayLongSuccess && `Waiting for network`}
                 </BaseButton>
               </>
             )}
 
-            {isRepay && repayCloseData?.isLong && !isApprovedRepayLongToken && (
-              <>
-              <BaseButton
-                disabled={!approvalRepayLongTokenFunc || isApprovalRepayLongLoading || isApprovalRepayLongSuccess}
-                onButtonClick={() => approvalRepayLongTokenFunc?.()}
-                moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full"
-              >
-                {(!isApprovalRepayLongLoading && !isApprovalRepayLongSuccess)  && `Approval ${token1.name}`}
-                {isApprovalRepayLongLoading && `Waiting for signing`}
-                {isApprovalRepayLongSuccess && `Waiting for network`}
-              </BaseButton>
-              </>
-            )}
+            {isRepay &&
+              !repayCloseData?.isLong &&
+              !isApprovedRepayShortToken && (
+                <>
+                  <BaseButton
+                    disabled={
+                      !approvalRepayShortTokenFunc ||
+                      isApprovalRepayShortLoading ||
+                      isApprovalRepayShortSuccess
+                    }
+                    onButtonClick={() => approvalRepayShortTokenFunc?.()}
+                    moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full"
+                  >
+                    {!isApprovalRepayShortLoading &&
+                      !isApprovalRepayShortSuccess &&
+                      `Approval ${token0.name}`}
+                    {isApprovalRepayShortLoading && `Waiting for signing`}
+                    {isApprovalRepayShortSuccess && `Waiting for network`}
+                  </BaseButton>
+                </>
+              )}
 
-            {isRepay && !repayCloseData?.isLong && !isApprovedRepayShortToken && (
-              <>
-              <BaseButton
-                disabled={!approvalRepayShortTokenFunc || isApprovalRepayShortLoading || isApprovalRepayShortSuccess}
-                onButtonClick={() => approvalRepayShortTokenFunc?.()}
-                moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full"
-              >
-                {(!isApprovalRepayShortLoading && !isApprovalRepayShortSuccess)  && `Approval ${token0.name}`}
-                {isApprovalRepayShortLoading && `Waiting for signing`}
-                {isApprovalRepayShortSuccess && `Waiting for network`}
-              </BaseButton>
-              </>
-            )}
-            
-            {!isRepay &&(
+            {!isRepay && (
               <>
                 <BaseButton
-                  disabled={!closeFunc || isCloseLoading || (isCloseSuccess && !isCloseConfirmed)}
+                  disabled={
+                    !closeFunc ||
+                    isCloseLoading ||
+                    (isCloseSuccess && !txCloseDone)
+                  }
                   onButtonClick={() => closeFunc?.()}
                   moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full"
                 >
-                  {((!isCloseLoading && !isCloseSuccess) || isCloseConfirmed) && `Close Position`}
+                  {((!isCloseLoading && !isCloseSuccess) || txCloseDone) &&
+                    `Close Position`}
                   {isCloseLoading && `Waiting for signing`}
-                  {isCloseSuccess && `Waiting for network`}
+                  {isCloseSuccess && !txCloseDone && `Waiting for network`}
                 </BaseButton>
               </>
             )}

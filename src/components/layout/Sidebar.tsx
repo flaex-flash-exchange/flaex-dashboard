@@ -47,7 +47,7 @@ const Sidebar = ({ toggleCollapse, onChangeToggle }: any) => {
   // };
 
   return (
-    <div className="h-full">
+    <div className="">
       <div
         className={`fixed -left-full bottom-0 top-0 md:top-auto md:bottom-auto md:left-auto w-full ease-in duration-300 md:relative bg-flaex-linear md:bg-transparent h-full md:h-auto z-50 ${
           toggleCollapse ? "left-0 md:w-[150px] px-10 md:px-0" : "md:w-[50px]"

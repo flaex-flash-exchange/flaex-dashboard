@@ -1,3 +1,4 @@
+import Decimal from "decimal.js";
 import { BigNumber } from "ethers";
 
 export interface UserData {
@@ -42,3 +43,14 @@ export interface TokenYieldList {
 }
 
 
+export interface LongShortInfo {
+    paying: Decimal,
+    flashSwap: Decimal,
+    borrowingToRepayFlash: Decimal,
+    entryPrice: Decimal,
+    liquidationPrice: Decimal,
+    marginRatio: Decimal,
+    commissionFee: Decimal,
+    marginAmount: Decimal,
+    leverage: Decimal
+}

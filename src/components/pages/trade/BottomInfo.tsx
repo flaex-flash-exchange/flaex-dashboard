@@ -1,20 +1,19 @@
-import { ApolloClient, gql, InMemoryCache } from "@apollo/client";
 import { validateAndParseAddress } from "@uniswap/sdk-core";
-import { IBottomProps, ILongShortData } from "constants/interface";
+import { ILongShortData } from "constants/interface";
 import { useContextTrade } from "context/TradeContext";
 import Decimal from "decimal.js";
 import { BigNumber } from "ethers";
-import { useLongShortData } from "hooks/useLongShortData";
 // import { useLongShortData } from "hooks/useLongShortData";
 import useQuoter from "hooks/useQuote";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
+import { BigNumberToReadableAmount } from "util/commons";
 import { tokenPair } from "util/constants";
 import { parseAmount } from "util/convertValue";
-import { Address } from "wagmi";
 import HistoryTable from "./HistoryTable";
 
-const BottomInfo = ({tableData}:{tableData:Array<ILongShortData>}) => {
+const BottomInfo = ({ tableData }: { tableData: Array<ILongShortData> }) => {
   const { pairCrypto } = useContextTrade();
+  const { setRepayCloseData, repayCloseData } = useContextTrade();
 
   const { token0, token1, fee } = useMemo(() => {
     return tokenPair[pairCrypto.origin || ""];
@@ -29,24 +28,13 @@ const BottomInfo = ({tableData}:{tableData:Array<ILongShortData>}) => {
     fee,
   );
 
-
-
   const longShortHistory = useMemo(() => {
-    return tableData?.map((item: ILongShortData, idx: number) => {
-      const isLong = validateAndParseAddress(item.baseToken) == validateAndParseAddress(token0.address);
-      const entryPriceParser = isLong
-        ? new Decimal(item?.quoteTokenAmount)
-            .div(
-              new Decimal(item?.baseMarginTokenAmount).mul(
-                new Decimal(item?.marginLevel).div(10000),
-              ),
-            )
-            .toNumber()
-        : new Decimal(item?.baseMarginTokenAmount)
-            .mul(new Decimal(item?.marginLevel).div(10000))
-            .div(new Decimal(item?.quoteTokenAmount))
-            .toNumber();
+    return tableData?.map((item: ILongShortData) => {
+      const isLong =
+        validateAndParseAddress(item.baseToken) ==
+        validateAndParseAddress(token0.address);
 
+      const entryPriceParser = new Decimal(item?.entryPrice).toFixed(4);
       const markPriceParser = isLong
         ? quotedAmountOut.priceExactInputToken0
         : quotedAmountOut.priceExactOutputToken1;
@@ -86,10 +74,28 @@ const BottomInfo = ({tableData}:{tableData:Array<ILongShortData>}) => {
         baseMarginTokenAmount: parseAmount(
           BigNumber.from(item?.baseMarginTokenAmount),
         ),
-        baseTokenAmount: parseAmount(BigNumber.from(item?.baseTokenAmount)),
-        quoteTokenAmount: parseAmount(BigNumber.from(item?.quoteTokenAmount)),
+        baseTokenAmount: isLong
+          ? BigNumberToReadableAmount(
+              BigNumber.from(item?.baseTokenAmount),
+              token0.decimals,
+            )
+          : BigNumberToReadableAmount(
+              BigNumber.from(item?.baseTokenAmount),
+              token1.decimals,
+            ),
+        quoteTokenAmount: isLong
+          ? BigNumberToReadableAmount(
+              BigNumber.from(item?.quoteTokenAmount),
+              token1.decimals,
+            )
+          : BigNumberToReadableAmount(
+              BigNumber.from(item?.quoteTokenAmount),
+              token0.decimals,
+            ),
         direction: isLong ? "long" : "short",
         marginLevel: new Decimal(item?.marginLevel).div(100).toNumber(),
+        token0: token0.symbol,
+        token1: token1.symbol,
         entryPrice: entryPriceParser,
         markPrice: markPriceParser,
         liquidPrice: liquidatePrice,
@@ -97,20 +103,28 @@ const BottomInfo = ({tableData}:{tableData:Array<ILongShortData>}) => {
           ? new Decimal(item.baseTokenAmount)
               .mul(new Decimal(markPriceParser))
               .div(new Decimal(item?.quoteTokenAmount))
-              .toNumber()
+              .toFixed(4)
           : new Decimal(item.baseTokenAmount)
               .div(
                 new Decimal(item?.quoteTokenAmount).mul(
                   new Decimal(markPriceParser),
                 ),
               )
-              .toNumber(),
+              .toFixed(4),
         pnlPercent,
         isLong,
       };
     });
-  }, [quotedAmountOut.priceExactInputToken0, quotedAmountOut.priceExactOutputToken1, tableData, token0.address]);
+  }, [quotedAmountOut.priceExactInputToken0, quotedAmountOut.priceExactOutputToken1, tableData, token0.address, token0.decimals, token0.symbol, token1.decimals, token1.symbol]);
 
+  useEffect(() => {
+    if (repayCloseData?.isLong) {
+      setRepayCloseData(longShortHistory.find((data) => data.isLong));
+    } else {
+      setRepayCloseData(longShortHistory.find((data) => !data.isLong));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tableData]);
 
   return (
     <div className="mt-[20px] overflow-auto	">
@@ -118,8 +132,6 @@ const BottomInfo = ({tableData}:{tableData:Array<ILongShortData>}) => {
     </div>
   );
 };
-
-
 
 export default BottomInfo;
 
@@ -141,19 +153,50 @@ const titleHistoryRow = [
     },
     classNameCustom: "text-left",
   },
-  { title: "Leverage", field: "marginLevel" },
+  {
+    title: "Leverage",
+    field: (data: any) => {
+      return <div className="whitespace-nowrap">{`${data.marginLevel} %`}</div>;
+    },
+  },
   {
     title: "Collateral",
     field: (data: any) => {
       return (
-        <div className="whitespace-nowrap">{`${data.baseTokenAmount} ${
-          data.direction.toLowerCase() === "long" ? "ETH" : "DAI"
-        }`}</div>
+        <div className="whitespace-nowrap">{`${data.baseTokenAmount} ${ data.isLong?data.token0:data.token1}`}</div>
       );
     },
   },
-  // { title: "Collateral", field: "baseTokenAmount" },
-  { title: "Debt", field: "quoteTokenAmount" },
+  {
+    title: "Debt",
+    field: (data: any) => {
+      return (
+        <div className="whitespace-nowrap">{`${data.quoteTokenAmount} ${data.isLong?data.token1:data.token0}`}</div>
+      );
+    },
+  },
+  // {
+  //   title: "Collateral",
+  //   field: (data: any) => {
+  //     console.log({ data });
+
+  //     return (
+  //       <div className="whitespace-nowrap">{`${data.baseTokenAmount} ${
+  //         data.direction.toLowerCase() === "long" ? data.token0 : data.token1
+  //       }`}</div>
+  //     );
+  //   },
+  // },
+  // {
+  //   title: "Debt",
+  //   field: (data: any) => {
+  //     return (
+  //       <div className="whitespace-nowrap">{`${data.quoteTokenAmount} ${
+  //         data.direction.toLowerCase() === "long" ? data.token1 : data.token0
+  //       }`}</div>
+  //     );
+  //   },
+  // },
   { title: "Entry Price", field: "entryPrice" },
   { title: "Mark Price", field: "markPrice" },
   { title: "Liquidation Price", field: "liquidPrice" },
@@ -180,3 +223,16 @@ const titleHistoryRow = [
   //   },
   // },
 ];
+
+// const turnToken = (data: any, type: string) => {
+//   switch (type) {
+//     case "long":
+//       return {
+//         token0: data?.token0,
+//         token1: data?.token1,
+//       };
+
+//     default:
+//       return
+//   }
+// };

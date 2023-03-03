@@ -1,4 +1,3 @@
-import { BlockNumberView } from "components/BlockNumber";
 import BottomInfo from "components/pages/trade/BottomInfo";
 import Mainbar from "components/pages/trade/Mainbar";
 import Topbar from "components/pages/trade/Topbar";
@@ -8,17 +7,12 @@ import { useLongShortData } from "hooks/useLongShortData";
 import type { NextPage } from "next";
 
 import { useEffect } from "react";
-import styled from "styled-components";
-import { useBlockNumber } from "wagmi";
 
 const Index: NextPage = () => {
-
-
-  const { fetchLongShortData , longShortData: tableData} = useLongShortData();
+  const { fetchLongShortData, longShortData: tableData } = useLongShortData();
   useEffect(() => {
     fetchLongShortData();
   }, [fetchLongShortData]);
-
 
   return (
     <>
@@ -37,11 +31,10 @@ const Index: NextPage = () => {
             </div>
           </div>
           <div className="col-span-5 lg:col-span-2 xl:col-span-2 2xl:col-span-2 h-full">
-            <Mainbar fetchLongShortData = {fetchLongShortData}/>
+            <Mainbar fetchLongShortData={fetchLongShortData} />
           </div>
         </div>
-        <BottomInfo tableData ={tableData}/>
-        <BlockNumberView />
+        <BottomInfo tableData={tableData} />
       </TradeContextProvider>
     </>
   );

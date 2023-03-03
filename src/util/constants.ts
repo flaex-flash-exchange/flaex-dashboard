@@ -67,3 +67,17 @@ export const tokenPair: any = {
   // "BTC/USDC": 1,
   // "BTC/ETH": 2,
 };
+
+export const eventLogs = {
+  ORDER_OPEN: "OrderOpened",
+  REPAY: "repayPartialDebt",
+  ORDER_CLOSE: "OrderClosed",
+  ASSET_PROVIDED: "AssetProvided",
+  ASSET_WITHDRAWN: "assetWithdrawn",
+  YIELD_CLAIMED: "yieldClaimed",
+  TRANSFER: "Transfer",
+  SWAP: "Swap",
+};
+export const argNames = {
+  BASE_TOKEN_AMOUNT: "baseTokenAmount",
+};

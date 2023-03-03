@@ -23,6 +23,7 @@ query MyQuery {
     baseToken
     baseMarginTokenAmount
     id
+    entryPrice
   }
 }
 `;
@@ -43,7 +44,6 @@ export const useLongShortData = () => {
       if (!token0 ||  !token1 || !address) {
         return ;
       } else {
-
         const client = new ApolloClient({
           uri: API,
           cache: new InMemoryCache({resultCaching:false}),

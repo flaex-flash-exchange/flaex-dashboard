@@ -5,7 +5,7 @@ import Link from "next/link";
 const Footer = (): JSX.Element => {
   return (
     <div>
-      <div className="flex flex-col flex-1  md:px-4 md:py-4 lg:px-12 xl:px-12 2xl:px-24">
+      <div className="flex flex-col flex-1   md:px-4 md:py-4 md:pt-0 md:pb-8 lg:px-12 xl:px-12 2xl:px-24">
         <div className="flex-1"></div>
         <div
           style={{

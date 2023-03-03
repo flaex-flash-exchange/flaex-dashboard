@@ -61,7 +61,6 @@ const ModalLanguageWallet = () => {
 
   const handleSelectedLanguage = (typeLanguage: string) => {
     closeModals();
-    console.log(typeLanguage);
   };
 
   return (

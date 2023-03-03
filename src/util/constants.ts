@@ -13,6 +13,8 @@ export enum FeeAmount {
   HIGH = 10000,
 }
 
+
+export const genesisTime = 1677828468000;
 export enum Shippaple {
   LOW = 0.005,
   MEDIUM = 0.01,

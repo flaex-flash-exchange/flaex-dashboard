@@ -134,7 +134,6 @@ const CloseRepay = ({
         ],
     enabled: amountValue > 0 && percentage > 0,
   });
-  console.log({error});
   const {
     data: dataClose,
     isLoading: isCloseLoading,
@@ -246,14 +245,6 @@ const CloseRepay = ({
       amountValueParser,
     );
 
-    console.log(
-      { repayCloseData },
-      { amountValueParser },
-      { baseTokenAmount: repayCloseData?.baseTokenAmount },
-      { quoteTokenAmount: repayCloseData?.quoteTokenAmount },
-      { markPrice: repayCloseData?.markPrice },
-      { debtMinusAmount: debtMinusAmount.toNumber() },
-    );
     if (!isRepay) {
       return repayCloseData?.isLong
         ? new Decimal(repayCloseData?.baseTokenAmount)

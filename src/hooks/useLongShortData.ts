@@ -43,7 +43,6 @@ export const useLongShortData = () => {
       if (!token0 ||  !token1 || !address) {
         return ;
       } else {
-        console.log("fetchLongShortData");
 
         const client = new ApolloClient({
           uri: API,
@@ -55,7 +54,6 @@ export const useLongShortData = () => {
         });
 
         if (data && data?.orders) {
-          console.log({data});
           setLongShortData(data?.orders?.flat());
         }
       }
@@ -64,9 +62,6 @@ export const useLongShortData = () => {
     }
   }, [address, orderQuery, token0, token1]);
 
-  useEffect(() => {
-    console.log("longShortData updated:", longShortData);
-  }, [longShortData]);
 
 
   return {

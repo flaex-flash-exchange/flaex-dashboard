@@ -96,7 +96,7 @@ const DrawAmountInvest = () => {
                 !isClaimSuccess) || txClaimDone )&&
                 `Claim`}
               {isClaimLoading && `Waiting for signing`}
-              {isClaimSuccess && `Waiting for network`}
+              {(isClaimSuccess && !txClaimDone) && `Waiting for network`}
         </BaseButton>
         <BaseButton
               disabled={
@@ -111,7 +111,7 @@ const DrawAmountInvest = () => {
                 !isWithdrawSuccess) || txWithdrawDone) &&
                 `Withdraw & Claim`}
               {isWithdrawLoading && `Waiting for signing`}
-              {isWithdrawSuccess && `Waiting for network`}
+              {(isWithdrawSuccess && !txWithdrawDone) && `Waiting for network`}
             </BaseButton>
       </div>
     </div>

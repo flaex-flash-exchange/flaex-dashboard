@@ -131,7 +131,7 @@ const AmountInvest = ({balance}:{balance:any}) => {
                 !isInvestSuccess ) || txInvestDone ) &&
                 `Invest`}
               {isInvestLoading && `Waiting for signing`}
-              {isInvestSuccess && `Waiting for network`}
+              {(isInvestSuccess && !txInvestDone) && `Waiting for network`}
             </BaseButton>
         )}
        

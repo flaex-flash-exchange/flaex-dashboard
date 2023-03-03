@@ -124,11 +124,13 @@ const LeftContent = () => {
 
   const available = amountToHealthFactor.greaterThan(10_000_000)?new Decimal(10_000_000).minus(BigNumberToReadableAmount(collateralInfo?.totalCollateralBase,8)).mul(new Decimal(10).pow(18)):amountToHealthFactor;
   
-  const healthFactor = new Decimal(collateralInfo?.healthFactor._hex || 0).equals(new Decimal(constants.MaxUint256._hex))?0: BigNumberToReadableAmount(collateralInfo?.healthFactor,18);
+  const healthFactor = BigNumberToReadableAmount(collateralInfo?.healthFactor,18);
+  const availableToInvest = new Decimal(healthFactor).greaterThan(2)? new Decimal(10_000_000).minus(new Decimal((totalMinted as BigNumber)?._hex).div(new Decimal(10).pow(18))):available;
+  
   const descInvest = [
     { title: "Total Invested (FlToken Minted)", value:  `${BigNumberToReadableAmount(totalMinted?(totalMinted as BigNumber):BigNumber.from(0),18)} $`},
     { title: "Current Health Factor", value: healthFactor },
-    { title: "Available to Invest", value: `${DecimalToReadableAmount(available,18)} $`  },
+    { title: "Available to Invest", value: `${availableToInvest.toFixed(4)} $`  },
   ];
 
   const fetchFLAPYDetails = useCallback(()=>{

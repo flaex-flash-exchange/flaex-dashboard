@@ -149,14 +149,14 @@ const LongShort = ({
     hash: approvalShortTokenData?.hash,
     confirmations: 1,
     onSuccess(data) {
-    //   console.log("onSuccess - setIsApprovedShortToken", data);
-    //   pushModal(
-    //     <ModalCallback
-    //       hash={"mintData?.hash"}
-    //       content={`Succesfully Opened position for`}
-    //     />,
-    //     true,
-    //   );
+      //   console.log("onSuccess - setIsApprovedShortToken", data);
+      //   pushModal(
+      //     <ModalCallback
+      //       hash={"mintData?.hash"}
+      //       content={`Succesfully Opened position for`}
+      //     />,
+      //     true,
+      //   );
       setIsApprovedShortToken(true);
     },
     // onError(error) {
@@ -182,19 +182,19 @@ const LongShort = ({
     hash: approvalLongTokenData?.hash,
     confirmations: 1,
     onSuccess(data) {
-    //   console.log("onSuccess - setIsApprovedLongToken", data);
+      //   console.log("onSuccess - setIsApprovedLongToken", data);
       setIsApprovedLongToken(true);
-    //   pushModal(
-    //     <ModalCallback
-    //       hash={"mintData?.hash"}
-    //       content={`Succesfully Opened position for`}
-    //     />,
-    //     true,
-    //   );
-    // },
-    // onError(error) {
-    //   console.log("setIsApprovedLongToken Short Error", error);
-    //   pushErrorModal("hash");
+      //   pushModal(
+      //     <ModalCallback
+      //       hash={"mintData?.hash"}
+      //       content={`Succesfully Opened position for`}
+      //     />,
+      //     true,
+      //   );
+      // },
+      // onError(error) {
+      //   console.log("setIsApprovedLongToken Short Error", error);
+      //   pushErrorModal("hash");
     },
   });
 
@@ -222,30 +222,38 @@ const LongShort = ({
     write: longFunc,
   } = useContractWrite(configLong);
 
-  const { isSuccess: isLongConfirmed , isError : isLongError } = useWaitForTransaction({
-    hash: longData?.hash,
-    confirmations: 1,
-    onSuccess(data) {
-      const result = getOpenInfo(true, data?.logs, token0.decimals, token1.decimals);
-      pushModal(
-        <ModalCallback
-          hash={data?.transactionHash}
-          content={
-            <div>
-              <div>Successfully Opened Long</div>
-              <div>{`${result.Amount.toFixed(4)} ${token0.symbol} at ${new Decimal(result.Price).toFixed(4)}`}</div>
-            </div>
-          }
-        />,
-        true,
-      );
-      fetchLongShortData();
-    },
-    onError(error) {
-      pushErrorModal("hash");
-      console.log("Error - Fail", error);
-    },
-  });
+  const { isSuccess: isLongConfirmed, isError: isLongError } =
+    useWaitForTransaction({
+      hash: longData?.hash,
+      confirmations: 1,
+      onSuccess(data) {
+        const result = getOpenInfo(
+          true,
+          data?.logs,
+          token0.decimals,
+          token1.decimals,
+        );
+        pushModal(
+          <ModalCallback
+            hash={data?.transactionHash}
+            content={
+              <div>
+                <div>Successfully Opened Long</div>
+                <div>{`${result.Amount.toFixed(4)} ${
+                  token0.symbol
+                } at ${new Decimal(result.Price).toFixed(4)}`}</div>
+              </div>
+            }
+          />,
+          true,
+        );
+        fetchLongShortData();
+      },
+      onError(error) {
+        pushErrorModal("hash");
+        console.log("Error - Fail", error);
+      },
+    });
 
   const txLongDone = isLongConfirmed || isLongError;
 
@@ -272,31 +280,39 @@ const LongShort = ({
     write: shortFunc,
   } = useContractWrite(configShort);
 
-  const { isSuccess: isShortConfirmed , isError : isShortError} = useWaitForTransaction({
-    hash: dataShort?.hash,
-    confirmations: 1,
-    onSuccess(data) {
-      const result = getOpenInfo(false, data?.logs, token0.decimals, token1.decimals);
+  const { isSuccess: isShortConfirmed, isError: isShortError } =
+    useWaitForTransaction({
+      hash: dataShort?.hash,
+      confirmations: 1,
+      onSuccess(data) {
+        const result = getOpenInfo(
+          false,
+          data?.logs,
+          token0.decimals,
+          token1.decimals,
+        );
 
-      pushModal(
-        <ModalCallback
-          hash={data?.transactionHash}
-          content={
-            <div>
-              <div>Successfully Opened Short</div>
-              <div>{`${result.Amount.toFixed(4)} ${token0.symbol} at ${new Decimal(result.Price).toFixed(4)}`}</div>
-            </div>
-          }
-        />,
-        true,
-      );
-      fetchLongShortData();
-    },
-    onError(error) {
-      pushErrorModal("hash");
-      console.log("Error - Fail", error);
-    },
-  });
+        pushModal(
+          <ModalCallback
+            hash={data?.transactionHash}
+            content={
+              <div>
+                <div>Successfully Opened Short</div>
+                <div>{`${result.Amount.toFixed(4)} ${
+                  token0.symbol
+                } at ${new Decimal(result.Price).toFixed(4)}`}</div>
+              </div>
+            }
+          />,
+          true,
+        );
+        fetchLongShortData();
+      },
+      onError(error) {
+        pushErrorModal("hash");
+        console.log("Error - Fail", error);
+      },
+    });
 
   const txShortDone = isShortConfirmed || isShortError;
 

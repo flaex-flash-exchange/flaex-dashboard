@@ -4,6 +4,7 @@ import { TestERC20, interfaceEvents } from "contracts";
 import { amountToHex, BigNumberToReadableAmount } from "./commons";
 import { argNames, eventLogs } from "./constants";
 import { type } from "os";
+import { contractAddress } from "constants/contractAddress";
 
 export const convertCurrency = (number: number) => {
   return "$" + number;
@@ -63,17 +64,33 @@ const getERCTransferEvent = (
   return result;
 };
 
-export const getOpenInfo = (isLong: boolean, log: Array<any>, token0Decimal: number, token1Decimal: number) => {
+export const getOpenInfo = (
+  isLong: boolean,
+  log: Array<any>,
+  token0Decimal: number,
+  token1Decimal: number,
+) => {
   let Amount: any = 0;
   let Price: any = 0;
   if (isLong) {
     const loggedOpen = getEvent(log, eventLogs.ORDER_OPEN);
-    Amount = new Decimal(loggedOpen.baseTokenAmount._hex).div(new Decimal(10).pow(token0Decimal));
-    Price = new Decimal(loggedOpen.quoteTokenAmount._hex).div(new Decimal(loggedOpen.baseMarginAmount._hex).mul(loggedOpen.marginLevel._hex).div(10000));
+    Amount = new Decimal(loggedOpen.baseTokenAmount._hex).div(
+      new Decimal(10).pow(token0Decimal),
+    );
+    Price = new Decimal(loggedOpen.quoteTokenAmount._hex).div(
+      new Decimal(loggedOpen.baseMarginAmount._hex)
+        .mul(loggedOpen.marginLevel._hex)
+        .div(10000),
+    );
   } else {
     const loggedOpen = getEvent(log, eventLogs.ORDER_OPEN);
-    Price = new Decimal(loggedOpen.baseMarginAmount._hex).mul(loggedOpen.marginLevel._hex).div(loggedOpen.quoteTokenAmount._hex).div(10000),
-    Amount =   new Decimal(loggedOpen.baseTokenAmount._hex).div(Price).div(new Decimal(10).pow(token1Decimal));
+    (Price = new Decimal(loggedOpen.baseMarginAmount._hex)
+      .mul(loggedOpen.marginLevel._hex)
+      .div(loggedOpen.quoteTokenAmount._hex)
+      .div(10000)),
+      (Amount = new Decimal(loggedOpen.baseTokenAmount._hex)
+        .div(Price)
+        .div(new Decimal(10).pow(token1Decimal)));
   }
   return { Amount, Price };
 };
@@ -189,4 +206,40 @@ export const getRepayInfo = (
   Amount = BigNumberToReadableAmount(loggedRepaid[3], 18);
 
   return { Amount, isLong };
+};
+
+export const getProvideInfo = (log: Array<any>) => {
+  const loggedProvided = getEvent(log, eventLogs.ASSET_PROVIDED);
+  return new Decimal(loggedProvided.amount._hex).div(new Decimal(10).pow(18));
+};
+
+export const getClaimYieldInfo = (log: Array<any>) => {
+  const loggedClaimed = getEvent(log, eventLogs.YIELD_CLAIMED);
+
+  const tokenList = loggedClaimed.yieldTokenAddress;
+  const tokenAmount = loggedClaimed.amount;
+
+  let result = {};
+
+  for (let i = 0; i < tokenList.length; i++) {
+    if (tokenList[i] !== contractAddress.ADD0) {
+      const tokenSymbol = Object.keys(contractAddress).find(
+        (key) => contractAddress[key] === tokenList[i],
+      );
+      result[tokenSymbol] = BigNumberToReadableAmount(tokenAmount[i], 18);
+    }
+  }
+
+  return result;
+};
+
+export const getWithdrawInfo = (log: Array<any>) => {
+  const loggedWithdrawn = getEvent(log, eventLogs.ASSET_WITHDRAWN);
+
+  const amountWithdrawn = new Decimal(loggedWithdrawn.amount._hex).div(
+    new Decimal(10).pow(18),
+  );
+  const YieldInfo = getClaimYieldInfo(log);
+
+  return { amountWithdrawn, YieldInfo };
 };

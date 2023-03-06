@@ -41,7 +41,6 @@ const LongShort = ({
   const { pairCrypto } = useContextTrade();
   const { pushModal } = useModalContext();
 
-  const [isMouted, setIsMouted] = useState(false);
   const provider = useProvider();
   const [isLong, setIsLong] = useState<boolean>(true);
   const [isApprovedLongToken, setIsApprovedLongToken] = useState<boolean>(true);
@@ -57,6 +56,8 @@ const LongShort = ({
 
   const btnLabel = useMemo(() => (isLong ? LSBtn.LONG : LSBtn.SHORT), [isLong]);
 
+  console.log({btnLabel});
+  console.log({isLong});
   const quotedAmountOut = useQuoter(
     token1,
     token0,
@@ -392,17 +393,13 @@ const LongShort = ({
   };
 
   useEffect(() => {
-    if (isMouted) {
+   
       setbtnConnected(isConnected);
       fetchAllowance();
-    } else {
-      setIsMouted(true);
-    }
-  }, [isConnected, fetchAllowance, isMouted]);
+  }, [isConnected, fetchAllowance]);
 
   return (
     <>
-      {isMouted && (
         <div className="flex h-full flex-col">
           <div className="flex text-base font-semibold bg-flaex-border bg-opacity-5 rounded-[10px]">
             <button
@@ -557,7 +554,7 @@ const LongShort = ({
           <div className="flex-1 flex flex-col justify-end">
             {btnConnected ? (
               <>
-                {isMouted && isLong && !isApprovedLongToken ? (
+                {isLong && !isApprovedLongToken ? (
                   <>
                     <BaseButton
                       disabled={
@@ -577,7 +574,7 @@ const LongShort = ({
                   </>
                 ) : (
                   <>
-                    {isMouted && !isLong && !isApprovedShortToken ? (
+                    {!isLong && !isApprovedShortToken ? (
                       <BaseButton
                         disabled={
                           !approvalShortTokenFunc ||
@@ -595,7 +592,7 @@ const LongShort = ({
                       </BaseButton>
                     ) : (
                       <>
-                        {isMouted && isLong && isApprovedShortToken ? (
+                        {isLong && isApprovedLongToken ? (
                           <BaseButton
                             disabled={
                               !longFunc ||
@@ -642,7 +639,6 @@ const LongShort = ({
             )}
           </div>
         </div>
-      )}
     </>
   );
 };

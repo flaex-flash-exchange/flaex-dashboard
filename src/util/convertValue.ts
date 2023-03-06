@@ -219,7 +219,7 @@ export const getClaimYieldInfo = (log: Array<any>) => {
   const tokenList = loggedClaimed.yieldTokenAddress;
   const tokenAmount = loggedClaimed.amount;
 
-  let result = {};
+  const result = {};
 
   for (let i = 0; i < tokenList.length; i++) {
     if (tokenList[i] !== contractAddress.ADD0) {

@@ -124,6 +124,7 @@ const DrawAmountInvest = () => {
                     ))}
                   </div>
                 ) : (
+                  // eslint-disable-next-line react/no-unescaped-entities
                   <div>Haven't got any Yield!</div>
                 )}
               </div>

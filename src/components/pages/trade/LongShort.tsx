@@ -56,8 +56,8 @@ const LongShort = ({
 
   const btnLabel = useMemo(() => (isLong ? LSBtn.LONG : LSBtn.SHORT), [isLong]);
 
-  console.log({btnLabel});
-  console.log({isLong});
+  console.log({ btnLabel });
+  console.log({ isLong });
   const quotedAmountOut = useQuoter(
     token1,
     token0,
@@ -150,20 +150,19 @@ const LongShort = ({
     hash: approvalShortTokenData?.hash,
     confirmations: 1,
     onSuccess(data) {
-      //   console.log("onSuccess - setIsApprovedShortToken", data);
-      //   pushModal(
-      //     <ModalCallback
-      //       hash={"mintData?.hash"}
-      //       content={`Succesfully Opened position for`}
-      //     />,
-      //     true,
-      //   );
+      pushModal(
+        <ModalCallback
+          hash={data?.transactionHash}
+          content={`Successfully Approved`}
+        />,
+        true,
+      );
       setIsApprovedShortToken(true);
     },
-    // onError(error) {
-    //   pushErrorModal("hash");
-    //   console.log("setIsApprovedShortToken Short Error", error);
-    // },
+    onError(error) {
+      pushErrorModal(approvalShortTokenData?.hash);
+      console.log("setIsApprovedShortToken Short Error", error);
+    },
   });
 
   const { config: configApprovalLongToken } = usePrepareContractWrite({
@@ -183,19 +182,18 @@ const LongShort = ({
     hash: approvalLongTokenData?.hash,
     confirmations: 1,
     onSuccess(data) {
-      //   console.log("onSuccess - setIsApprovedLongToken", data);
+      pushModal(
+        <ModalCallback
+          hash={data?.transactionHash}
+          content={`Successfully Approved`}
+        />,
+        true,
+      );
       setIsApprovedLongToken(true);
-      //   pushModal(
-      //     <ModalCallback
-      //       hash={"mintData?.hash"}
-      //       content={`Succesfully Opened position for`}
-      //     />,
-      //     true,
-      //   );
-      // },
-      // onError(error) {
-      //   console.log("setIsApprovedLongToken Short Error", error);
-      //   pushErrorModal("hash");
+    },
+    onError(error) {
+      pushErrorModal(approvalLongTokenData?.hash);
+      console.log("setIsApprovedLongToken Short Error", error);
     },
   });
 
@@ -251,7 +249,7 @@ const LongShort = ({
         fetchLongShortData();
       },
       onError(error) {
-        pushErrorModal("hash");
+        pushErrorModal(longData?.hash);
         console.log("Error - Fail", error);
       },
     });
@@ -310,7 +308,7 @@ const LongShort = ({
         fetchLongShortData();
       },
       onError(error) {
-        pushErrorModal("hash");
+        pushErrorModal(dataShort?.hash);
         console.log("Error - Fail", error);
       },
     });
@@ -393,111 +391,110 @@ const LongShort = ({
   };
 
   useEffect(() => {
-   
-      setbtnConnected(isConnected);
-      fetchAllowance();
+    setbtnConnected(isConnected);
+    fetchAllowance();
   }, [isConnected, fetchAllowance]);
 
   return (
     <>
-        <div className="flex h-full flex-col">
-          <div className="flex text-base font-semibold bg-flaex-border bg-opacity-5 rounded-[10px]">
-            <button
-              onClick={() => {
-                handleChangeLongShort(true);
-              }}
-              className={`flex-1 ${
-                isLong ? "bg-flaex-button" : ""
-              } text-base py-2.5 rounded-[10px]`}
+      <div className="flex h-full flex-col">
+        <div className="flex text-base font-semibold bg-flaex-border bg-opacity-5 rounded-[10px]">
+          <button
+            onClick={() => {
+              handleChangeLongShort(true);
+            }}
+            className={`flex-1 ${
+              isLong ? "bg-flaex-button" : ""
+            } text-base py-2.5 rounded-[10px]`}
+          >
+            {LSBtn.LONG}
+          </button>
+
+          <button
+            onClick={() => {
+              handleChangeLongShort(false);
+            }}
+            className={`flex-1 ${
+              !isLong ? "bg-flaex-button" : ""
+            } text-base py-2.5 rounded-[10px]`}
+          >
+            {LSBtn.SHORT}
+          </button>
+        </div>
+
+        <div className="mt-[22px]">
+          <div className="text-sm font-semibold">Leverage</div>
+          <div className="flex justify-between rounded-[10px] bg-flaex-border bg-opacity-5 py-1 px-2 mt-2">
+            <input
+              className="bg-transparent outline-none"
+              onChange={(e: any) => handleChangeSlider(e.target.value)}
+              value={percentage}
+              max={1000}
+              type="number"
+            />
+            <div className="mr-2">%</div>
+          </div>
+
+          <div className="mt-8">
+            <SliderCustom
+              value={percentage}
+              onChangeValue={handleChangeSlider}
+              marks={marks}
+              max={1000}
+            />
+          </div>
+        </div>
+
+        <div className="rounded-[10px] bg-flaex-border bg-opacity-5 py-2.5 px-4 mt-12">
+          <div className="flex justify-between text-[12px] font-light">
+            <span>Amount</span>
+          </div>
+
+          <div className="flex justify-between mt-2.5 font-normal text-sm">
+            <NumericFormat
+              className="bg-transparent outline-none w-full"
+              onValueChange={handleChangeAmount}
+              allowNegative={false}
+              decimalScale={4}
+              value={
+                amountValue
+                  ? amountValue
+                  : longShortInfo.marginAmount.toNumber()
+              }
+            />
+            <span>{pairCrypto?.base}</span>
+          </div>
+        </div>
+
+        <div className="rounded-[10px] bg-flaex-border bg-opacity-5 py-2.5 px-4 mt-1">
+          <div className="flex justify-between text-[12px] font-light">
+            <span>Paying</span>
+            <span>{isLong ? pairCrypto?.base : pairCrypto?.quote}</span>
+          </div>
+
+          <div className="flex justify-between mt-2.5 font-normal text-sm">
+            {/* <span>{longShortInfo.paying}</span> */}
+            <NumericFormat
+              className="bg-transparent outline-none w-full"
+              onValueChange={handleChangePaying}
+              allowNegative={false}
+              decimalScale={4}
+              value={
+                payingValue ? payingValue : longShortInfo.paying.toNumber()
+              }
+            />
+            <span
+              className="cursor-pointer whitespace-nowrap"
+              onClick={() => _onSetBalance(_onBalance)}
             >
-              {LSBtn.LONG}
-            </button>
-
-            <button
-              onClick={() => {
-                handleChangeLongShort(false);
-              }}
-              className={`flex-1 ${
-                !isLong ? "bg-flaex-button" : ""
-              } text-base py-2.5 rounded-[10px]`}
-            >
-              {LSBtn.SHORT}
-            </button>
+              Balance: {_onBalance}
+            </span>
           </div>
-
-          <div className="mt-[22px]">
-            <div className="text-sm font-semibold">Leverage</div>
-            <div className="flex justify-between rounded-[10px] bg-flaex-border bg-opacity-5 py-1 px-2 mt-2">
-              <input
-                className="bg-transparent outline-none"
-                onChange={(e: any) => handleChangeSlider(e.target.value)}
-                value={percentage}
-                max={1000}
-                type="number"
-              />
-              <div className="mr-2">%</div>
-            </div>
-
-            <div className="mt-8">
-              <SliderCustom
-                value={percentage}
-                onChangeValue={handleChangeSlider}
-                marks={marks}
-                max={1000}
-              />
-            </div>
-          </div>
-
-          <div className="rounded-[10px] bg-flaex-border bg-opacity-5 py-2.5 px-4 mt-12">
-            <div className="flex justify-between text-[12px] font-light">
-              <span>Amount</span>
-            </div>
-
-            <div className="flex justify-between mt-2.5 font-normal text-sm">
-              <NumericFormat
-                className="bg-transparent outline-none w-full"
-                onValueChange={handleChangeAmount}
-                allowNegative={false}
-                decimalScale={4}
-                value={
-                  amountValue
-                    ? amountValue
-                    : longShortInfo.marginAmount.toNumber()
-                }
-              />
-              <span>{pairCrypto?.base}</span>
-            </div>
-          </div>
-
-          <div className="rounded-[10px] bg-flaex-border bg-opacity-5 py-2.5 px-4 mt-1">
-            <div className="flex justify-between text-[12px] font-light">
-              <span>Paying</span>
-              <span>{isLong ? pairCrypto?.base : pairCrypto?.quote}</span>
-            </div>
-
-            <div className="flex justify-between mt-2.5 font-normal text-sm">
-              {/* <span>{longShortInfo.paying}</span> */}
-              <NumericFormat
-                className="bg-transparent outline-none w-full"
-                onValueChange={handleChangePaying}
-                allowNegative={false}
-                decimalScale={4}
-                value={
-                  payingValue ? payingValue : longShortInfo.paying.toNumber()
-                }
-              />
-              <span
-                className="cursor-pointer whitespace-nowrap"
-                onClick={() => _onSetBalance(_onBalance)}
-              >
-                Balance: {_onBalance}
-              </span>
-            </div>
-          </div>
-          <div className="mt-5">
-            <div className="flex justify-between">
-              <p className="text-xs font-light italic">Total Collateral:</p>
-              <p className="text-sm font-semibold whitespace-nowrap ">{`
+        </div>
+        <div className="mt-5">
+          <div className="flex justify-between">
+            <p className="text-xs font-light italic">Total Collateral:</p>
+            <p className="text-sm font-semibold whitespace-nowrap ">{`
                 ${
                   isLong
                     ? longShortInfo.marginAmount.toFixed(4)
@@ -507,138 +504,133 @@ const LongShort = ({
                 }
                 
                 ${isLong ? pairCrypto?.base : pairCrypto?.quote}`}</p>
-            </div>
-            <div className="flex justify-between">
-              <p className="text-xs font-light italic">Flash Swap:</p>
-              <p className="text-sm font-semibold whitespace-nowrap ">{`${Number(
-                longShortInfo?.flashSwap,
-              ).toFixed(4)} ${
-                isLong ? pairCrypto?.base : pairCrypto?.quote
-              }`}</p>
-            </div>
-            <div className="flex justify-between">
-              <p className="text-xs font-light italic">
-                Borrowing to Repay Flash:
-              </p>
-              <p className="text-sm font-semibold whitespace-nowrap">{`${Number(
-                longShortInfo?.borrowingToRepayFlash,
-              ).toFixed(4)} ${
-                isLong ? pairCrypto?.quote : pairCrypto.base
-              }`}</p>
-            </div>
-            <div className="flex justify-between">
-              <p className="text-xs font-light italic">Entry Price:</p>
-              <p className="text-sm font-semibold whitespace-nowrap">{`${longShortInfo?.entryPrice.toFixed(
-                4,
-              )}`}</p>
-            </div>
-            <div className="flex justify-between">
-              <p className="text-xs font-light italic">Liquidation Price:</p>
-              <p className="text-sm font-semibold whitespace-nowrap">{`${longShortInfo?.liquidationPrice.toFixed(
-                4,
-              )}`}</p>
-            </div>
-            <div className="flex justify-between">
-              <p className="text-xs font-light italic">Margin Ratio:</p>
-              <p className="text-sm font-semibold whitespace-nowrap">{`${longShortInfo?.marginRatio.toFixed(
-                4,
-              )}`}</p>
-            </div>
-            <div className="flex justify-between">
-              <p className="text-xs font-light italic">Commission Fee:</p>
-              <p className="text-sm font-semibold whitespace-nowrap">{`${longShortInfo?.commissionFee.toFixed(
-                4,
-              )} ${isLong ? pairCrypto?.quote : pairCrypto?.base}`}</p>
-            </div>
           </div>
-          <div className="flex-1 flex flex-col justify-end">
-            {btnConnected ? (
-              <>
-                {isLong && !isApprovedLongToken ? (
-                  <>
-                    <BaseButton
-                      disabled={
-                        !approvalLongTokenFunc ||
-                        isApprovalLongLoading ||
-                        isApprovalLongSuccess
-                      }
-                      onButtonClick={() => approvalLongTokenFunc?.()}
-                      moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
-                    >
-                      {!isApprovalLongLoading &&
-                        !isApprovalLongSuccess &&
-                        `Approval ${token0.name}`}
-                      {isApprovalLongLoading && `Waiting for signing`}
-                      {isApprovalLongSuccess && `Waiting for network`}
-                    </BaseButton>
-                  </>
-                ) : (
-                  <>
-                    {!isLong && !isApprovedShortToken ? (
-                      <BaseButton
-                        disabled={
-                          !approvalShortTokenFunc ||
-                          isApprovalShortLoading ||
-                          isApprovalShortSuccess
-                        }
-                        onButtonClick={() => approvalShortTokenFunc?.()}
-                        moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
-                      >
-                        {!isApprovalShortLoading &&
-                          !isApprovalShortSuccess &&
-                          `Approval ${token1.name}`}
-                        {isApprovalShortLoading && `Waiting for signing`}
-                        {isApprovalShortSuccess && `Waiting for network`}
-                      </BaseButton>
-                    ) : (
-                      <>
-                        {isLong && isApprovedLongToken ? (
-                          <BaseButton
-                            disabled={
-                              !longFunc ||
-                              isLongLoading ||
-                              (isLongSuccess && !txLongDone)
-                            }
-                            onButtonClick={() => longFunc?.()}
-                            moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
-                          >
-                            {((!isLongLoading && !isLongSuccess) ||
-                              txLongDone) &&
-                              `${btnLabel} ${pairCrypto?.origin}`}
-                            {isLongLoading && `Waiting for signing`}
-                            {isLongSuccess &&
-                              !txLongDone &&
-                              `Waiting for network`}
-                          </BaseButton>
-                        ) : (
-                          <BaseButton
-                            disabled={
-                              !shortFunc ||
-                              isShortLoading ||
-                              (isShortSuccess && !txShortDone)
-                            }
-                            onButtonClick={() => shortFunc?.()}
-                            moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
-                          >
-                            {((!isShortLoading && !isShortSuccess) ||
-                              txShortDone) &&
-                              `${btnLabel} ${pairCrypto?.origin}`}
-                            {isShortLoading && `Waiting for signing`}
-                            {isShortSuccess &&
-                              !txShortDone &&
-                              `Waiting for network`}
-                          </BaseButton>
-                        )}
-                      </>
-                    )}
-                  </>
-                )}
-              </>
-            ) : (
-              <LiteWagmiBtnConnect />
-            )}
+          <div className="flex justify-between">
+            <p className="text-xs font-light italic">Flash Swap:</p>
+            <p className="text-sm font-semibold whitespace-nowrap ">{`${Number(
+              longShortInfo?.flashSwap,
+            ).toFixed(4)} ${isLong ? pairCrypto?.base : pairCrypto?.quote}`}</p>
+          </div>
+          <div className="flex justify-between">
+            <p className="text-xs font-light italic">
+              Borrowing to Repay Flash:
+            </p>
+            <p className="text-sm font-semibold whitespace-nowrap">{`${Number(
+              longShortInfo?.borrowingToRepayFlash,
+            ).toFixed(4)} ${isLong ? pairCrypto?.quote : pairCrypto.base}`}</p>
+          </div>
+          <div className="flex justify-between">
+            <p className="text-xs font-light italic">Entry Price:</p>
+            <p className="text-sm font-semibold whitespace-nowrap">{`${longShortInfo?.entryPrice.toFixed(
+              4,
+            )}`}</p>
+          </div>
+          <div className="flex justify-between">
+            <p className="text-xs font-light italic">Liquidation Price:</p>
+            <p className="text-sm font-semibold whitespace-nowrap">{`${longShortInfo?.liquidationPrice.toFixed(
+              4,
+            )}`}</p>
+          </div>
+          <div className="flex justify-between">
+            <p className="text-xs font-light italic">Margin Ratio:</p>
+            <p className="text-sm font-semibold whitespace-nowrap">{`${longShortInfo?.marginRatio.toFixed(
+              4,
+            )}`}</p>
+          </div>
+          <div className="flex justify-between">
+            <p className="text-xs font-light italic">Commission Fee:</p>
+            <p className="text-sm font-semibold whitespace-nowrap">{`${longShortInfo?.commissionFee.toFixed(
+              4,
+            )} ${isLong ? pairCrypto?.quote : pairCrypto?.base}`}</p>
           </div>
         </div>
+        <div className="flex-1 flex flex-col justify-end">
+          {btnConnected ? (
+            <>
+              {isLong && !isApprovedLongToken ? (
+                <>
+                  <BaseButton
+                    disabled={
+                      !approvalLongTokenFunc ||
+                      isApprovalLongLoading ||
+                      isApprovalLongSuccess
+                    }
+                    onButtonClick={() => approvalLongTokenFunc?.()}
+                    moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
+                  >
+                    {!isApprovalLongLoading &&
+                      !isApprovalLongSuccess &&
+                      `Approval ${token0.name}`}
+                    {isApprovalLongLoading && `Waiting for signing`}
+                    {isApprovalLongSuccess && `Waiting for network`}
+                  </BaseButton>
+                </>
+              ) : (
+                <>
+                  {!isLong && !isApprovedShortToken ? (
+                    <BaseButton
+                      disabled={
+                        !approvalShortTokenFunc ||
+                        isApprovalShortLoading ||
+                        isApprovalShortSuccess
+                      }
+                      onButtonClick={() => approvalShortTokenFunc?.()}
+                      moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
+                    >
+                      {!isApprovalShortLoading &&
+                        !isApprovalShortSuccess &&
+                        `Approval ${token1.name}`}
+                      {isApprovalShortLoading && `Waiting for signing`}
+                      {isApprovalShortSuccess && `Waiting for network`}
+                    </BaseButton>
+                  ) : (
+                    <>
+                      {isLong && isApprovedLongToken ? (
+                        <BaseButton
+                          disabled={
+                            !longFunc ||
+                            isLongLoading ||
+                            (isLongSuccess && !txLongDone)
+                          }
+                          onButtonClick={() => longFunc?.()}
+                          moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
+                        >
+                          {((!isLongLoading && !isLongSuccess) || txLongDone) &&
+                            `${btnLabel} ${pairCrypto?.origin}`}
+                          {isLongLoading && `Waiting for signing`}
+                          {isLongSuccess &&
+                            !txLongDone &&
+                            `Waiting for network`}
+                        </BaseButton>
+                      ) : (
+                        <BaseButton
+                          disabled={
+                            !shortFunc ||
+                            isShortLoading ||
+                            (isShortSuccess && !txShortDone)
+                          }
+                          onButtonClick={() => shortFunc?.()}
+                          moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
+                        >
+                          {((!isShortLoading && !isShortSuccess) ||
+                            txShortDone) &&
+                            `${btnLabel} ${pairCrypto?.origin}`}
+                          {isShortLoading && `Waiting for signing`}
+                          {isShortSuccess &&
+                            !txShortDone &&
+                            `Waiting for network`}
+                        </BaseButton>
+                      )}
+                    </>
+                  )}
+                </>
+              )}
+            </>
+          ) : (
+            <LiteWagmiBtnConnect />
+          )}
+        </div>
+      </div>
     </>
   );
 };

@@ -62,8 +62,19 @@ const AmountInvest = ({ balance }: { balance: any }) => {
   useWaitForTransaction({
     hash: approvalTokenData?.hash,
     confirmations: 1,
-    onSuccess() {
+    onSuccess(data) {
+      pushModal(
+        <ModalCallback
+          hash={data?.transactionHash}
+          content={`Successfully Approved`}
+        />,
+        true,
+      );
       setIsApproved(true);
+    },
+    onError(error) {
+      pushErrorModal(approvalTokenData?.hash);
+      console.log("setIsApprovedLongToken Short Error", error);
     },
   });
 
@@ -123,15 +134,21 @@ const AmountInvest = ({ balance }: { balance: any }) => {
           Amount (DAI)
         </div>
         <input
-          className="bg-transparent outline-none"
+          className="bg-transparent outline-none mt-1"
           onChange={handleChangeAmount}
           value={amount}
-          max={1000}
           type="number"
         />
-        <div className="text-[12px] md:text-[14px] font-light">
+        <span
+          className="cursor-pointer whitespace-nowrap text-[12px] md:text-[14px] font-light"
+          onClick={() =>
+            setAmount(
+              new Decimal(balance._hex).div(new Decimal(10).pow(18)).toNumber(),
+            )
+          }
+        >
           Max: {BigNumberToReadableAmount(balance, 18)}
-        </div>
+        </span>
       </div>
       <div className="mt-[7px]">
         {!isApproved && (

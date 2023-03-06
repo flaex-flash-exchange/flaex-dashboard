@@ -148,17 +148,32 @@ const DrawAmountInvest = () => {
           Withdraw Amount (DAI)
         </div>
         <input
-          className="bg-transparent outline-none"
+          className="bg-transparent outline-none mt-1"
           onChange={handleChangeAmount}
           value={amount}
-          max={1000}
+          // max={1000}
           type="number"
         />
-        <div className="text-[12px] md:text-[14px] font-light">
-          Max:{" "}
-          {new Decimal(balanceFlToken ? (balanceFlToken as BigNumber)._hex : 0)
-            .div(new Decimal(10).pow(18))
-            .toFixed(4)}
+        <div>
+          <span
+            className="cursor-pointer whitespace-nowrap text-[12px] md:text-[14px] font-light"
+            onClick={() =>
+              setAmount(
+                new Decimal(
+                  balanceFlToken ? (balanceFlToken as BigNumber)._hex : 0,
+                )
+                  .div(new Decimal(10).pow(18))
+                  .toNumber(),
+              )
+            }
+          >
+            Max:{" "}
+            {new Decimal(
+              balanceFlToken ? (balanceFlToken as BigNumber)._hex : 0,
+            )
+              .div(new Decimal(10).pow(18))
+              .toFixed(4)}
+          </span>
         </div>
       </div>
       <div className="grid grid-cols-3 justify-between gap-2 mt-[7px] ">

@@ -12,6 +12,7 @@ import { QuoterReturn } from "hooks/useQuote";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import { NumericFormat } from "react-number-format";
+import { BounceLoader } from "react-spinners";
 import { amountToHex } from "util/commons";
 import { eventLogs, Shippaple, tokenPair } from "util/constants";
 import { toBigNumber, getCloseInfo, getRepayInfo } from "util/convertValue";
@@ -182,37 +183,38 @@ const CloseRepay = ({
     write: closeFunc,
   } = useContractWrite(configClose);
 
-  const { isSuccess: isCloseConfirmed , isError : isCloseEroor } = useWaitForTransaction({
-    hash: dataClose?.hash,
-    confirmations: 1,
-    onSuccess(data) {
-      const result = getCloseInfo(token0.address, data?.logs, address);
-      const isLong = result.isLong;
-      pushModal(
-        <ModalCallback
-          hash={data?.transactionHash}
-          content={
-            <div>
-              <div>Successfully Closed {isLong ? "Long" : "Short"}</div>
-              <div>{`${result.Amount} ETH at ${result.Price}`}</div>
+  const { isSuccess: isCloseConfirmed, isError: isCloseEroor } =
+    useWaitForTransaction({
+      hash: dataClose?.hash,
+      confirmations: 1,
+      onSuccess(data) {
+        const result = getCloseInfo(token0.address, data?.logs, address);
+        const isLong = result.isLong;
+        pushModal(
+          <ModalCallback
+            hash={data?.transactionHash}
+            content={
               <div>
-                Receive {isLong ? result.receiveBase : result.receiveQuote} ETH
-                and{" "}
+                <div>Successfully Closed {isLong ? "Long" : "Short"}</div>
+                <div>{`${result.Amount} ETH at ${result.Price}`}</div>
                 <div>
-                  {isLong ? result.receiveQuote : result.receiveBase} DAI
+                  Receive {isLong ? result.receiveBase : result.receiveQuote}{" "}
+                  ETH and{" "}
+                  <div>
+                    {isLong ? result.receiveQuote : result.receiveBase} DAI
+                  </div>
                 </div>
               </div>
-            </div>
-          }
-        />,
-        true,
-      );
+            }
+          />,
+          true,
+        );
 
-      fetchLongShortData();
-    },
-  });
+        fetchLongShortData();
+      },
+    });
 
-  const txCloseDone = isCloseConfirmed ||  isCloseEroor;
+  const txCloseDone = isCloseConfirmed || isCloseEroor;
 
   const { config: configRepay } = usePrepareContractWrite({
     address: contractAddress.FlaexMain as `0x${string}`,
@@ -238,28 +240,29 @@ const CloseRepay = ({
     write: repayFunc,
   } = useContractWrite(configRepay);
 
-  const { isSuccess: isRepayConfirmed, isError: isRepayError } = useWaitForTransaction({
-    hash: dataRepay?.hash,
-    confirmations: 1,
-    onSuccess(data) {
-      const result = getRepayInfo(token0.address, data?.logs, address);
-      pushModal(
-        <ModalCallback
-          hash={data?.transactionHash}
-          content={
-            <div>
-              <div>Successfully Repaid </div>
+  const { isSuccess: isRepayConfirmed, isError: isRepayError } =
+    useWaitForTransaction({
+      hash: dataRepay?.hash,
+      confirmations: 1,
+      onSuccess(data) {
+        const result = getRepayInfo(token0.address, data?.logs, address);
+        pushModal(
+          <ModalCallback
+            hash={data?.transactionHash}
+            content={
               <div>
-                {result.Amount} {result.isLong ? " ETH" : " DAI"}
+                <div>Successfully Repaid </div>
+                <div>
+                  {result.Amount} {result.isLong ? " ETH" : " DAI"}
+                </div>
               </div>
-            </div>
-          }
-        />,
-        true,
-      );
-      fetchLongShortData();
-    },
-  });
+            }
+          />,
+          true,
+        );
+        fetchLongShortData();
+      },
+    });
 
   const txRepayDone = isRepayConfirmed || isRepayError;
 
@@ -356,42 +359,56 @@ const CloseRepay = ({
     }
   }, [amountValue, repayCloseData, isRepay]);
 
-  const { receiveToken0 , receiveToken1 , commissionFee } = useMemo(() => {
-    if(repayCloseData){
-      const priceFlash = repayCloseData?.isLong ? price.priceExactInputToken0: price.priceExactOutputToken1;
-      const flashSwap = repayCloseData?.isLong ? new Decimal(amountValue).mul(priceFlash).mul(0.9995) : new Decimal(amountValue).div(priceFlash).mul(0.9995);
-      if(flashSwap.gte(repayCloseData?.quoteTokenAmount || 0)){
-        if(repayCloseData?.isLong){
+  const { receiveToken0, receiveToken1, commissionFee } = useMemo(() => {
+    if (repayCloseData) {
+      const priceFlash = repayCloseData?.isLong
+        ? price.priceExactInputToken0
+        : price.priceExactOutputToken1;
+      const flashSwap = repayCloseData?.isLong
+        ? new Decimal(amountValue).mul(priceFlash).mul(0.9995)
+        : new Decimal(amountValue).div(priceFlash).mul(0.9995);
+      if (flashSwap.gte(repayCloseData?.quoteTokenAmount || 0)) {
+        if (repayCloseData?.isLong) {
           return {
-            receiveToken0 :new Decimal(repayCloseData?.baseTokenAmount).sub(amountValue).toFixed(4),
-            receiveToken1: new Decimal(flashSwap).sub(repayCloseData?.quoteTokenAmount).toFixed(4),
-            commissionFee:new Decimal(flashSwap).mul(0.0005).toFixed(4),
+            receiveToken0: new Decimal(repayCloseData?.baseTokenAmount)
+              .sub(amountValue)
+              .toFixed(4),
+            receiveToken1: new Decimal(flashSwap)
+              .sub(repayCloseData?.quoteTokenAmount)
+              .toFixed(4),
+            commissionFee: new Decimal(flashSwap).mul(0.0005).toFixed(4),
           };
         } else {
           return {
-            receiveToken1 :new Decimal(repayCloseData?.baseTokenAmount).sub(amountValue).toFixed(4),
-            receiveToken0: new Decimal(flashSwap).sub(repayCloseData?.quoteTokenAmount).toFixed(4),
-            commissionFee:new Decimal(flashSwap).mul(0.0005).toFixed(4),
+            receiveToken1: new Decimal(repayCloseData?.baseTokenAmount)
+              .sub(amountValue)
+              .toFixed(4),
+            receiveToken0: new Decimal(flashSwap)
+              .sub(repayCloseData?.quoteTokenAmount)
+              .toFixed(4),
+            commissionFee: new Decimal(flashSwap).mul(0.0005).toFixed(4),
           };
         }
       } else {
         return {
-          receiveToken0 :new Decimal(0).toFixed(4),
-          receiveToken1:new Decimal(0).toFixed(4),
-          commissionFee:new Decimal(0).toFixed(4),
+          receiveToken0: new Decimal(0).toFixed(4),
+          receiveToken1: new Decimal(0).toFixed(4),
+          commissionFee: new Decimal(0).toFixed(4),
         };
-      } 
-    }else {
-        return {
-          receiveToken0 :new Decimal(0).toFixed(4),
-          receiveToken1:new Decimal(0).toFixed(4),
-          commissionFee:new Decimal(0).toFixed(4),
-        };
+      }
+    } else {
+      return {
+        receiveToken0: new Decimal(0).toFixed(4),
+        receiveToken1: new Decimal(0).toFixed(4),
+        commissionFee: new Decimal(0).toFixed(4),
+      };
     }
-  
-  }, [amountValue, price.priceExactInputToken0, price.priceExactOutputToken1, repayCloseData]);
-
- 
+  }, [
+    amountValue,
+    price.priceExactInputToken0,
+    price.priceExactOutputToken1,
+    repayCloseData,
+  ]);
 
   useEffect(() => {
     if (percentage > 0) {
@@ -556,7 +573,7 @@ const CloseRepay = ({
                 {repayCloseData ? repayCloseData?.marginRatio : 0}
               </p>
             </div>
-    
+
             {/* {isRepay ? (
               <div className="flex justify-between">
                 <p className="text-xs font-light italic">Margin Ratio After:</p>
@@ -571,26 +588,32 @@ const CloseRepay = ({
               </p>
             </div>
             {/* <div className="flex justify-between"> */}
-              <p className="text-xs font-light italic">Receive:</p>
-              <p className="text-sm font-semibold">
-                <>
+            <p className="text-xs font-light italic">Receive:</p>
+            <p className="text-sm font-semibold">
+              <>
                 <div className="flex justify-between ">
-                <p className="text-xs font-light italic pl-2">{token0.symbol}:</p>
-                {Number(receiveToken0) < 0 ? 0 : receiveToken0}
+                  <p className="text-xs font-light italic pl-2">
+                    {token0.symbol}:
+                  </p>
+                  {Number(receiveToken0) < 0 ? 0 : receiveToken0}
                 </div>
                 <div className="flex justify-between">
-                <p className="text-xs font-light italic pl-2">{token1.symbol}:</p>
-                {Number(receiveToken1) < 0 ? 0 : receiveToken1}
+                  <p className="text-xs font-light italic pl-2">
+                    {token1.symbol}:
+                  </p>
+                  {Number(receiveToken1) < 0 ? 0 : receiveToken1}
                 </div>
-                </>
-              </p>
+              </>
+            </p>
             {/* </div> */}
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Commission Fee:</p>
               <p className="text-sm font-semibold">
-                {`${Number(commissionFee) < 0 ? 0 : commissionFee} ${repayCloseData?.isLong?token1.symbol:token0.symbol}` }
+                {`${Number(commissionFee) < 0 ? 0 : commissionFee} ${
+                  repayCloseData?.isLong ? token1.symbol : token0.symbol
+                }`}
               </p>
-              </div>
+            </div>
           </>
         )}
       </div>
@@ -608,15 +631,17 @@ const CloseRepay = ({
                       (isRepaySuccess && !txRepayDone)
                     }
                     onButtonClick={() => repayFunc?.()}
-                    moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full"
+                    moreClass="mt-3.5 py-2.5 text-base flex items-center justify-center gap-2 font-semibold rounded-[10px] bg-flaex-button w-full"
                   >
-                    {((!isRepayLoading && !isRepaySuccess) ||
-                      txRepayDone) &&
+                    {((!isRepayLoading && !isRepaySuccess) || txRepayDone) &&
                       `Repay Partition Debt`}
-                    {isRepayLoading && `Waiting for signing`}
-                    {isRepaySuccess &&
-                      !txRepayDone &&
-                      `Waiting for network`}
+                    {isRepayLoading && <>Waiting for signing</>}
+                    {isRepaySuccess && !txRepayDone && (
+                      <>
+                        Waiting for network{" "}
+                        <BounceLoader size={24} color={"#fafafa"} />
+                      </>
+                    )}
                   </BaseButton>
                 </>
               )}
@@ -630,13 +655,23 @@ const CloseRepay = ({
                     isApprovalRepayLongSuccess
                   }
                   onButtonClick={() => approvalRepayLongTokenFunc?.()}
-                  moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full"
+                  moreClass="mt-3.5 py-2.5 text-base flex items-center justify-center gap-2 font-semibold rounded-[10px] bg-flaex-button w-full"
                 >
                   {!isApprovalRepayLongLoading &&
                     !isApprovalRepayLongSuccess &&
                     `Approval ${token1.name}`}
-                  {isApprovalRepayLongLoading && `Waiting for signing`}
-                  {isApprovalRepayLongSuccess && `Waiting for network`}
+                  {isApprovalRepayLongLoading && (
+                    <>
+                      Waiting for signing{" "}
+                      <BounceLoader size={24} color={"#fafafa"} />
+                    </>
+                  )}
+                  {isApprovalRepayLongSuccess && (
+                    <>
+                      Waiting for network{" "}
+                      <BounceLoader size={24} color={"#fafafa"} />
+                    </>
+                  )}
                 </BaseButton>
               </>
             )}
@@ -652,13 +687,23 @@ const CloseRepay = ({
                       isApprovalRepayShortSuccess
                     }
                     onButtonClick={() => approvalRepayShortTokenFunc?.()}
-                    moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full"
+                    moreClass="mt-3.5 py-2.5 text-base flex items-center justify-center gap-2 font-semibold rounded-[10px] bg-flaex-button w-full"
                   >
                     {!isApprovalRepayShortLoading &&
                       !isApprovalRepayShortSuccess &&
                       `Approval ${token0.name}`}
-                    {isApprovalRepayShortLoading && `Waiting for signing`}
-                    {isApprovalRepayShortSuccess && `Waiting for network`}
+                    {isApprovalRepayShortLoading && (
+                      <>
+                        Waiting for signing{" "}
+                        <BounceLoader size={24} color={"#fafafa"} />
+                      </>
+                    )}
+                    {isApprovalRepayShortSuccess && (
+                      <>
+                        Waiting for network{" "}
+                        <BounceLoader size={24} color={"#fafafa"} />
+                      </>
+                    )}
                   </BaseButton>
                 </>
               )}
@@ -672,12 +717,22 @@ const CloseRepay = ({
                     (isCloseSuccess && !txCloseDone)
                   }
                   onButtonClick={() => closeFunc?.()}
-                  moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full"
+                  moreClass="mt-3.5 py-2.5 text-base flex items-center justify-center gap-2 font-semibold rounded-[10px] bg-flaex-button w-full"
                 >
                   {((!isCloseLoading && !isCloseSuccess) || txCloseDone) &&
                     `Close Position`}
-                  {isCloseLoading && `Waiting for signing`}
-                  {isCloseSuccess && !txCloseDone && `Waiting for network`}
+                  {isCloseLoading && (
+                    <>
+                      Waiting for signing{" "}
+                      <BounceLoader size={24} color={"#fafafa"} />
+                    </>
+                  )}
+                  {isCloseSuccess && !txCloseDone && (
+                    <>
+                      Waiting for network{" "}
+                      <BounceLoader size={24} color={"#fafafa"} />
+                    </>
+                  )}
                 </BaseButton>
               </>
             )}

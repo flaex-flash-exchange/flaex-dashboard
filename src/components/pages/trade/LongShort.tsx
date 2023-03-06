@@ -11,6 +11,7 @@ import { BigNumber, constants, Contract } from "ethers";
 import useQuoter, { QuoterReturn } from "hooks/useQuote";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { NumericFormat } from "react-number-format";
+import { BounceLoader } from "react-spinners";
 import {
   BigNumberToReadableAmount,
   _onLongCalculator,
@@ -556,13 +557,23 @@ const LongShort = ({
                       isApprovalLongSuccess
                     }
                     onButtonClick={() => approvalLongTokenFunc?.()}
-                    moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
+                    moreClass="mt-3.5 py-2.5 text-base flex items-center justify-center gap-2 font-semibold rounded-[10px] bg-flaex-button w-full border-none"
                   >
                     {!isApprovalLongLoading &&
                       !isApprovalLongSuccess &&
                       `Approval ${token0.name}`}
-                    {isApprovalLongLoading && `Waiting for signing`}
-                    {isApprovalLongSuccess && `Waiting for network`}
+                    {isApprovalLongLoading && (
+                      <>
+                        Waiting for signing {" "}
+                        <BounceLoader size={24} color={"#fafafa"} />
+                      </>
+                    )}
+                    {isApprovalLongSuccess && (
+                      <>
+                        Waiting for network {" "}
+                        <BounceLoader size={24} color={"#fafafa"} />
+                      </>
+                    )}
                   </BaseButton>
                 </>
               ) : (
@@ -575,13 +586,23 @@ const LongShort = ({
                         isApprovalShortSuccess
                       }
                       onButtonClick={() => approvalShortTokenFunc?.()}
-                      moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
+                      moreClass="mt-3.5 py-2.5 text-base flex items-center justify-center gap-2 font-semibold rounded-[10px] bg-flaex-button w-full border-none"
                     >
                       {!isApprovalShortLoading &&
                         !isApprovalShortSuccess &&
                         `Approval ${token1.name}`}
-                      {isApprovalShortLoading && `Waiting for signing`}
-                      {isApprovalShortSuccess && `Waiting for network`}
+                      {isApprovalShortLoading && (
+                        <>
+                          Waiting for signing{" "}
+                          <BounceLoader size={24} color={"#fafafa"} />
+                        </>
+                      )}
+                      {isApprovalShortSuccess && (
+                        <>
+                          Waiting for network{" "}
+                          <BounceLoader size={24} color={"#fafafa"} />
+                        </>
+                      )}
                     </BaseButton>
                   ) : (
                     <>
@@ -593,14 +614,22 @@ const LongShort = ({
                             (isLongSuccess && !txLongDone)
                           }
                           onButtonClick={() => longFunc?.()}
-                          moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
+                          moreClass="mt-3.5 py-2.5 text-base flex items-center justify-center gap-2 font-semibold rounded-[10px] bg-flaex-button w-full border-none"
                         >
                           {((!isLongLoading && !isLongSuccess) || txLongDone) &&
                             `${btnLabel} ${pairCrypto?.origin}`}
-                          {isLongLoading && `Waiting for signing`}
-                          {isLongSuccess &&
-                            !txLongDone &&
-                            `Waiting for network`}
+                          {isLongLoading && (
+                            <>
+                              Waiting for signing{" "}
+                              <BounceLoader size={24} color={"#fafafa"} />
+                            </>
+                          )}
+                          {isLongSuccess && !txLongDone && (
+                            <>
+                              Waiting for network{" "}
+                              <BounceLoader size={24} color={"#fafafa"} />
+                            </>
+                          )}
                         </BaseButton>
                       ) : (
                         <BaseButton
@@ -610,15 +639,27 @@ const LongShort = ({
                             (isShortSuccess && !txShortDone)
                           }
                           onButtonClick={() => shortFunc?.()}
-                          moreClass="mt-3.5 py-2.5 text-base font-semibold rounded-[10px] bg-flaex-button w-full border-none"
+                          moreClass="mt-3.5 py-2.5 text-base flex items-center justify-center gap-2 font-semibold rounded-[10px] bg-flaex-button w-full border-none"
                         >
                           {((!isShortLoading && !isShortSuccess) ||
                             txShortDone) &&
                             `${btnLabel} ${pairCrypto?.origin}`}
-                          {isShortLoading && `Waiting for signing`}
-                          {isShortSuccess &&
-                            !txShortDone &&
-                            `Waiting for network`}
+                          {isShortLoading && (
+                            <>
+                              {" "}
+                              Waiting for signing{" "}
+                              <BounceLoader size={24} color={"#fafafa"} />
+                            </>
+                          )}
+                          {isShortSuccess && !txShortDone && (
+                            <>
+                              Waiting for network{" "}
+                              <BounceLoader size={24} color={"#fafafa"} />
+                            </>
+                          )}
+                          {isShortLoading && isShortSuccess && (
+                            <BounceLoader size={24} color={"#fafafa"} />
+                          )}
                         </BaseButton>
                       )}
                     </>

@@ -73,11 +73,13 @@ const CloseRepay = ({
     }
   }, [address, provider, token0.address, token1.address]);
 
-  const available = repayCloseData
+  const available = useMemo(()=>{
+    return repayCloseData
     ? isRepay
       ? new Decimal(repayCloseData?.quoteTokenAmount).mul(0.9999).toFixed(4)
       : new Decimal(repayCloseData?.baseTokenAmount).toFixed(4)
     : 0;
+  },[repayCloseData,isRepay]);
 
   const [amountValue, setAmount] = useState<number | string>(
     repayCloseData
@@ -174,7 +176,7 @@ const CloseRepay = ({
           0,
           fee,
         ],
-    enabled: amountValue > 0 && percentage > 0,
+    enabled: !isRepay && amountValue > 0 && percentage > 0,
   });
   const {
     data: dataClose,
@@ -224,12 +226,12 @@ const CloseRepay = ({
       ? [
           token0.address,
           token1.address,
-          amountToHex(amountValue, token0.decimals),
+          amountToHex(amountValue, token1.decimals),
         ]
       : [
           token1.address,
           token0.address,
-          amountToHex(amountValue, token1.decimals),
+          amountToHex(amountValue, token0.decimals),
         ],
     enabled: amountValue > 0 && percentage > 0 && ((repayCloseData?.isLong  && isApprovedRepayLongToken)  || (!repayCloseData?.isLong  && isApprovedRepayShortToken)),
   });
@@ -267,7 +269,7 @@ const CloseRepay = ({
   const txRepayDone = isRepayConfirmed || isRepayError;
 
   const { config: configApprovalRepayShortToken } = usePrepareContractWrite({
-    address: token1.address,
+    address: token0.address,
     abi: TestERC20.abi,
     functionName: "approve",
     args: [contractAddress.FlaexMain, constants.MaxUint256],
@@ -289,7 +291,7 @@ const CloseRepay = ({
   });
 
   const { config: configApprovalRepayLongToken } = usePrepareContractWrite({
-    address: token0.address,
+    address: token1.address,
     abi: TestERC20.abi,
     functionName: "approve",
     args: [contractAddress.FlaexMain, constants.MaxUint256],

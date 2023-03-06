@@ -231,7 +231,7 @@ const CloseRepay = ({
           token0.address,
           amountToHex(amountValue, token1.decimals),
         ],
-    enabled: amountValue > 0 && percentage > 0,
+    enabled: amountValue > 0 && percentage > 0 && ((repayCloseData?.isLong  && isApprovedRepayLongToken)  || (!repayCloseData?.isLong  && isApprovedRepayShortToken)),
   });
   const {
     data: dataRepay,

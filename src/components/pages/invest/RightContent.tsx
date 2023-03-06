@@ -45,8 +45,6 @@ const RightContent = () => {
     return investorYield ? (investorYield as Array<any>) : [];
   }, [investorYield]);
 
-  console.log({ investorYield });
-
   const fetchPriceData = useCallback(
     async (asset) => {
       const AAVEOrcaleContract = new Contract(

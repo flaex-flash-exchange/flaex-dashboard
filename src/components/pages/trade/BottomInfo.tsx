@@ -178,7 +178,6 @@ const titleHistoryRow = [
   // {
   //   title: "Collateral",
   //   field: (data: any) => {
-  //     console.log({ data });
 
   //     return (
   //       <div className="whitespace-nowrap">{`${data.baseTokenAmount} ${

@@ -57,8 +57,6 @@ const LongShort = ({
 
   const btnLabel = useMemo(() => (isLong ? LSBtn.LONG : LSBtn.SHORT), [isLong]);
 
-  console.log({ btnLabel });
-  console.log({ isLong });
   const quotedAmountOut = useQuoter(
     token1,
     token0,
@@ -162,7 +160,6 @@ const LongShort = ({
     },
     onError(error) {
       pushErrorModal(approvalShortTokenData?.hash);
-      console.log("setIsApprovedShortToken Short Error", error);
     },
   });
 
@@ -194,7 +191,6 @@ const LongShort = ({
     },
     onError(error) {
       pushErrorModal(approvalLongTokenData?.hash);
-      console.log("setIsApprovedLongToken Short Error", error);
     },
   });
 
@@ -212,7 +208,7 @@ const LongShort = ({
       fee,
       longShortInfo.leverage.mul(100).toHex(),
     ],
-    enabled: Boolean(new Decimal(longShortInfo.paying).greaterThan(0)),
+    enabled: Boolean(new Decimal(longShortInfo.paying).greaterThan(0)) && isApprovedLongToken,
   });
 
   const {
@@ -251,7 +247,6 @@ const LongShort = ({
       },
       onError(error) {
         pushErrorModal(longData?.hash);
-        console.log("Error - Fail", error);
       },
     });
 
@@ -271,7 +266,7 @@ const LongShort = ({
       fee,
       longShortInfo.leverage.mul(100).toHex(),
     ],
-    enabled: Boolean(new Decimal(longShortInfo.paying).greaterThan(0)),
+    enabled: Boolean(new Decimal(longShortInfo.paying).greaterThan(0))  && isApprovedShortToken,
   });
   const {
     data: dataShort,
@@ -310,7 +305,6 @@ const LongShort = ({
       },
       onError(error) {
         pushErrorModal(dataShort?.hash);
-        console.log("Error - Fail", error);
       },
     });
 

@@ -85,7 +85,6 @@ const DrawAmountInvest = () => {
       },
       onError(error) {
         pushErrorModal(withdrawData?.hash);
-        console.log("Error", error);
       },
     });
 
@@ -135,7 +134,6 @@ const DrawAmountInvest = () => {
       },
       onError(error) {
         pushErrorModal(claimData?.hash);
-        console.log("Error", error);
       },
     });
 

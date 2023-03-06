@@ -74,7 +74,6 @@ const AmountInvest = ({ balance }: { balance: any }) => {
     },
     onError(error) {
       pushErrorModal(approvalTokenData?.hash);
-      console.log("setIsApprovedLongToken Short Error", error);
     },
   });
 
@@ -113,7 +112,6 @@ const AmountInvest = ({ balance }: { balance: any }) => {
     },
     onError(error) {
       pushErrorModal(investTokenData?.hash);
-      console.log("Error", error);
     },
   });
 

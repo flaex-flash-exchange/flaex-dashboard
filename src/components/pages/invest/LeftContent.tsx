@@ -99,7 +99,6 @@ const LeftContent = () => {
     [provider, totalMinted],
   );
 
-  console.log({ allYieldAsset });
 
   const { data: aaveReserveInfo } = useContractRead({
     abi: AavePool.abi,
@@ -145,7 +144,6 @@ const LeftContent = () => {
     };
   }, [allAPY]);
 
-  console.log({ totalAPY, allAPY });
 
   const { data: getVaultData } = useContractRead({
     abi: AavePool.abi,
@@ -203,7 +201,6 @@ const LeftContent = () => {
           return await fetchFLIndex(asset);
         }),
       );
-      console.log({ array });
       setFlaexAPYDetails(array);
     })();
   }, [allYieldAsset, fetchFLIndex]);

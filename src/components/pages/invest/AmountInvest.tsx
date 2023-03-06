@@ -120,7 +120,7 @@ const AmountInvest = ({ balance }: { balance: any }) => {
     <div className="bg-border-transparent-flaex p-2.5">
       <div className="py-2.5 px-3 bg-flaex-border bg-opacity-5 rounded-[10px]">
         <div className="text-[12px] md:text-[14px] font-normal">
-          Amount (USDC)
+          Amount (DAI)
         </div>
         <input
           className="bg-transparent outline-none"

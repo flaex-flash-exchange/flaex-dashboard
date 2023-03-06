@@ -168,7 +168,7 @@ const LeftContent = () => {
       )
     : amountToHealthFactor;
 
-  const healthFactor = BigNumberToReadableAmount(
+  const healthFactor = collateralInfo?.healthFactor.eq(constants.MaxUint256._hex) ? 0 : BigNumberToReadableAmount(
     collateralInfo?.healthFactor,
     18,
   );
@@ -179,6 +179,9 @@ const LeftContent = () => {
         ),
       )
     : available;
+  
+
+  
 
   const descInvest = [
     {

@@ -233,7 +233,7 @@ const CloseRepay = ({
           token0.address,
           amountToHex(amountValue, token0.decimals),
         ],
-    enabled: amountValue > 0 && percentage > 0 && new Decimal(amountValue).lt(repayCloseData?.quoteTokenAmount) && ((repayCloseData?.isLong  && isApprovedRepayLongToken ) || (!repayCloseData?.isLong  && isApprovedRepayShortToken)),
+    enabled: amountValue > 0 && percentage > 0 && new Decimal(amountValue).lt(repayCloseData?.quoteTokenAmount || 0) && ((repayCloseData?.isLong  && isApprovedRepayLongToken ) || (!repayCloseData?.isLong  && isApprovedRepayShortToken)),
   });
   const {
     data: dataRepay,

@@ -1,4 +1,5 @@
 import React from "react";
+import { formatNumberWithCommas } from "util/commons";
 
 const RewardTable = ({
   totalRow,
@@ -11,7 +12,7 @@ const RewardTable = ({
     <div className="bg-border-flaex">
       <div className="flex justify-between text-[18px] font-semibold pt-3.5 pb-3 px-[19px] border-b-[0.2px] border-flaex-border-table ">
         <div>{totalRow.title}</div>
-        <div className="font-bold">{`${totalRow.value.toFixed(2)} $`}</div>
+        <div className="font-bold">{`${formatNumberWithCommas(totalRow.value.toNumber(),4)} $`}</div>
       </div>
 
       <div className="pt-1 pb-[10px] px-[22px]">
@@ -28,7 +29,7 @@ const RewardTable = ({
               >
                 {item.title}
               </div>
-              <div className="font-bold">{`${item.value.toFixed(4)} (${item.netValue.toFixed(4)} $)`}</div>
+              <div className="font-bold">{`${formatNumberWithCommas(item.value.toNumber(),4)} (${formatNumberWithCommas(item.netValue.toNumber(),4)} $)`}</div>
             </div>
           );
         })}

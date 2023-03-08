@@ -62,7 +62,7 @@ const DrawAmountInvest = () => {
     address: contractAddress.FlaexInvestor as `0x${string}`,
     abi: FlaexInvest.abi,
     functionName: "withdraw",
-    args: [amountToHex(amount, 18)],
+    args: [amountToHex(amount.toFixed(4), 18)],
     enabled: amount > 0,
   });
 
@@ -85,7 +85,7 @@ const DrawAmountInvest = () => {
             content={
               <div>
                 <div>Successfully Withdrawn</div>
-                <div>{result.amountWithdrawn.toFixed(4)} flDAI</div>
+                <div>{result.amountWithdrawn.toFixed(4)} DAI</div>
                 {Object.keys(result.YieldInfo).length > 0 ? (
                   <div>
                     <div>And Claimed Yield Of</div>
@@ -113,6 +113,7 @@ const DrawAmountInvest = () => {
     functionName: "claimYield",
     args: [],
   });
+
 
   const {
     data: claimData,
@@ -162,7 +163,7 @@ const DrawAmountInvest = () => {
     <div className="bg-border-transparent-flaex p-2.5 flex flex-col justify-between">
       <div className="py-2.5 px-3 bg-flaex-border bg-opacity-5 rounded-[10px]">
         <div className="text-[12px] md:text-[14px] font-normal">
-          Withdraw Amount (DAI)
+          Withdraw Amount (flDAI)
         </div>
         <NumericFormat
           className="bg-transparent outline-none mt-1"

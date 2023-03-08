@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   BigNumberToNumberAmount,
   BigNumberToReadableAmount,
+  formatNumberWithCommas,
 } from "util/commons";
 import { TokenYieldList, UserInvestYield } from "util/type";
 import { useAccount, useContractRead, useProvider } from "wagmi";
@@ -107,10 +108,10 @@ const RightContent = () => {
       <div className="flex justify-between text-lg font-semibold bg-border-flaex py-[18px] px-[19px]">
         <p>Balance</p>
         <p>
-          {BigNumberToReadableAmount(
+          {formatNumberWithCommas(BigNumberToReadableAmount(
             balanceFlToken ? (balanceFlToken as BigNumber) : BigNumber.from(0),
             18,
-          )}{" "}
+          ),4)}{" "}
           flDAI
         </p>
       </div>

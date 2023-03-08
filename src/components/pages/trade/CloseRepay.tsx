@@ -13,7 +13,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import { NumericFormat } from "react-number-format";
 import { BounceLoader } from "react-spinners";
-import { amountToHex } from "util/commons";
+import { amountToHex, formatNumberWithCommas } from "util/commons";
 import { eventLogs, Shippaple, tokenPair } from "util/constants";
 import { toBigNumber, getCloseInfo, getRepayInfo } from "util/convertValue";
 
@@ -517,19 +517,19 @@ const CloseRepay = ({
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Entry Price:</p>
               <p className="text-sm font-semibold">
-                {repayCloseData ? repayCloseData?.entryPrice : 0}
+                {repayCloseData ? formatNumberWithCommas(repayCloseData?.entryPrice,4) : 0}
               </p>
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Current Price:</p>
               <p className="text-sm font-semibold">
-                {repayCloseData ? repayCloseData?.markPrice : 0}
+                {repayCloseData ? formatNumberWithCommas(repayCloseData?.markPrice,4) : 0}
               </p>
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Liquidation Price:</p>
               <p className="text-sm font-semibold">
-                {repayCloseData ? repayCloseData?.liquidPrice : 0}
+                {repayCloseData ? formatNumberWithCommas(repayCloseData?.liquidPrice,4) : 0}
               </p>
             </div>
             <div className="flex justify-between">
@@ -554,19 +554,19 @@ const CloseRepay = ({
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Entry Price:</p>
               <p className="text-sm font-semibold">
-                {repayCloseData ? repayCloseData?.entryPrice : 0}
+                {repayCloseData ? formatNumberWithCommas(repayCloseData?.entryPrice,4) : 0}
               </p>
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Current Price:</p>
               <p className="text-sm font-semibold">
-                {repayCloseData ? repayCloseData?.markPrice : 0}
+                {repayCloseData ? formatNumberWithCommas(repayCloseData?.markPrice,4) : 0}
               </p>
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Liquidation Price:</p>
               <p className="text-sm font-semibold">
-                {repayCloseData ? repayCloseData?.liquidPrice : 0}
+                {repayCloseData ? formatNumberWithCommas(repayCloseData?.liquidPrice,4) : 0}
               </p>
             </div>
             <div className="flex justify-between">

@@ -17,6 +17,7 @@ import {
   amountToHex,
   BigNumberToReadableAmount,
   DecimalToReadableAmount,
+  formatNumberWithCommas,
 } from "util/commons";
 import { genesisTime } from "util/constants";
 import type { FlaexCollateralInfo } from "util/type";
@@ -99,7 +100,6 @@ const LeftContent = () => {
     [provider, totalMinted],
   );
 
-
   const { data: aaveReserveInfo } = useContractRead({
     abi: AavePool.abi,
     address: contractAddress.AAVEPool as `0x${string}`,
@@ -144,7 +144,6 @@ const LeftContent = () => {
     };
   }, [allAPY]);
 
-
   const { data: getVaultData } = useContractRead({
     abi: AavePool.abi,
     address: contractAddress.AAVEPool as `0x${string}`,
@@ -182,15 +181,18 @@ const LeftContent = () => {
   const descInvest = [
     {
       title: "Total Invested (FlToken Minted)",
-      value: `${BigNumberToReadableAmount(
-        totalMinted ? (totalMinted as BigNumber) : BigNumber.from(0),
-        18,
+      value: `${formatNumberWithCommas(
+        BigNumberToReadableAmount(
+          totalMinted ? (totalMinted as BigNumber) : BigNumber.from(0),
+          18,
+        ),
+        4,
       )} $`,
     },
     { title: "Current Health Factor", value: healthFactor },
     {
       title: "Available to Invest",
-      value: `${availableToInvest.toFixed(4)} $`,
+      value: `${formatNumberWithCommas(availableToInvest.toNumber(), 4)} $`,
     },
   ];
 

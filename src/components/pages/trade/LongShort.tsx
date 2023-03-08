@@ -14,6 +14,7 @@ import { NumericFormat } from "react-number-format";
 import { BounceLoader } from "react-spinners";
 import {
   BigNumberToReadableAmount,
+  formatNumberWithCommas,
   _onLongCalculator,
   _onShortCalculator,
 } from "util/commons";
@@ -208,7 +209,9 @@ const LongShort = ({
       fee,
       longShortInfo.leverage.mul(100).toHex(),
     ],
-    enabled: Boolean(new Decimal(longShortInfo.paying).greaterThan(0)) && isApprovedLongToken,
+    enabled:
+      Boolean(new Decimal(longShortInfo.paying).greaterThan(0)) &&
+      isApprovedLongToken,
   });
 
   const {
@@ -266,7 +269,9 @@ const LongShort = ({
       fee,
       longShortInfo.leverage.mul(100).toHex(),
     ],
-    enabled: Boolean(new Decimal(longShortInfo.paying).greaterThan(0))  && isApprovedShortToken,
+    enabled:
+      Boolean(new Decimal(longShortInfo.paying).greaterThan(0)) &&
+      isApprovedShortToken,
   });
   const {
     data: dataShort,
@@ -492,50 +497,51 @@ const LongShort = ({
             <p className="text-sm font-semibold whitespace-nowrap ">{`
                 ${
                   isLong
-                    ? longShortInfo.marginAmount.toFixed(4)
-                    : longShortInfo.flashSwap
-                        .add(longShortInfo.paying)
-                        .toFixed(4)
+                    ? formatNumberWithCommas(
+                        longShortInfo.marginAmount.toNumber(),4
+                      )
+                    : formatNumberWithCommas(
+                        longShortInfo.flashSwap
+                          .add(longShortInfo.paying)
+                          .toNumber(),4
+                      )
                 }
                 
                 ${isLong ? pairCrypto?.base : pairCrypto?.quote}`}</p>
           </div>
           <div className="flex justify-between">
             <p className="text-xs font-light italic">Flash Swap:</p>
-            <p className="text-sm font-semibold whitespace-nowrap ">{`${Number(
-              longShortInfo?.flashSwap,
-            ).toFixed(4)} ${isLong ? pairCrypto?.base : pairCrypto?.quote}`}</p>
+            <p className="text-sm font-semibold whitespace-nowrap ">{`${formatNumberWithCommas(
+              longShortInfo?.flashSwap.toNumber(),4
+            )} ${isLong ? pairCrypto?.base : pairCrypto?.quote}`}</p>
           </div>
           <div className="flex justify-between">
             <p className="text-xs font-light italic">
               Borrowing to Repay Flash:
             </p>
-            <p className="text-sm font-semibold whitespace-nowrap">{`${Number(
-              longShortInfo?.borrowingToRepayFlash,
-            ).toFixed(4)} ${isLong ? pairCrypto?.quote : pairCrypto.base}`}</p>
+            <p className="text-sm font-semibold whitespace-nowrap">{`${formatNumberWithCommas(
+              longShortInfo?.borrowingToRepayFlash.toNumber(),4,
+            )} ${isLong ? pairCrypto?.quote : pairCrypto.base}`}</p>
           </div>
           <div className="flex justify-between">
             <p className="text-xs font-light italic">Entry Price:</p>
-            <p className="text-sm font-semibold whitespace-nowrap">{`${longShortInfo?.entryPrice.toFixed(
-              4,
+            <p className="text-sm font-semibold whitespace-nowrap">{`${formatNumberWithCommas(
+              longShortInfo?.entryPrice.toNumber(),4,
             )}`}</p>
           </div>
           <div className="flex justify-between">
             <p className="text-xs font-light italic">Liquidation Price:</p>
-            <p className="text-sm font-semibold whitespace-nowrap">{`${longShortInfo?.liquidationPrice.toFixed(
-              4,
+            <p className="text-sm font-semibold whitespace-nowrap">{`${formatNumberWithCommas(longShortInfo?.liquidationPrice.toNumber(),4
             )}`}</p>
           </div>
           <div className="flex justify-between">
             <p className="text-xs font-light italic">Margin Ratio:</p>
-            <p className="text-sm font-semibold whitespace-nowrap">{`${longShortInfo?.marginRatio.toFixed(
-              4,
+            <p className="text-sm font-semibold whitespace-nowrap">{`${formatNumberWithCommas(longShortInfo?.marginRatio.toNumber(),4
             )}`}</p>
           </div>
           <div className="flex justify-between">
             <p className="text-xs font-light italic">Commission Fee:</p>
-            <p className="text-sm font-semibold whitespace-nowrap">{`${longShortInfo?.commissionFee.toFixed(
-              4,
+            <p className="text-sm font-semibold whitespace-nowrap">{`${formatNumberWithCommas(longShortInfo?.commissionFee.toNumber(),4,
             )} ${isLong ? pairCrypto?.quote : pairCrypto?.base}`}</p>
           </div>
         </div>
@@ -558,13 +564,13 @@ const LongShort = ({
                       `Approval ${token0.name}`}
                     {isApprovalLongLoading && (
                       <>
-                        Waiting for signing {" "}
+                        Waiting for signing{" "}
                         <BounceLoader size={24} color={"#fafafa"} />
                       </>
                     )}
                     {isApprovalLongSuccess && (
                       <>
-                        Waiting for network {" "}
+                        Waiting for network{" "}
                         <BounceLoader size={24} color={"#fafafa"} />
                       </>
                     )}

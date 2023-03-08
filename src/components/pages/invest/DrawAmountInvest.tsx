@@ -4,7 +4,11 @@ import { FlaexInvest, TestERC20 } from "contracts";
 import Decimal from "decimal.js";
 import { BigNumber } from "ethers";
 import React, { useCallback, useState } from "react";
-import { amountToHex, BigNumberToNumberAmount } from "util/commons";
+import {
+  amountToHex,
+  BigNumberToNumberAmount,
+  formatNumberWithCommas,
+} from "util/commons";
 import {
   useAccount,
   useContractRead,
@@ -30,11 +34,15 @@ const DrawAmountInvest = () => {
   });
 
   const handleChangeAmount = (e: any) => {
-    if(isNaN(e.floatValue)){
+    if (isNaN(e.floatValue)) {
       setAmount(0);
     } else {
-      if(new Decimal(e.floatValue).greaterThan(BigNumberToNumberAmount(balanceFlToken as BigNumber,18))){
-        setAmount(BigNumberToNumberAmount(balanceFlToken as BigNumber,18));
+      if (
+        new Decimal(e.floatValue).greaterThan(
+          BigNumberToNumberAmount(balanceFlToken as BigNumber, 18),
+        )
+      ) {
+        setAmount(BigNumberToNumberAmount(balanceFlToken as BigNumber, 18));
       } else {
         setAmount(e.floatValue);
       }
@@ -177,11 +185,14 @@ const DrawAmountInvest = () => {
             }
           >
             Max:{" "}
-            {new Decimal(
-              balanceFlToken ? (balanceFlToken as BigNumber)._hex : 0,
-            )
-              .div(new Decimal(10).pow(18))
-              .toFixed(4)}
+            {formatNumberWithCommas(
+              new Decimal(
+                balanceFlToken ? (balanceFlToken as BigNumber)._hex : 0,
+              )
+                .div(new Decimal(10).pow(18))
+                .toNumber(),
+              4,
+            )}
           </span>
         </div>
       </div>

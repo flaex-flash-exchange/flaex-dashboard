@@ -50,6 +50,22 @@ export function DecimalToReadableAmount(num: Decimal, decimals: number) : string
   return  num.div(new Decimal(10).pow(decimals)).toFixed(4);
 }
 
+export function formatNumberWithCommas(number: number | string, digits : number): string {
+  if(typeof (number) === "number"){
+    return new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits,
+    }).format(Number(number));
+  } else if(typeof (number) === "string"){
+    return new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits,
+    }).format(Number(number));
+  } else {
+    return "";
+  }
+}
+
 
 export function _onLongCalculator(
   percentage: number | string,

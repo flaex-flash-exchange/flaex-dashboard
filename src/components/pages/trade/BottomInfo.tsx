@@ -6,7 +6,7 @@ import { BigNumber } from "ethers";
 // import { useLongShortData } from "hooks/useLongShortData";
 import useQuoter from "hooks/useQuote";
 import { useEffect, useMemo } from "react";
-import { BigNumberToReadableAmount } from "util/commons";
+import { BigNumberToReadableAmount, formatNumberWithCommas } from "util/commons";
 import { tokenPair } from "util/constants";
 import { parseAmount } from "util/convertValue";
 import HistoryTable from "./HistoryTable";
@@ -163,7 +163,7 @@ const titleHistoryRow = [
     title: "Collateral",
     field: (data: any) => {
       return (
-        <div className="whitespace-nowrap">{`${data.baseTokenAmount} ${ data.isLong?data.token0:data.token1}`}</div>
+        <div className="whitespace-nowrap">{`${formatNumberWithCommas(data.baseTokenAmount,4)} ${ data.isLong?data.token0:data.token1}`}</div>
       );
     },
   },
@@ -171,7 +171,7 @@ const titleHistoryRow = [
     title: "Debt",
     field: (data: any) => {
       return (
-        <div className="whitespace-nowrap">{`${data.quoteTokenAmount} ${data.isLong?data.token1:data.token0}`}</div>
+        <div className="whitespace-nowrap">{`${formatNumberWithCommas(data.quoteTokenAmount,4)} ${data.isLong?data.token1:data.token0}`}</div>
       );
     },
   },

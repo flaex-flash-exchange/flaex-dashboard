@@ -4,7 +4,7 @@ import { FlaexInvest, TestERC20 } from "contracts";
 import Decimal from "decimal.js";
 import { BigNumber, constants, Contract } from "ethers";
 import React, { useCallback, useEffect, useState } from "react";
-import { amountToHex, BigNumberToNumberAmount, BigNumberToReadableAmount } from "util/commons";
+import { amountToHex, BigNumberToNumberAmount, BigNumberToReadableAmount, formatNumberWithCommas } from "util/commons";
 import {
   useAccount,
   useProvider,
@@ -157,7 +157,7 @@ const AmountInvest = ({ balance }: { balance: any }) => {
             )
           }
         >
-          Max: {BigNumberToReadableAmount(balance, 18)}
+          Max: {formatNumberWithCommas(BigNumberToReadableAmount(balance, 18),4)}
         </span>
       </div>
       <div className="mt-[7px]">

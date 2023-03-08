@@ -42,8 +42,8 @@ export function BigNumberToReadableAmount(num: BigNumber, decimals: number | und
 }
 
 
-export function BigNumberToNumberAmount(num: BigNumber, decimals: number | undefined): string{
-  return new Decimal(num?._hex || 0).div(new Decimal(10).pow(decimals || 0)).toFixed(4);
+export function BigNumberToNumberAmount(num: BigNumber, decimals: number | undefined): number{
+  return new Decimal(num?._hex || 0).div(new Decimal(10).pow(decimals || 0)).toNumber();
 }
 
 export function DecimalToReadableAmount(num: Decimal, decimals: number) : string{

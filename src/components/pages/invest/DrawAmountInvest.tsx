@@ -4,7 +4,7 @@ import { FlaexInvest, TestERC20 } from "contracts";
 import Decimal from "decimal.js";
 import { BigNumber } from "ethers";
 import React, { useCallback, useState } from "react";
-import { amountToHex } from "util/commons";
+import { amountToHex, BigNumberToNumberAmount } from "util/commons";
 import {
   useAccount,
   useContractRead,
@@ -16,6 +16,8 @@ import ModalCallback from "components/modal/ModalCallback";
 import { useModalContext } from "context/ModalContext";
 import { getClaimYieldInfo, getWithdrawInfo } from "util/convertValue";
 import { ADDRESS_ZERO } from "@uniswap/v3-sdk";
+import { NumericFormat } from "react-number-format";
+import { fail } from "assert";
 
 const DrawAmountInvest = () => {
   const [amount, setAmount] = useState<number>(0);
@@ -27,9 +29,17 @@ const DrawAmountInvest = () => {
     args: [address || ADDRESS_ZERO],
   });
 
-  const handleChangeAmount = useCallback((e: any) => {
-    setAmount(Number(e.target.value));
-  }, []);
+  const handleChangeAmount = (e: any) => {
+    if(isNaN(e.floatValue)){
+      setAmount(0);
+    } else {
+      if(new Decimal(e.floatValue).greaterThan(BigNumberToNumberAmount(balanceFlToken as BigNumber,18))){
+        setAmount(BigNumberToNumberAmount(balanceFlToken as BigNumber,18));
+      } else {
+        setAmount(e.floatValue);
+      }
+    }
+  };
 
   const { pushModal } = useModalContext();
 
@@ -146,12 +156,12 @@ const DrawAmountInvest = () => {
         <div className="text-[12px] md:text-[14px] font-normal">
           Withdraw Amount (DAI)
         </div>
-        <input
+        <NumericFormat
           className="bg-transparent outline-none mt-1"
-          onChange={handleChangeAmount}
+          onValueChange={handleChangeAmount}
           value={amount}
-          // max={1000}
-          type="number"
+          allowNegative={false}
+          decimalScale={4}
         />
         <div>
           <span

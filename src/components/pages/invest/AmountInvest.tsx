@@ -4,7 +4,7 @@ import { FlaexInvest, TestERC20 } from "contracts";
 import Decimal from "decimal.js";
 import { BigNumber, constants, Contract } from "ethers";
 import React, { useCallback, useEffect, useState } from "react";
-import { amountToHex, BigNumberToReadableAmount } from "util/commons";
+import { amountToHex, BigNumberToNumberAmount, BigNumberToReadableAmount } from "util/commons";
 import {
   useAccount,
   useProvider,
@@ -16,6 +16,7 @@ import ModalCallback from "components/modal/ModalCallback";
 import { useModalContext } from "context/ModalContext";
 import { getProvideInfo } from "util/convertValue";
 import { ADDRESS_ZERO } from "@uniswap/v3-sdk";
+import { NumericFormat } from "react-number-format";
 
 const AmountInvest = ({ balance }: { balance: any }) => {
   const [amount, setAmount] = useState<number>(0);
@@ -84,7 +85,7 @@ const AmountInvest = ({ balance }: { balance: any }) => {
     abi: FlaexInvest.abi,
     functionName: "provide",
     args: [amountToHex(amount, 18)],
-    enabled: amount > 0,
+    enabled: amount > 0 && isApproved,
   });
 
   const {
@@ -119,9 +120,17 @@ const AmountInvest = ({ balance }: { balance: any }) => {
 
   const txInvestDone = isSuccess || isError;
 
-  const handleChangeAmount = useCallback((e: any) => {
-    setAmount(Number(e.target.value));
-  }, []);
+  const handleChangeAmount = (e: any) => {
+    if(isNaN(e.floatValue)){
+      setAmount(0);
+    } else {
+      if(new Decimal(e.floatValue).greaterThan(BigNumberToNumberAmount(balance, 18))){
+        setAmount(BigNumberToNumberAmount(balance, 18));
+      } else {
+        setAmount(e.floatValue);
+      }
+    }
+  };
 
   useEffect(() => {
     fetchAllowance();
@@ -133,11 +142,12 @@ const AmountInvest = ({ balance }: { balance: any }) => {
         <div className="text-[12px] md:text-[14px] font-normal">
           Amount (DAI)
         </div>
-        <input
+        <NumericFormat
           className="bg-transparent outline-none mt-1"
-          onChange={handleChangeAmount}
+          onValueChange={handleChangeAmount}
           value={amount}
-          type="number"
+          decimalScale={4}
+          allowNegative={false}
         />
         <span
           className="cursor-pointer whitespace-nowrap text-[12px] md:text-[14px] font-light"

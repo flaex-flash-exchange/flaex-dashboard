@@ -562,60 +562,26 @@ const LongShort = ({
             <>
               {isLong && !isApprovedLongToken ? (
                 <>
-                  <BaseButton
-                    disabled={
-                      !approvalLongTokenFunc ||
-                      isApprovalLongLoading ||
-                      isApprovalLongSuccess
-                    }
-                    onButtonClick={() => approvalLongTokenFunc?.()}
+                  <WriteFuncButton
+                    lableButton={`Approval ${token0.name}`}
+                    func={approvalLongTokenFunc}
+                    isLoading={isApprovalLongLoading}
+                    isSuccess={isApprovalLongSuccess}
+                    isTxDone={false}
                     moreClass="mt-3.5 py-2.5 text-base flex items-center justify-center gap-2 font-semibold rounded-[10px] bg-flaex-button w-full border-none"
-                  >
-                    {!isApprovalLongLoading &&
-                      !isApprovalLongSuccess &&
-                      `Approval ${token0.name}`}
-                    {isApprovalLongLoading && (
-                      <>
-                        Waiting for signing{" "}
-                        <BounceLoader size={24} color={"#fafafa"} />
-                      </>
-                    )}
-                    {isApprovalLongSuccess && (
-                      <>
-                        Waiting for network{" "}
-                        <BounceLoader size={24} color={"#fafafa"} />
-                      </>
-                    )}
-                  </BaseButton>
+                  />
                 </>
               ) : (
                 <>
                   {!isLong && !isApprovedShortToken ? (
-                    <BaseButton
-                      disabled={
-                        !approvalShortTokenFunc ||
-                        isApprovalShortLoading ||
-                        isApprovalShortSuccess
-                      }
-                      onButtonClick={() => approvalShortTokenFunc?.()}
+                    <WriteFuncButton
+                      lableButton={`Approval ${token1.name}`}
+                      func={approvalShortTokenFunc}
+                      isLoading={isApprovalShortLoading}
+                      isSuccess={isApprovalShortSuccess}
+                      isTxDone={false}
                       moreClass="mt-3.5 py-2.5 text-base flex items-center justify-center gap-2 font-semibold rounded-[10px] bg-flaex-button w-full border-none"
-                    >
-                      {!isApprovalShortLoading &&
-                        !isApprovalShortSuccess &&
-                        `Approval ${token1.name}`}
-                      {isApprovalShortLoading && (
-                        <>
-                          Waiting for signing{" "}
-                          <BounceLoader size={24} color={"#fafafa"} />
-                        </>
-                      )}
-                      {isApprovalShortSuccess && (
-                        <>
-                          Waiting for network{" "}
-                          <BounceLoader size={24} color={"#fafafa"} />
-                        </>
-                      )}
-                    </BaseButton>
+                    />
                   ) : (
                     <>
                       {isLong && isApprovedLongToken ? (

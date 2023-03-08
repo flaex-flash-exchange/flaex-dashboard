@@ -6,7 +6,7 @@ const WriteFuncButton = ({
   func,
   isLoading,
   isSuccess,
-  isTxDone,
+  isTxDone = false,
   moreClass,
 }: {
   lableButton: string;

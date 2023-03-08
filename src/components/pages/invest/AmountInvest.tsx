@@ -172,19 +172,15 @@ const AmountInvest = ({ balance }: { balance: any }) => {
       </div>
       <div className="mt-[7px]">
         {!isApproved && (
-          <BaseButton
-            disabled={
-              !approvalTokenFunc || isApprovalLoading || isApprovalSuccess
-            }
-            onButtonClick={() => approvalTokenFunc?.()}
+          <WriteFuncButton
+            lableButton={`Approval DAI`}
+            func={approvalTokenFunc}
+            isLoading={isApprovalLoading}
+            isSuccess={isApprovalSuccess}
+            isTxDone={false}
             moreClass="col-span-2 button-primary"
-          >
-            {!isApprovalLoading && !isApprovalSuccess && `Approval DAI`}
-            {isApprovalLoading && `Waiting for signing`}
-            {isApprovalSuccess && `Waiting for network`}
-          </BaseButton>
+          />
         )}
-
         {isApproved && (
           <WriteFuncButton
             lableButton={`Invest`}

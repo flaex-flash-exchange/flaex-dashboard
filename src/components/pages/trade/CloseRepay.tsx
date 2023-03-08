@@ -657,31 +657,14 @@ const CloseRepay = ({
 
             {isRepay && repayCloseData?.isLong && !isApprovedRepayLongToken && (
               <>
-                <BaseButton
-                  disabled={
-                    !approvalRepayLongTokenFunc ||
-                    isApprovalRepayLongLoading ||
-                    isApprovalRepayLongSuccess
-                  }
-                  onButtonClick={() => approvalRepayLongTokenFunc?.()}
+                <WriteFuncButton
+                  lableButton={`Approval ${token1.name}`}
+                  func={approvalRepayLongTokenFunc}
+                  isLoading={isApprovalRepayLongLoading}
+                  isSuccess={isApprovalRepayLongSuccess}
+                  isTxDone={false}
                   moreClass="mt-3.5 py-2.5 text-base flex items-center justify-center gap-2 font-semibold rounded-[10px] bg-flaex-button w-full"
-                >
-                  {!isApprovalRepayLongLoading &&
-                    !isApprovalRepayLongSuccess &&
-                    `Approval ${token1.name}`}
-                  {isApprovalRepayLongLoading && (
-                    <>
-                      Waiting for signing{" "}
-                      <BounceLoader size={24} color={"#fafafa"} />
-                    </>
-                  )}
-                  {isApprovalRepayLongSuccess && (
-                    <>
-                      Waiting for network{" "}
-                      <BounceLoader size={24} color={"#fafafa"} />
-                    </>
-                  )}
-                </BaseButton>
+                />
               </>
             )}
 
@@ -689,31 +672,14 @@ const CloseRepay = ({
               !repayCloseData?.isLong &&
               !isApprovedRepayShortToken && (
                 <>
-                  <BaseButton
-                    disabled={
-                      !approvalRepayShortTokenFunc ||
-                      isApprovalRepayShortLoading ||
-                      isApprovalRepayShortSuccess
-                    }
-                    onButtonClick={() => approvalRepayShortTokenFunc?.()}
+                  <WriteFuncButton
+                    lableButton={`Approval ${token0.name}`}
+                    func={approvalRepayShortTokenFunc}
+                    isLoading={isApprovalRepayShortLoading}
+                    isSuccess={isApprovalRepayShortSuccess}
+                    isTxDone={false}
                     moreClass="mt-3.5 py-2.5 text-base flex items-center justify-center gap-2 font-semibold rounded-[10px] bg-flaex-button w-full"
-                  >
-                    {!isApprovalRepayShortLoading &&
-                      !isApprovalRepayShortSuccess &&
-                      `Approval ${token0.name}`}
-                    {isApprovalRepayShortLoading && (
-                      <>
-                        Waiting for signing{" "}
-                        <BounceLoader size={24} color={"#fafafa"} />
-                      </>
-                    )}
-                    {isApprovalRepayShortSuccess && (
-                      <>
-                        Waiting for network{" "}
-                        <BounceLoader size={24} color={"#fafafa"} />
-                      </>
-                    )}
-                  </BaseButton>
+                  />
                 </>
               )}
 

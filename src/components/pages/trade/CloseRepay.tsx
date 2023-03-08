@@ -591,7 +591,7 @@ const CloseRepay = ({
             </div>
             {/* <div className="flex justify-between"> */}
             <p className="text-xs font-light italic">Receive:</p>
-            <p className="text-sm font-semibold">
+            <div className="text-sm font-semibold">
               <>
                 <div className="flex justify-between ">
                   <p className="text-xs font-light italic pl-2">
@@ -606,7 +606,7 @@ const CloseRepay = ({
                   {Number(receiveToken1) < 0 ? 0 : receiveToken1}
                 </div>
               </>
-            </p>
+            </div>
             {/* </div> */}
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Commission Fee:</p>

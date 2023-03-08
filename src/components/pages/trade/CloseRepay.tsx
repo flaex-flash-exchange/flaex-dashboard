@@ -1,5 +1,6 @@
 import BaseButton from "components/common/BaseButton";
 import SliderCustom from "components/common/SliderCustom";
+import WriteFuncButton from "components/common/WriteFuncButton";
 import { LiteWagmiBtnConnect } from "components/layout/ConnectButton";
 import ModalCallback from "components/modal/ModalCallback";
 import { contractAddress } from "constants/contractAddress";
@@ -73,13 +74,13 @@ const CloseRepay = ({
     }
   }, [address, provider, token0.address, token1.address]);
 
-  const available = useMemo(()=>{
+  const available = useMemo(() => {
     return repayCloseData
-    ? isRepay
-      ? new Decimal(repayCloseData?.quoteTokenAmount).mul(0.9999).toFixed(4)
-      : new Decimal(repayCloseData?.baseTokenAmount).toFixed(4)
-    : 0;
-  },[repayCloseData,isRepay]);
+      ? isRepay
+        ? new Decimal(repayCloseData?.quoteTokenAmount).mul(0.9999).toFixed(4)
+        : new Decimal(repayCloseData?.baseTokenAmount).toFixed(4)
+      : 0;
+  }, [repayCloseData, isRepay]);
 
   const [amountValue, setAmount] = useState<number | string>(
     repayCloseData
@@ -233,7 +234,12 @@ const CloseRepay = ({
           token0.address,
           amountToHex(amountValue, token0.decimals),
         ],
-    enabled: amountValue > 0 && percentage > 0 && new Decimal(amountValue).lt(repayCloseData?.quoteTokenAmount || 0) && ((repayCloseData?.isLong  && isApprovedRepayLongToken ) || (!repayCloseData?.isLong  && isApprovedRepayShortToken)),
+    enabled:
+      amountValue > 0 &&
+      percentage > 0 &&
+      new Decimal(amountValue).lt(repayCloseData?.quoteTokenAmount || 0) &&
+      ((repayCloseData?.isLong && isApprovedRepayLongToken) ||
+        (!repayCloseData?.isLong && isApprovedRepayShortToken)),
   });
   const {
     data: dataRepay,
@@ -517,19 +523,25 @@ const CloseRepay = ({
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Entry Price:</p>
               <p className="text-sm font-semibold">
-                {repayCloseData ? formatNumberWithCommas(repayCloseData?.entryPrice,4) : 0}
+                {repayCloseData
+                  ? formatNumberWithCommas(repayCloseData?.entryPrice, 4)
+                  : 0}
               </p>
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Current Price:</p>
               <p className="text-sm font-semibold">
-                {repayCloseData ? formatNumberWithCommas(repayCloseData?.markPrice,4) : 0}
+                {repayCloseData
+                  ? formatNumberWithCommas(repayCloseData?.markPrice, 4)
+                  : 0}
               </p>
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Liquidation Price:</p>
               <p className="text-sm font-semibold">
-                {repayCloseData ? formatNumberWithCommas(repayCloseData?.liquidPrice,4) : 0}
+                {repayCloseData
+                  ? formatNumberWithCommas(repayCloseData?.liquidPrice, 4)
+                  : 0}
               </p>
             </div>
             <div className="flex justify-between">
@@ -554,19 +566,25 @@ const CloseRepay = ({
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Entry Price:</p>
               <p className="text-sm font-semibold">
-                {repayCloseData ? formatNumberWithCommas(repayCloseData?.entryPrice,4) : 0}
+                {repayCloseData
+                  ? formatNumberWithCommas(repayCloseData?.entryPrice, 4)
+                  : 0}
               </p>
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Current Price:</p>
               <p className="text-sm font-semibold">
-                {repayCloseData ? formatNumberWithCommas(repayCloseData?.markPrice,4) : 0}
+                {repayCloseData
+                  ? formatNumberWithCommas(repayCloseData?.markPrice, 4)
+                  : 0}
               </p>
             </div>
             <div className="flex justify-between">
               <p className="text-xs font-light italic">Liquidation Price:</p>
               <p className="text-sm font-semibold">
-                {repayCloseData ? formatNumberWithCommas(repayCloseData?.liquidPrice,4) : 0}
+                {repayCloseData
+                  ? formatNumberWithCommas(repayCloseData?.liquidPrice, 4)
+                  : 0}
               </p>
             </div>
             <div className="flex justify-between">
@@ -626,25 +644,14 @@ const CloseRepay = ({
               ((repayCloseData?.isLong && isApprovedRepayLongToken) ||
                 (!repayCloseData?.isLong && isApprovedRepayShortToken)) && (
                 <>
-                  <BaseButton
-                    disabled={
-                      !repayFunc ||
-                      isRepayLoading ||
-                      (isRepaySuccess && !txRepayDone)
-                    }
-                    onButtonClick={() => repayFunc?.()}
+                  <WriteFuncButton
+                    lableButton={`Repay Partition Debt`}
+                    func={repayFunc}
+                    isLoading={isRepayLoading}
+                    isSuccess={isRepaySuccess}
+                    isTxDone={txRepayDone}
                     moreClass="mt-3.5 py-2.5 text-base flex items-center justify-center gap-2 font-semibold rounded-[10px] bg-flaex-button w-full"
-                  >
-                    {((!isRepayLoading && !isRepaySuccess) || txRepayDone) &&
-                      `Repay Partition Debt`}
-                    {isRepayLoading && <>Waiting for signing</>}
-                    {isRepaySuccess && !txRepayDone && (
-                      <>
-                        Waiting for network{" "}
-                        <BounceLoader size={24} color={"#fafafa"} />
-                      </>
-                    )}
-                  </BaseButton>
+                  />
                 </>
               )}
 
@@ -712,30 +719,14 @@ const CloseRepay = ({
 
             {!isRepay && (
               <>
-                <BaseButton
-                  disabled={
-                    !closeFunc ||
-                    isCloseLoading ||
-                    (isCloseSuccess && !txCloseDone)
-                  }
-                  onButtonClick={() => closeFunc?.()}
+                <WriteFuncButton
+                  lableButton={`Close Position`}
+                  func={closeFunc}
+                  isLoading={isCloseLoading}
+                  isSuccess={isCloseSuccess}
+                  isTxDone={txCloseDone}
                   moreClass="mt-3.5 py-2.5 text-base flex items-center justify-center gap-2 font-semibold rounded-[10px] bg-flaex-button w-full"
-                >
-                  {((!isCloseLoading && !isCloseSuccess) || txCloseDone) &&
-                    `Close Position`}
-                  {isCloseLoading && (
-                    <>
-                      Waiting for signing{" "}
-                      <BounceLoader size={24} color={"#fafafa"} />
-                    </>
-                  )}
-                  {isCloseSuccess && !txCloseDone && (
-                    <>
-                      Waiting for network{" "}
-                      <BounceLoader size={24} color={"#fafafa"} />
-                    </>
-                  )}
-                </BaseButton>
+                />
               </>
             )}
           </>

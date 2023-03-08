@@ -4,7 +4,12 @@ import { FlaexInvest, TestERC20 } from "contracts";
 import Decimal from "decimal.js";
 import { BigNumber, constants, Contract } from "ethers";
 import React, { useCallback, useEffect, useState } from "react";
-import { amountToHex, BigNumberToNumberAmount, BigNumberToReadableAmount, formatNumberWithCommas } from "util/commons";
+import {
+  amountToHex,
+  BigNumberToNumberAmount,
+  BigNumberToReadableAmount,
+  formatNumberWithCommas,
+} from "util/commons";
 import {
   useAccount,
   useProvider,
@@ -17,6 +22,7 @@ import { useModalContext } from "context/ModalContext";
 import { getProvideInfo } from "util/convertValue";
 import { ADDRESS_ZERO } from "@uniswap/v3-sdk";
 import { NumericFormat } from "react-number-format";
+import WriteFuncButton from "components/common/WriteFuncButton";
 
 const AmountInvest = ({ balance }: { balance: any }) => {
   const [amount, setAmount] = useState<number>(0);
@@ -37,7 +43,6 @@ const AmountInvest = ({ balance }: { balance: any }) => {
     if (!contract) {
       return;
     } else {
-    
       const allowance = await contract.allowance(
         address || ADDRESS_ZERO,
         contractAddress.FlaexInvestor,
@@ -121,10 +126,14 @@ const AmountInvest = ({ balance }: { balance: any }) => {
   const txInvestDone = isSuccess || isError;
 
   const handleChangeAmount = (e: any) => {
-    if(isNaN(e.floatValue)){
+    if (isNaN(e.floatValue)) {
       setAmount(0);
     } else {
-      if(new Decimal(e.floatValue).greaterThan(BigNumberToNumberAmount(balance, 18))){
+      if (
+        new Decimal(e.floatValue).greaterThan(
+          BigNumberToNumberAmount(balance, 18),
+        )
+      ) {
         setAmount(BigNumberToNumberAmount(balance, 18));
       } else {
         setAmount(e.floatValue);
@@ -157,7 +166,8 @@ const AmountInvest = ({ balance }: { balance: any }) => {
             )
           }
         >
-          Max: {formatNumberWithCommas(BigNumberToReadableAmount(balance, 18),4)}
+          Max:{" "}
+          {formatNumberWithCommas(BigNumberToReadableAmount(balance, 18), 4)}
         </span>
       </div>
       <div className="mt-[7px]">
@@ -176,20 +186,14 @@ const AmountInvest = ({ balance }: { balance: any }) => {
         )}
 
         {isApproved && (
-          <BaseButton
-            disabled={
-              !investFunc ||
-              isInvestLoading ||
-              (isInvestSuccess && !txInvestDone)
-            }
-            onButtonClick={() => investFunc?.()}
+          <WriteFuncButton
+            lableButton={`Invest`}
+            func={investFunc}
+            isLoading={isInvestLoading}
+            isSuccess={isInvestSuccess}
+            isTxDone={txInvestDone}
             moreClass="col-span-2 button-primary"
-          >
-            {((!isInvestLoading && !isInvestSuccess) || txInvestDone) &&
-              `Invest`}
-            {isInvestLoading && `Waiting for signing`}
-            {isInvestSuccess && !txInvestDone && `Waiting for network`}
-          </BaseButton>
+          />
         )}
       </div>
     </div>

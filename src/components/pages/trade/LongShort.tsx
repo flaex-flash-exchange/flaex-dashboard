@@ -1,6 +1,7 @@
 import { ADDRESS_ZERO } from "@uniswap/v3-sdk";
 import BaseButton from "components/common/BaseButton";
 import SliderCustom from "components/common/SliderCustom";
+import WriteFuncButton from "components/common/WriteFuncButton";
 import { LiteWagmiBtnConnect } from "components/layout/ConnectButton";
 import ModalCallback from "components/modal/ModalCallback";
 import { contractAddress } from "constants/contractAddress";
@@ -498,12 +499,14 @@ const LongShort = ({
                 ${
                   isLong
                     ? formatNumberWithCommas(
-                        longShortInfo.marginAmount.toNumber(),4
+                        longShortInfo.marginAmount.toNumber(),
+                        4,
                       )
                     : formatNumberWithCommas(
                         longShortInfo.flashSwap
                           .add(longShortInfo.paying)
-                          .toNumber(),4
+                          .toNumber(),
+                        4,
                       )
                 }
                 
@@ -512,7 +515,8 @@ const LongShort = ({
           <div className="flex justify-between">
             <p className="text-xs font-light italic">Flash Swap:</p>
             <p className="text-sm font-semibold whitespace-nowrap ">{`${formatNumberWithCommas(
-              longShortInfo?.flashSwap.toNumber(),4
+              longShortInfo?.flashSwap.toNumber(),
+              4,
             )} ${isLong ? pairCrypto?.base : pairCrypto?.quote}`}</p>
           </div>
           <div className="flex justify-between">
@@ -520,28 +524,36 @@ const LongShort = ({
               Borrowing to Repay Flash:
             </p>
             <p className="text-sm font-semibold whitespace-nowrap">{`${formatNumberWithCommas(
-              longShortInfo?.borrowingToRepayFlash.toNumber(),4,
+              longShortInfo?.borrowingToRepayFlash.toNumber(),
+              4,
             )} ${isLong ? pairCrypto?.quote : pairCrypto.base}`}</p>
           </div>
           <div className="flex justify-between">
             <p className="text-xs font-light italic">Entry Price:</p>
             <p className="text-sm font-semibold whitespace-nowrap">{`${formatNumberWithCommas(
-              longShortInfo?.entryPrice.toNumber(),4,
+              longShortInfo?.entryPrice.toNumber(),
+              4,
             )}`}</p>
           </div>
           <div className="flex justify-between">
             <p className="text-xs font-light italic">Liquidation Price:</p>
-            <p className="text-sm font-semibold whitespace-nowrap">{`${formatNumberWithCommas(longShortInfo?.liquidationPrice.toNumber(),4
+            <p className="text-sm font-semibold whitespace-nowrap">{`${formatNumberWithCommas(
+              longShortInfo?.liquidationPrice.toNumber(),
+              4,
             )}`}</p>
           </div>
           <div className="flex justify-between">
             <p className="text-xs font-light italic">Margin Ratio:</p>
-            <p className="text-sm font-semibold whitespace-nowrap">{`${formatNumberWithCommas(longShortInfo?.marginRatio.toNumber(),4
+            <p className="text-sm font-semibold whitespace-nowrap">{`${formatNumberWithCommas(
+              longShortInfo?.marginRatio.toNumber(),
+              4,
             )}`}</p>
           </div>
           <div className="flex justify-between">
             <p className="text-xs font-light italic">Commission Fee:</p>
-            <p className="text-sm font-semibold whitespace-nowrap">{`${formatNumberWithCommas(longShortInfo?.commissionFee.toNumber(),4,
+            <p className="text-sm font-semibold whitespace-nowrap">{`${formatNumberWithCommas(
+              longShortInfo?.commissionFee.toNumber(),
+              4,
             )} ${isLong ? pairCrypto?.quote : pairCrypto?.base}`}</p>
           </div>
         </div>
@@ -607,60 +619,23 @@ const LongShort = ({
                   ) : (
                     <>
                       {isLong && isApprovedLongToken ? (
-                        <BaseButton
-                          disabled={
-                            !longFunc ||
-                            isLongLoading ||
-                            (isLongSuccess && !txLongDone)
-                          }
-                          onButtonClick={() => longFunc?.()}
+                        <WriteFuncButton
+                          lableButton={`${btnLabel} ${pairCrypto?.origin}`}
+                          func={longFunc}
+                          isLoading={isLongLoading}
+                          isSuccess={isLongSuccess}
+                          isTxDone={txLongDone}
                           moreClass="mt-3.5 py-2.5 text-base flex items-center justify-center gap-2 font-semibold rounded-[10px] bg-flaex-button w-full border-none"
-                        >
-                          {((!isLongLoading && !isLongSuccess) || txLongDone) &&
-                            `${btnLabel} ${pairCrypto?.origin}`}
-                          {isLongLoading && (
-                            <>
-                              Waiting for signing{" "}
-                              <BounceLoader size={24} color={"#fafafa"} />
-                            </>
-                          )}
-                          {isLongSuccess && !txLongDone && (
-                            <>
-                              Waiting for network{" "}
-                              <BounceLoader size={24} color={"#fafafa"} />
-                            </>
-                          )}
-                        </BaseButton>
+                        />
                       ) : (
-                        <BaseButton
-                          disabled={
-                            !shortFunc ||
-                            isShortLoading ||
-                            (isShortSuccess && !txShortDone)
-                          }
-                          onButtonClick={() => shortFunc?.()}
+                        <WriteFuncButton
+                          lableButton={`${btnLabel} ${pairCrypto?.origin}`}
+                          func={shortFunc}
+                          isLoading={isShortLoading}
+                          isSuccess={isShortSuccess}
+                          isTxDone={txShortDone}
                           moreClass="mt-3.5 py-2.5 text-base flex items-center justify-center gap-2 font-semibold rounded-[10px] bg-flaex-button w-full border-none"
-                        >
-                          {((!isShortLoading && !isShortSuccess) ||
-                            txShortDone) &&
-                            `${btnLabel} ${pairCrypto?.origin}`}
-                          {isShortLoading && (
-                            <>
-                              {" "}
-                              Waiting for signing{" "}
-                              <BounceLoader size={24} color={"#fafafa"} />
-                            </>
-                          )}
-                          {isShortSuccess && !txShortDone && (
-                            <>
-                              Waiting for network{" "}
-                              <BounceLoader size={24} color={"#fafafa"} />
-                            </>
-                          )}
-                          {isShortLoading && isShortSuccess && (
-                            <BounceLoader size={24} color={"#fafafa"} />
-                          )}
-                        </BaseButton>
+                        />
                       )}
                     </>
                   )}

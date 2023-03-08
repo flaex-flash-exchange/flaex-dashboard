@@ -22,6 +22,7 @@ import { getClaimYieldInfo, getWithdrawInfo } from "util/convertValue";
 import { ADDRESS_ZERO } from "@uniswap/v3-sdk";
 import { NumericFormat } from "react-number-format";
 import { fail } from "assert";
+import WriteFuncButton from "components/common/WriteFuncButton";
 
 const DrawAmountInvest = () => {
   const [amount, setAmount] = useState<number>(0);
@@ -204,31 +205,22 @@ const DrawAmountInvest = () => {
         </div>
       </div>
       <div className="grid grid-cols-3 justify-between gap-2 mt-[7px] ">
-        <BaseButton
-          disabled={
-            !claimFunc || isClaimLoading || (isClaimSuccess && !txClaimDone)
-          }
-          onButtonClick={() => claimFunc?.()}
-          moreClass="col-span-1 button-primary"
-        >
-          {((!isClaimLoading && !isClaimSuccess) || txClaimDone) && `Claim`}
-          {isClaimLoading && `Waiting for signing`}
-          {isClaimSuccess && !txClaimDone && `Waiting for network`}
-        </BaseButton>
-        <BaseButton
-          disabled={
-            !withdrawFunc ||
-            isWithdrawLoading ||
-            (isWithdrawSuccess && !txWithdrawDone)
-          }
-          onButtonClick={() => withdrawFunc?.()}
-          moreClass="col-span-2 button-primary"
-        >
-          {((!isWithdrawLoading && !isWithdrawSuccess) || txWithdrawDone) &&
-            `Withdraw & Claim`}
-          {isWithdrawLoading && `Waiting for signing`}
-          {isWithdrawSuccess && !txWithdrawDone && `Waiting for network`}
-        </BaseButton>
+        <WriteFuncButton
+            lableButton={`Claim`}
+            func={claimFunc}
+            isLoading={isClaimLoading}
+            isSuccess={isClaimSuccess}
+            isTxDone={txClaimDone}
+            moreClass="col-span-1 button-primary"
+          />
+        <WriteFuncButton
+            lableButton={`Withdraw & Claim`}
+            func={withdrawFunc}
+            isLoading={isWithdrawLoading}
+            isSuccess={isWithdrawSuccess}
+            isTxDone={txClaimDone}
+            moreClass="col-span-2 button-primary"
+          />      
       </div>
     </div>
   );

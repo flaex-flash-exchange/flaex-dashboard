@@ -7,6 +7,8 @@ const WriteFuncButton = ({
   isLoading,
   isSuccess,
   isTxDone = false,
+  isLoadingLable =`Waiting for signing`,
+  isSuccessLable =`Waiting for network`,
   moreClass,
 }: {
   lableButton: string;
@@ -14,7 +16,9 @@ const WriteFuncButton = ({
   isLoading: boolean;
   isSuccess: boolean;
   isTxDone: boolean;
-  moreClass: string,
+  moreClass: string;
+  isLoadingLable?: string;
+  isSuccessLable?: string;
 }) => {
   return (
     <BaseButton
@@ -25,13 +29,14 @@ const WriteFuncButton = ({
       {((!isLoading && !isSuccess) || isTxDone) && `${lableButton}`}
       {isLoading && (
         <>
-          {" "}
-          Waiting for signing <BounceLoader size={24} color={"#fafafa"} />
+          {`${isLoadingLable} `}
+          <BounceLoader size={24} color={"#fafafa"} />
         </>
       )}
       {isSuccess && !isTxDone && (
         <>
-          Waiting for network <BounceLoader size={24} color={"#fafafa"} />
+          {`${isSuccessLable} `}
+          <BounceLoader size={24} color={"#fafafa"} />
         </>
       )}
       {isLoading && isSuccess && <BounceLoader size={24} color={"#fafafa"} />}

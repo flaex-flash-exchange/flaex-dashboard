@@ -178,6 +178,8 @@ const AmountInvest = ({ balance }: { balance: any }) => {
             isLoading={isApprovalLoading}
             isSuccess={isApprovalSuccess}
             isTxDone={false}
+            isLoadingLable={`Signing`}
+            isSuccessLable={`Waiting`}
             moreClass="col-span-2 button-primary"
           />
         )}
@@ -188,6 +190,8 @@ const AmountInvest = ({ balance }: { balance: any }) => {
             isLoading={isInvestLoading}
             isSuccess={isInvestSuccess}
             isTxDone={txInvestDone}
+            isLoadingLable={`Signing`}
+            isSuccessLable={`Waiting`}
             moreClass="col-span-2 button-primary"
           />
         )}

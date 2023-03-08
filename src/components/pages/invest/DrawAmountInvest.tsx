@@ -211,6 +211,8 @@ const DrawAmountInvest = () => {
             isLoading={isClaimLoading}
             isSuccess={isClaimSuccess}
             isTxDone={txClaimDone}
+            isLoadingLable={`Signing`}
+            isSuccessLable={`Waiting`}
             moreClass="col-span-1 button-primary"
           />
         <WriteFuncButton
@@ -219,6 +221,8 @@ const DrawAmountInvest = () => {
             isLoading={isWithdrawLoading}
             isSuccess={isWithdrawSuccess}
             isTxDone={txClaimDone}
+            isLoadingLable={`Signing`}
+            isSuccessLable={`Waiting`}
             moreClass="col-span-2 button-primary"
           />      
       </div>

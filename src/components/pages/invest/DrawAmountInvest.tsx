@@ -32,6 +32,8 @@ const DrawAmountInvest = () => {
     functionName: "balanceOf",
     args: [address || ADDRESS_ZERO],
   });
+  
+  const [isWithdrawMax , setIsWithdrawMax] = useState<boolean>(false);
 
   const handleChangeAmount = (e: any) => {
     if (isNaN(e.floatValue)) {
@@ -49,6 +51,17 @@ const DrawAmountInvest = () => {
     }
   };
 
+  const handleSetWithdrawMax =() => {
+    setIsWithdrawMax(true);
+    setAmount(
+      new Decimal(
+        balanceFlToken ? (balanceFlToken as BigNumber)._hex : 0,
+      )
+        .div(new Decimal(10).pow(18))
+        .toNumber(),
+    );
+  };
+
   const { pushModal } = useModalContext();
 
   const pushErrorModal = (hash: string) => {
@@ -62,7 +75,7 @@ const DrawAmountInvest = () => {
     address: contractAddress.FlaexInvestor as `0x${string}`,
     abi: FlaexInvest.abi,
     functionName: "withdraw",
-    args: [amountToHex(amount.toFixed(4), 18)],
+    args: [isWithdrawMax? balanceFlToken : amountToHex(amount.toFixed(4), 18)],
     enabled: amount > 0,
   });
 
@@ -175,14 +188,7 @@ const DrawAmountInvest = () => {
         <div>
           <span
             className="cursor-pointer whitespace-nowrap text-[12px] md:text-[14px] font-light"
-            onClick={() =>
-              setAmount(
-                new Decimal(
-                  balanceFlToken ? (balanceFlToken as BigNumber)._hex : 0,
-                )
-                  .div(new Decimal(10).pow(18))
-                  .toNumber(),
-              )
+            onClick={() => handleSetWithdrawMax()
             }
           >
             Max:{" "}

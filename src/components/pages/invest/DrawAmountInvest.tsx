@@ -15,6 +15,7 @@ import {
 import ModalCallback from "components/modal/ModalCallback";
 import { useModalContext } from "context/ModalContext";
 import { getClaimYieldInfo, getWithdrawInfo } from "util/convertValue";
+import { ADDRESS_ZERO } from "@uniswap/v3-sdk";
 
 const DrawAmountInvest = () => {
   const [amount, setAmount] = useState<number>(0);
@@ -23,7 +24,7 @@ const DrawAmountInvest = () => {
     address: contractAddress.FlaexToken as `0x${string}`,
     abi: TestERC20.abi,
     functionName: "balanceOf",
-    args: [address],
+    args: [address || ADDRESS_ZERO],
   });
 
   const handleChangeAmount = useCallback((e: any) => {

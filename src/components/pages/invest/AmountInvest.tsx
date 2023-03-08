@@ -15,6 +15,7 @@ import {
 import ModalCallback from "components/modal/ModalCallback";
 import { useModalContext } from "context/ModalContext";
 import { getProvideInfo } from "util/convertValue";
+import { ADDRESS_ZERO } from "@uniswap/v3-sdk";
 
 const AmountInvest = ({ balance }: { balance: any }) => {
   const [amount, setAmount] = useState<number>(0);
@@ -35,8 +36,9 @@ const AmountInvest = ({ balance }: { balance: any }) => {
     if (!contract) {
       return;
     } else {
+    
       const allowance = await contract.allowance(
-        address,
+        address || ADDRESS_ZERO,
         contractAddress.FlaexInvestor,
       );
       if (new Decimal(allowance._hex || 0).lessThanOrEqualTo(0)) {

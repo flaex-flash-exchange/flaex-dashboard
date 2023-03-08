@@ -1,4 +1,5 @@
 import { connectorsForWallets } from "@rainbow-me/rainbowkit";
+import { ADDRESS_ZERO } from "@uniswap/v3-sdk";
 import { contractAddress } from "constants/contractAddress";
 import { rewardTokens } from "constants/rewardTokens";
 import { AAVEOracle, FlaexInvest, TestERC20 } from "contracts";
@@ -24,21 +25,21 @@ const RightContent = () => {
     abi: TestERC20.abi,
     address: contractAddress.DAI as `0x${string}`,
     functionName: "balanceOf",
-    args: [address],
+    args: [address || ADDRESS_ZERO],
   });
 
   const { data: balanceFlToken } = useContractRead({
     address: contractAddress.FlaexToken as `0x${string}`,
     abi: TestERC20.abi,
     functionName: "balanceOf",
-    args: [address],
+    args: [address || ADDRESS_ZERO],
   });
 
   const { data: investorYield } = useContractRead({
     abi: FlaexInvest.abi,
     address: contractAddress.FlaexInvestor as `0x${string}`,
     functionName: "getInvestorYield",
-    args: [address],
+    args: [address || ADDRESS_ZERO],
   });
 
   const userInvestYield = useMemo(() => {

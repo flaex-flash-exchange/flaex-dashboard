@@ -104,7 +104,7 @@ const LeftContent = () => {
     abi: AavePool.abi,
     address: contractAddress.AAVEPool as `0x${string}`,
     functionName: "getReserveData",
-    args: [assetToInvest[0]],
+    args: [assetToInvest[0] || ADDRESS_ZERO],
   });
 
   const AAVEAPY = useMemo(() => {

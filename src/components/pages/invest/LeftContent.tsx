@@ -172,7 +172,7 @@ const LeftContent = () => {
     : BigNumberToReadableAmount(collateralInfo?.healthFactor, 18);
   const availableToInvest = new Decimal(healthFactor).greaterThan(2)
     ? new Decimal(10_000_000).minus(
-        new Decimal((totalMinted as BigNumber)?._hex).div(
+        new Decimal((totalMinted as BigNumber)?._hex || 0).div(
           new Decimal(10).pow(18),
         ),
       )
